@@ -10,22 +10,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Раздаем HTML файлы из папки public
-app.use(express.static(path.join(__dirname, 'public')));
-
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: "*" }
 });
 
+// Отдаем index.html из КОРНЯ проекта
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Роут для проверки (чтобы Render не засыпал)
 app.get('/ping', (req, res) => {
   res.send('Server is alive!');
-});
-
-// Отдаем URL LiveKit фронтенду
-app.get('/livekit-url', (req, res) => {
-  res.json({ url: process.env.LIVEKIT_URL });
 });
 
 // Генерация токена для звонков LiveKit
@@ -58,21 +55,19 @@ app.post('/get-livekit-token', async (req, res) => {
   }
 });
 
-// Хранилище пользователей онлайн
+// Хранилище пользователей
 const onlineUsers = new Map();
 
-// Логика чата через Socket.io
+// Чат Socket.io
 io.on('connection', (socket) => {
   console.log('✅ Пользователь подключился:', socket.id);
 
-  // Пользователь заходит с именем
   socket.on('user_join', (username) => {
     onlineUsers.set(socket.id, username);
     io.emit('users_update', Array.from(onlineUsers.values()));
     io.emit('system_message', `👋 ${username} зашел в чат`);
   });
 
-  // Получение сообщения
   socket.on('send_message', (data) => {
     io.emit('receive_message', {
       user: data.user,
@@ -81,7 +76,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  // Уведомление о звонке
   socket.on('call_started', (data) => {
     socket.broadcast.emit('incoming_call', {
       from: data.from,
@@ -89,7 +83,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  // Отключение
   socket.on('disconnect', () => {
     const username = onlineUsers.get(socket.id);
     if (username) {
