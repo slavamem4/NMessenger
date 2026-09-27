@@ -1,0 +1,1477 @@
+/* ============================================================================
+   GeoMetric 3.0 — оформление приложения (визуальный слой).
+   ----------------------------------------------------------------------------
+   Этот файл подключается ПОСЛЕ style.css и отвечает только за внешний вид:
+   цвета, свечения, скругления, тени, анимации. Логика и разметка не меняются.
+   Такой подход удобен: чтобы поменять «лицо» приложения — правится один файл.
+
+   Порядок разделов:
+     1. Палитра и базовые переменные
+     2. Фон приложения (глубина, световые пятна, «шум»)
+     3. Экран подключения к серверу
+     4. Экран входа и заставка запуска
+     5. Основной каркас: боковая панель, список чатов
+     6. Шапка чата, лента сообщений, пузыри
+     7. Поле ввода и кнопки действий
+     8. Истории, профиль, настройки
+     9. Звонки
+    10. Мелочи: тосты, скроллбары, мобильная версия
+   ========================================================================== */
+
+/* ==========================================================================
+   1. ПАЛИТРА И БАЗОВЫЕ ПЕРЕМЕННЫЕ
+   ========================================================================== */
+:root {
+  --g: #6c5cff;                      /* основной акцент приложения (фиолетовый) */
+  --g2: #37b6ff;                     /* второй акцент (голубой) — для градиентов */
+  --g-soft: rgba(108, 92, 255, .16);  /* мягкая заливка акцентом */
+  --card: rgba(23, 27, 42, .72);      /* «стеклянная» поверхность карточек */
+  --card-solid: #151a2b;             /* плотная поверхность (там, где нужен контраст) */
+  --stroke: rgba(255, 255, 255, .07); /* тонкая обводка поверхностей */
+  --stroke-2: rgba(255, 255, 255, .12);/* обводка заметнее — для наведения */
+  --text: #eef1f8;                   /* основной текст */
+  --text-2: #a2acc4;                  /* второстепенный текст */
+  --text-3: #6f7a93;                  /* подписи и подсказки */
+  --ok: #38e0a0;                     /* «в сети», успех */
+  --warn: #ffb020;                   /* предупреждение */
+  --bad: #ff5c7a;                    /* ошибка, удаление */
+  --r-lg: 22px;                      /* крупное скругление (карточки, окна) */
+  --r-md: 16px;                      /* среднее (поля, кнопки) */
+  --r-sm: 11px;                      /* мелкое (иконки-кнопки) */
+  --sh-1: 0 1px 2px rgba(0, 0, 0, .35);                    /* лёгкая тень */
+  --sh-2: 0 10px 30px rgba(0, 0, 0, .38);                  /* средняя тень */
+  --sh-3: 0 24px 70px rgba(0, 0, 0, .55);                  /* крупная тень для окон */
+  --glow: 0 0 0 1px rgba(108, 92, 255, .35), 0 12px 40px rgba(108, 92, 255, .25); /* свечение акцентом */
+}
+
+/* Светлая тема: те же роли, другие значения — приложению не важно, какая тема. */
+:root[data-theme="light"], :root[data-theme="lavender"], :root[data-theme="mint"] {
+  --card: rgba(255, 255, 255, .82);  /* светлые «стеклянные» карточки */
+  --card-solid: #ffffff;            /* плотные поверхности */
+  --stroke: rgba(16, 24, 40, .08);   /* мягкая обводка на светлом */
+  --stroke-2: rgba(16, 24, 40, .16); /* обводка при наведении */
+  --text: #131a2b;                  /* тёмный текст */
+  --text-2: #4c5873;                 /* второстепенный */
+  --text-3: #7b869c;                 /* подписи */
+  --sh-2: 0 10px 30px rgba(20, 30, 60, .12);   /* тени на светлом фоне мягче */
+  --sh-3: 0 24px 70px rgba(20, 30, 60, .18);
+}
+
+/* AMOLED-тема: чисто чёрный фон (экономит заряд на OLED-экранах телефонов). */
+:root[data-theme="amoled"] {
+  --card: rgba(10, 10, 12, .86);     /* почти чёрные поверхности */
+  --card-solid: #08080a;
+  --stroke: rgba(255, 255, 255, .09);
+}
+
+/* ==========================================================================
+   2. ФОН ПРИЛОЖЕНИЯ: глубина и световые пятна
+   ========================================================================== */
+body {
+  background: #0a0c14;                                        /* базовый тёмный фон */
+  background-image:
+    radial-gradient(60% 45% at 12% -5%, rgba(108, 92, 255, .22), transparent 70%),  /* пятно слева сверху */
+    radial-gradient(55% 40% at 92% 8%, rgba(55, 182, 255, .16), transparent 72%),   /* пятно справа сверху */
+    radial-gradient(70% 55% at 50% 110%, rgba(108, 92, 255, .12), transparent 75%); /* мягкое свечение снизу */
+  background-attachment: fixed;                               /* фон не «уезжает» при прокрутке */
+}
+
+/* Светлая тема — свои, более нежные пятна. */
+:root[data-theme="light"], :root[data-theme="lavender"], :root[data-theme="mint"] body {
+  background: #f2f4fa;                                        /* светлый фон */
+  background-image:
+    radial-gradient(60% 45% at 10% -5%, rgba(108, 92, 255, .16), transparent 70%),
+    radial-gradient(55% 40% at 95% 5%, rgba(55, 182, 255, .14), transparent 72%);
+}
+
+/* AMOLED — чистый чёрный, без свечений. */
+:root[data-theme="amoled"] body { background: #000; background-image: none; }
+
+/* ==========================================================================
+   3. ЭКРАН ПОДКЛЮЧЕНИЯ К СЕРВЕРУ
+   ========================================================================== */
+.server-screen {
+  position: fixed;                     /* на весь экран поверх всего */
+  inset: 0;                            /* растягиваем по краям */
+  display: flex;                       /* центрируем карточку */
+  align-items: center;                 /* по вертикали */
+  justify-content: center;             /* по горизонтали */
+  padding: 22px;                       /* отступы для телефонов */
+  z-index: 60;                         /* выше мессенджера */
+  background: rgba(8, 10, 18, .82);    /* затемнение фона */
+  backdrop-filter: blur(18px);         /* размытие того, что под карточкой */
+}
+
+.server-card {
+  width: 100%;                         /* на телефоне карточка занимает всю ширину */
+  max-width: 430px;                    /* на компьютере — не растягивается */
+  background: linear-gradient(180deg, rgba(28, 33, 52, .96), rgba(17, 21, 34, .98)); /* объёмный фон */
+  border: 1px solid var(--stroke-2);   /* заметная обводка */
+  border-radius: 26px;                 /* крупные скругления — «современно» */
+  padding: 30px 26px 24px;             /* внутренние отступы */
+  box-shadow: var(--sh-3), 0 0 60px rgba(108, 92, 255, .18);   /* тень и свечение */
+  text-align: center;                  /* всё по центру */
+  animation: card-in .45s cubic-bezier(.2, .9, .25, 1);        /* появление снизу с «пружинкой» */
+}
+
+@keyframes card-in {                   /* анимация появления карточки */
+  from { opacity: 0; transform: translateY(18px) scale(.97); }  /* начинаем чуть ниже и меньше */
+  to { opacity: 1; transform: none; }                           /* приходим в норму */
+}
+
+.server-logo {                          /* логотип над заголовком */
+  width: 86px;                          /* размер круга */
+  height: 86px;
+  margin: 0 auto 16px;                  /* центрируем */
+  border-radius: 24px;                  /* скруглённый квадрат, как у иконок приложений */
+  overflow: hidden;                     /* картинка не выходит за края */
+  box-shadow: var(--glow);              /* свечение акцентом */
+}
+.server-logo img { width: 100%; height: 100%; display: block; }  /* картинка на всю площадь */
+
+.server-title {                         /* название приложения */
+  margin: 0;                            /* убираем внешние отступы */
+  font-size: 30px;                      /* крупно */
+  font-weight: 800;                     /* очень жирно */
+  letter-spacing: -.4px;                /* плотнее буквы — выглядит современнее */
+  background: linear-gradient(92deg, #fff, #b9c6ff 60%, #7ee0ff);   /* градиентный текст */
+  -webkit-background-clip: text;        /* обрезаем фон по контуру букв (Chrome/WebView) */
+  background-clip: text;                /* то же для прочих браузеров */
+  -webkit-text-fill-color: transparent; /* сам цвет букв делаем прозрачным */
+}
+:root[data-theme="light"], :root[data-theme="lavender"], :root[data-theme="mint"] .server-title { background: linear-gradient(92deg, #2a2f45, #5a49d6); -webkit-background-clip: text; background-clip: text; }
+
+.server-sub {                           /* пояснение под заголовком */
+  margin: 10px 0 22px;                  /* отступы */
+  color: var(--text-2);                 /* второстепенный цвет */
+  font-size: 14.5px;                    /* читаемый размер */
+  line-height: 1.5;                     /* воздух между строками */
+}
+
+.server-label {                         /* подпись к полю ввода */
+  display: block;                       /* на своей строке */
+  text-align: left;                     /* выравнивание по левому краю */
+  color: var(--text-3);                 /* приглушённый цвет */
+  font-size: 12.5px;                    /* мелкий шрифт */
+  margin: 0 0 7px 4px;                  /* отступы */
+  font-weight: 600;                     /* чуть жирнее */
+  letter-spacing: .3px;                 /* разрядка */
+  text-transform: uppercase;            /* капсом — стильно и компактно */
+}
+
+.server-input {                         /* поле адреса сервера */
+  width: 100%;                          /* на всю ширину карточки */
+  background: rgba(9, 11, 20, .9);      /* тёмный ввод */
+  border: 1px solid var(--stroke-2);    /* обводка */
+  border-radius: 15px;                  /* скругление */
+  padding: 15px 16px;                   /* отступы внутри */
+  color: var(--text);                   /* цвет текста */
+  font-size: 15px;                      /* размер */
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;   /* моноширинный — адреса читать удобнее */
+  text-align: center;                   /* адрес по центру */
+  outline: none;                        /* убираем стандартную рамку фокуса */
+  transition: border-color .18s, box-shadow .18s;   /* плавная реакция на фокус */
+}
+:root[data-theme="light"], :root[data-theme="lavender"], :root[data-theme="mint"] .server-input { background: #fff; }
+.server-input:focus {                   /* когда человек пишет адрес */
+  border-color: var(--g);               /* подсвечиваем рамку акцентом */
+  box-shadow: 0 0 0 4px var(--g-soft);  /* и добавляем мягкое свечение */
+}
+
+.server-hint {                          /* пояснение под полем */
+  color: var(--text-3);                 /* приглушённый цвет */
+  font-size: 12.5px;                    /* мелкий шрифт */
+  line-height: 1.55;                    /* воздух */
+  margin: 12px 2px 0;                   /* отступы */
+  text-align: left;                     /* по левому краю */
+}
+
+.server-btn {                           /* главная кнопка «Подключиться» */
+  width: 100%;                          /* на всю ширину */
+  margin-top: 18px;                     /* отступ сверху */
+  padding: 16px;                        /* крупная, удобная для пальца */
+  font-size: 16.5px;                    /* заметный текст */
+  font-weight: 700;                     /* жирный */
+  border-radius: 16px;                  /* скругление */
+}
+
+.server-demo {                          /* ссылка «использовать демо-сервер» */
+  background: none;                     /* без фона */
+  border: none;                         /* без рамки */
+  color: var(--text-3);                 /* приглушённый цвет */
+  font-size: 13px;                      /* мелкий */
+  margin-top: 14px;                     /* отступ */
+  cursor: pointer;                      /* курсор-рука */
+  text-decoration: underline;           /* подчёркнуто, что это кликабельно */
+  text-underline-offset: 3px;           /* отступ подчёркивания */
+  transition: color .18s;               /* плавная смена цвета */
+}
+.server-demo:hover { color: var(--g2); }  /* при наведении — голубой */
+
+.server-now {                           /* строка «текущий сервер» в настройках */
+  font-family: ui-monospace, Menlo, Consolas, monospace;   /* моноширинный */
+  font-size: 12.5px;                    /* мелкий */
+  color: var(--text-2);                 /* второстепенный */
+  background: rgba(9, 11, 20, .6);      /* тёмная плашка */
+  border: 1px solid var(--stroke);      /* обводка */
+  border-radius: 12px;                  /* скругление */
+  padding: 11px 13px;                   /* отступы */
+  word-break: break-all;                /* длинный адрес переносится */
+}
+
+/* ==========================================================================
+   4. ЭКРАН ВХОДА И ЗАСТАВКА ЗАПУСКА
+   ========================================================================== */
+.auth-card {                            /* карточка входа/регистрации */
+  background: linear-gradient(180deg, rgba(26, 31, 49, .95), rgba(15, 19, 31, .97));  /* объёмный фон */
+  border: 1px solid var(--stroke);      /* обводка */
+  border-radius: 28px;                  /* крупные скругления */
+  box-shadow: var(--sh-3);              /* тень */
+}
+:root[data-theme="light"], :root[data-theme="lavender"], :root[data-theme="mint"] .auth-card { background: linear-gradient(180deg, #fff, #f7f8fd); }
+
+/* Кнопки входа: главная — градиентная, второстепенная — стеклянная. */
+#auth-submit {
+  background: linear-gradient(135deg, var(--g), #8a6bff 45%, var(--g2));   /* фирменный градиент */
+  box-shadow: 0 12px 28px rgba(108, 92, 255, .35);                        /* свечение под кнопкой */
+  border: none;                          /* рамка не нужна */
+}
+#auth-submit:active { transform: translateY(1px); }   /* лёгкое «нажатие» */
+
+/* Заставка запуска: логотип мягко пульсирует, пока приложение грузится. */
+#splash { background: radial-gradient(60% 50% at 50% 30%, #171c2e, #080a12 70%); }
+#splash svg { animation: splash-pulse 2.1s ease-in-out infinite; }   /* пульсация логотипа */
+@keyframes splash-pulse {              /* дыхание логотипа */
+  0%, 100% { opacity: .85; transform: scale(1); }      /* обычное состояние */
+  50% { opacity: 1; transform: scale(1.06); }          /* чуть крупнее и ярче */
+}
+
+/* ==========================================================================
+   5. КАРКАС: БОКОВАЯ ПАНЕЛЬ И СПИСОК ЧАТОВ
+   ========================================================================== */
+.sidebar {                              /* левая колонка со списком чатов */
+  background: linear-gradient(180deg, rgba(17, 21, 34, .92), rgba(11, 14, 24, .95));  /* тёмное стекло */
+  border-right: 1px solid var(--stroke);/* разделитель справа */
+  backdrop-filter: blur(20px);          /* размытие фона под панелью */
+}
+:root[data-theme="light"], :root[data-theme="lavender"], :root[data-theme="mint"] .sidebar { background: linear-gradient(180deg, rgba(255, 255, 255, .9), rgba(246, 248, 253, .95)); }
+
+.sidebar-head {                         /* шапка панели: я, поиск, кнопки */
+  padding: 16px 16px 12px;              /* отступы */
+  border-bottom: 1px solid var(--stroke);  /* разделитель */
+}
+
+/* Кнопка «Я» (профиль) — при наведении подсвечивается. */
+#me-block { border-radius: 16px; padding: 8px; transition: background .18s; }
+#me-block:hover { background: rgba(255, 255, 255, .05); }   /* подсветка строки профиля */
+
+.search {                              /* поле поиска по чатам */
+  background: rgba(9, 11, 20, .75);     /* тёмный фон */
+  border: 1px solid var(--stroke);      /* обводка */
+  border-radius: 14px;                  /* скругление */
+  transition: border-color .18s, box-shadow .18s;   /* плавный фокус */
+}
+.search:focus-within {                  /* когда пишем в поиске */
+  border-color: var(--g);               /* рамка акцентом */
+  box-shadow: 0 0 0 4px var(--g-soft);  /* мягкое свечение */
+}
+
+/* Строка чата: слева круглый аватар с «кольцом», справа имя и последнее сообщение. */
+.chat-item {
+  border-radius: 16px;                  /* скруглённая строка */
+  margin: 3px 8px;                      /* отступы между строками */
+  padding: 11px 12px;                   /* внутренние отступы */
+  border: 1px solid transparent;        /* рамка «зарезервирована» под активное состояние */
+  transition: background .16s, border-color .16s, transform .12s;   /* плавные реакции */
+}
+.chat-item:hover { background: rgba(255, 255, 255, .045); }        /* наведение */
+.chat-item:active { transform: scale(.995); }                      /* нажатие */
+.chat-item.active {                     /* открытый чат */
+  background: linear-gradient(90deg, var(--g-soft), rgba(55, 182, 255, .07));  /* акцентная заливка */
+  border-color: rgba(108, 92, 255, .35);/* акцентная рамка */
+}
+.chat-item.active::before {             /* вертикальная «полоска» у активного чата */
+  content: "";                          /* псевдоэлемент без текста */
+  position: absolute;                   /* позиционируем внутри строки */
+  left: 0; top: 22%; bottom: 22%;       /* высота — 56% строки */
+  width: 3px;                           /* толщина полоски */
+  border-radius: 3px;                   /* скругление */
+  background: linear-gradient(180deg, var(--g), var(--g2));   /* градиент */
+}
+.chat-item { position: relative; }      /* нужно, чтобы полоска встала правильно */
+
+.chat-meta-name { font-weight: 650; letter-spacing: -.1px; }   /* имя собеседника */
+.chat-meta-time { font-size: 11.5px; color: var(--text-3); }    /* время последнего сообщения */
+.chat-preview { color: var(--text-2); }                         /* текст последнего сообщения */
+
+.unread-badge, .badge {                 /* счётчик непрочитанных */
+  background: linear-gradient(135deg, var(--g), #9a6bff);   /* градиентный кружок */
+  color: #fff;                          /* белые цифры */
+  font-weight: 700;                     /* жирные */
+  border-radius: 999px;                 /* «таблетка» */
+  box-shadow: 0 6px 16px rgba(108, 92, 255, .45);   /* свечение */
+}
+
+/* ==========================================================================
+   6. ШАПКА ЧАТА, ЛЕНТА СООБЩЕНИЙ, ПУЗЫРИ
+   ========================================================================== */
+.chat-head {                            /* шапка открытого чата */
+  background: rgba(13, 16, 27, .78);    /* полупрозрачная */
+  border-bottom: 1px solid var(--stroke);  /* разделитель */
+  backdrop-filter: blur(18px);          /* размытие под шапкой */
+}
+:root[data-theme="light"], :root[data-theme="lavender"], :root[data-theme="mint"] .chat-head { background: rgba(255, 255, 255, .82); }
+
+.messages {                             /* лента сообщений */
+  background: transparent;              /* фон даёт body — так видны световые пятна */
+  padding: 18px 18px 8px;               /* отступы */
+}
+
+.day-sep {                              /* разделитель «Сегодня» / «Вчера» */
+  background: rgba(255, 255, 255, .06); /* полупрозрачная плашка */
+  color: var(--text-2);                 /* текст */
+  border-radius: 999px;                 /* «таблетка» */
+  padding: 5px 14px;                    /* отступы */
+  font-size: 11.5px;                    /* мелкий */
+  letter-spacing: .4px;                 /* разрядка */
+}
+
+/* ---- Пузыри сообщений ---- */
+.bubble {
+  border-radius: 20px;                  /* крупное скругление */
+  max-width: min(560px, 74%);           /* не шире 74% ленты */
+  padding: 10px 14px 8px;               /* отступы внутри */
+  line-height: 1.45;                    /* читаемость */
+  box-shadow: var(--sh-1);              /* лёгкая тень */
+  animation: bubble-in .22s cubic-bezier(.2, .9, .3, 1);   /* появление */
+}
+@keyframes bubble-in {                  /* всплытие нового сообщения */
+  from { opacity: 0; transform: translateY(8px) scale(.98); }   /* снизу и чуть меньше */
+  to { opacity: 1; transform: none; }                           /* в норме */
+}
+
+.bubble.out {                           /* мои сообщения — фирменный градиент */
+  background: linear-gradient(135deg, #6a55ff, #7b5cff 45%, #5f7dff);
+  color: #fff;                          /* белый текст */
+  border-bottom-right-radius: 7px;      /* «хвостик» справа снизу */
+  box-shadow: 0 8px 22px rgba(108, 92, 255, .28);   /* объём и свечение */
+}
+.bubble.in {                            /* сообщения собеседника — стеклянные */
+  background: rgba(30, 36, 56, .92);    /* тёмное стекло */
+  color: var(--text);                   /* обычный текст */
+  border-bottom-left-radius: 7px;       /* «хвостик» слева снизу */
+  border: 1px solid var(--stroke);      /* тонкая обводка */
+}
+:root[data-theme="light"], :root[data-theme="lavender"], :root[data-theme="mint"] .bubble.in { background: #fff; border-color: rgba(16, 24, 40, .07); }
+
+.bubble-actions { opacity: .55; transition: opacity .16s; }   /* кнопки действий над сообщением */
+.bubble:hover .bubble-actions { opacity: 1; }                 /* при наведении — ярче */
+
+
+/* Картинка в сообщении — скруглённая, как в хороших мессенджерах. */
+.bubble-media img, .bubble img {
+  border-radius: 14px;                  /* скругление фото */
+  display: block;                       /* без лишних отступов снизу */
+  max-width: 100%;                      /* не выходит за пузырь */
+}
+
+/* Системные сообщения (журнал звонков). */
+.call-log {                             /* запись о звонке в переписке */
+  display: flex;                        /* строка: иконка + текст */
+  align-items: center;                  /* по центру по вертикали */
+  gap: 9px;                             /* расстояние между иконкой и текстом */
+  color: var(--text-2);                 /* второстепенный цвет */
+  font-size: 13px;                      /* мелкий шрифт */
+}
+.call-log.missed { color: var(--bad); }  /* пропущенный — красный */
+
+/* ==========================================================================
+   7. ПОЛЕ ВВОДА
+   ========================================================================== */
+.composer {                             /* панель ввода внизу */
+  background: rgba(13, 16, 27, .82);    /* полупрозрачная */
+  border-top: 1px solid var(--stroke);  /* разделитель */
+  backdrop-filter: blur(18px);          /* размытие */
+}
+:root[data-theme="light"], :root[data-theme="lavender"], :root[data-theme="mint"] .composer { background: rgba(255, 255, 255, .85); }
+
+#message-input {                        /* поле ввода текста */
+  background: rgba(9, 11, 20, .8);      /* тёмный фон */
+  border: 1px solid var(--stroke);      /* обводка */
+  border-radius: 18px;                  /* скругление */
+  transition: border-color .18s, box-shadow .18s;   /* фокус */
+}
+#message-input:focus {                  /* когда печатаем */
+  border-color: rgba(108, 92, 255, .6); /* рамка акцентом */
+  box-shadow: 0 0 0 4px var(--g-soft);  /* свечение */
+}
+
+#btn-send {                             /* кнопка отправки */
+  background: linear-gradient(135deg, var(--g), var(--g2));   /* градиент */
+  box-shadow: 0 10px 24px rgba(108, 92, 255, .4);             /* свечение */
+  transition: transform .12s, box-shadow .18s;                /* плавность */
+}
+#btn-send:hover { transform: translateY(-1px) scale(1.03); }  /* при наведении приподнимается */
+#btn-send:active { transform: scale(.96); }                   /* при нажатии «вжимается» */
+
+.icon-btn {                             /* круглые кнопки-иконки */
+  border-radius: 13px;                  /* скруглённый квадрат */
+  transition: background .16s, color .16s, transform .12s;   /* плавные реакции */
+}
+.icon-btn:hover { background: rgba(255, 255, 255, .08); color: #fff; }   /* наведение */
+.icon-btn:active { transform: scale(.94); }                              /* нажатие */
+
+/* ==========================================================================
+   8. ИСТОРИИ, ПРОФИЛЬ, НАСТРОЙКИ
+   ========================================================================== */
+.stories-bar { padding: 14px 12px 6px; gap: 12px; }   /* лента историй сверху */
+
+/* Кольцо вокруг историй оставляем тем, что уже есть в style.css: попытка нарисовать
+   своё «переливающееся» кольцо ломала ленту (градиент растягивался на всю панель).
+   Поэтому здесь только аккуратные подписи. */
+.story-label {                          /* подпись под кругом истории */
+  font-size: 11.5px;                    /* мелкий шрифт */
+  color: var(--text-2);                 /* второстепенный цвет */
+  max-width: 68px;                      /* чтобы длинные имена обрезались, а не растягивали ленту */
+  overflow: hidden;                     /* скрываем лишнее */
+  text-overflow: ellipsis;              /* многоточие */
+  white-space: nowrap;                  /* в одну строку */
+}
+.stories-bar {                          /* лента историй */
+  overflow-x: auto;                     /* прокрутка по горизонтали, если историй много */
+  overflow-y: hidden;                   /* вертикальная прокрутка не нужна */
+}
+
+.modal-card {                           /* окна: профиль, настройки, новый чат */
+  background: linear-gradient(180deg, rgba(24, 29, 46, .98), rgba(14, 18, 30, .99));  /* объёмный фон */
+  border: 1px solid var(--stroke-2);    /* обводка */
+  border-radius: 26px;                  /* скругления */
+  box-shadow: var(--sh-3);              /* крупная тень */
+}
+:root[data-theme="light"], :root[data-theme="lavender"], :root[data-theme="mint"] .modal-card { background: linear-gradient(180deg, #fff, #f8f9fe); }
+
+.section h4 {                           /* заголовки разделов настроек */
+  font-size: 12.5px;                    /* мелкие */
+  text-transform: uppercase;            /* капсом */
+  letter-spacing: .8px;                 /* разрядка */
+  color: var(--text-3);                 /* приглушённые */
+  margin-bottom: 10px;                  /* отступ снизу */
+}
+
+.theme-card {                           /* карточка выбора темы */
+  border-radius: 16px;                  /* скругление */
+  border: 1px solid var(--stroke);      /* обводка */
+  transition: border-color .18s, transform .12s, box-shadow .18s;   /* плавность */
+}
+.theme-card:hover { transform: translateY(-2px); border-color: var(--stroke-2); }   /* приподнимается */
+.theme-card.active {                    /* выбранная тема */
+  border-color: var(--g);               /* акцентная рамка */
+  box-shadow: 0 0 0 3px var(--g-soft);  /* свечение */
+}
+
+.swatch {                               /* цвет аватара в профиле */
+  border-radius: 50%;                   /* круглая */
+  transition: transform .12s, box-shadow .18s;   /* плавность */
+}
+.swatch:hover { transform: scale(1.12); }          /* увеличивается при наведении */
+.swatch.active { box-shadow: 0 0 0 3px var(--g), 0 0 0 6px rgba(108, 92, 255, .18); }   /* выбранный */
+
+.switch-row { border-radius: 14px; padding: 11px 13px; transition: background .16s; }   /* строка-переключатель */
+.switch-row:hover { background: rgba(255, 255, 255, .04); }      /* наведение */
+.switch-row i { background: linear-gradient(135deg, var(--g), var(--g2)); }   /* включённый тумблер */
+
+/* ==========================================================================
+   9. ЗВОНКИ
+   ========================================================================== */
+.call-overlay {                         /* полноэкранный звонок */
+  background: radial-gradient(70% 60% at 50% 25%, #1b2140, #07090f 72%);   /* глубокий фон */
+}
+#btn-hangup {                           /* красная кнопка «завершить» */
+  background: linear-gradient(135deg, #ff4d6d, #ff2d55);   /* красный градиент */
+  box-shadow: 0 12px 30px rgba(255, 45, 85, .45);          /* свечение */
+}
+#btn-accept {                           /* зелёная кнопка «принять» */
+  background: linear-gradient(135deg, #23d18b, #12b981);   /* зелёный градиент */
+  box-shadow: 0 12px 30px rgba(35, 209, 139, .42);         /* свечение */
+  animation: accept-pulse 1.6s ease-in-out infinite;       /* призывно пульсирует */
+}
+@keyframes accept-pulse {               /* пульсация кнопки приёма */
+  0%, 100% { box-shadow: 0 12px 30px rgba(35, 209, 139, .42); }   /* обычное свечение */
+  50% { box-shadow: 0 12px 42px rgba(35, 209, 139, .8); }         /* ярче — «нажми меня» */
+}
+
+.pulse-ring { border-radius: 50%; border: 2px solid rgba(108, 92, 255, .45); }   /* кольца вокруг аватара */
+.incoming-bar {                         /* плашка входящего звонка */
+  border-radius: 18px;                  /* скругление */
+  background: linear-gradient(135deg, rgba(35, 209, 139, .95), rgba(18, 165, 120, .95));   /* зелёная */
+  box-shadow: 0 18px 50px rgba(18, 165, 120, .45);         /* свечение */
+  border: 1px solid rgba(255, 255, 255, .18);              /* светлая обводка */
+}
+
+/* ==========================================================================
+   10. МЕЛОЧИ: ТОСТЫ, СКРОЛЛБАРЫ, МОБИЛЬНАЯ ВЕРСИЯ
+   ========================================================================== */
+.toast {                                /* всплывающая подсказка */
+  border-radius: 16px;                  /* скругление */
+  background: rgba(20, 25, 40, .96);    /* плотный фон */
+  border: 1px solid var(--stroke-2);    /* обводка */
+  box-shadow: var(--sh-2);              /* тень */
+  backdrop-filter: blur(14px);          /* размытие */
+}
+:root[data-theme="light"], :root[data-theme="lavender"], :root[data-theme="mint"] .toast { background: rgba(255, 255, 255, .97); color: #131a2b; }
+
+/* Аккуратные скроллбары: тонкие, появляются только при наведении. */
+.scroll-thin::-webkit-scrollbar, .messages::-webkit-scrollbar, .chat-list::-webkit-scrollbar { width: 9px; height: 9px; }
+.scroll-thin::-webkit-scrollbar-thumb, .messages::-webkit-scrollbar-thumb, .chat-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .12);   /* полупрозрачный бегунок */
+  border-radius: 999px;                   /* скруглённый */
+  border: 3px solid transparent;           /* «отступ» от края */
+  background-clip: content-box;            /* бегунок тоньше дорожки */
+}
+.messages::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .22); background-clip: content-box; }   /* ярче при наведении */
+.messages::-webkit-scrollbar-track { background: transparent; }   /* без дорожки */
+
+/* Мобильная версия: интерфейс как в нативных мессенджерах. */
+@media (max-width: 760px) {
+  .bubble { max-width: 84%; }            /* на телефоне пузыри шире */
+  .chat-head { box-shadow: 0 6px 22px rgba(0, 0, 0, .3); }   /* шапка визуально приподнята */
+  #btn-send { width: 46px; height: 46px; }   /* крупная кнопка отправки — удобно пальцем */
+  .composer { padding-bottom: max(10px, env(safe-area-inset-bottom)); }   /* учёт «подбородка» iPhone */
+  .server-card { padding: 26px 20px 20px; }   /* компактнее на маленьком экране */
+}
+
+/* =========================================================================
+   19. РЕЖИМ НАСТОЯЩЕГО ПРИЛОЖЕНИЯ (нативность).
+   Здесь убираем всё, по чему видно, что перед нами веб-страница:
+   1) выделение текста курсором и «палочку» вместо стрелки;
+   2) полосы прокрутки браузера;
+   3) системное меню по правой кнопке (у нас своё — #app-menu);
+   4) серое мигание и зум по двойному тапу;
+   5) «залипание» прокрутки за краем экрана (pull-to-refresh).
+   ========================================================================= */
+
+:root {
+  --ripple-color: rgba(255, 255, 255, .30);   /* цвет «волны» от нажатия по кнопке */
+  --press-scale: .965;                        /* насколько кнопка «проседает» при нажатии */
+}
+
+/* --- 19.1 Общие правила для всего окна приложения --- */
+html {
+  -webkit-text-size-adjust: 100%;             /* телефон не увеличивает текст сам по себе */
+  text-size-adjust: 100%;                     /* то же правило для остальных движков */
+  overscroll-behavior: none;                  /* запрет прокрутки «за край» листа */
+  touch-action: manipulation;                 /* двойной тап не приближает интерфейс */
+}
+body {
+  -webkit-user-select: none;                  /* ГЛАВНОЕ: текст нельзя выделить курсором */
+  user-select: none;                          /* то же для Firefox и новых движков */
+  -webkit-touch-callout: none;                /* на iPhone не всплывает системное «копировать» */
+  -webkit-tap-highlight-color: transparent;   /* нет серого прямоугольника при нажатии */
+  cursor: default;                            /* курсор-стрелка, а не «палочка ввода текста» */
+  overscroll-behavior: none;                  /* страница не «оттягивается» вниз при прокрутке */
+}
+
+/* Выделять и копировать текст можно ТОЛЬКО там, где его набирают руками. */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text;                  /* в поле ввода выделение работает */
+  user-select: text;                          /* то же для других движков */
+  cursor: text;                               /* внутри поля курсор снова «палочка» */
+}
+
+/* Даже если выделение как-то включится — подсветки не будет видно. */
+::selection { background: transparent; }      /* снимаем синий фон выделения везде */
+input::selection, textarea::selection { background: rgba(124, 92, 255, .45); }   /* в поле ввода подсветка мягкая */
+::-moz-selection { background: transparent; } /* то же для Firefox */
+
+/* Картинки и иконки нельзя «тащить» мышью, как на сайте. */
+img, svg { -webkit-user-drag: none; user-drag: none; }
+
+/* --- 19.2 Полосы прокрутки полностью скрыты (прокрутка остаётся) --- */
+::-webkit-scrollbar { width: 0; height: 0; }  /* прячем полосы в Chrome/Safari/WebView */
+* { scrollbar-width: none; }                  /* прячем полосы в Firefox */
+.messages, .chat-list, .scroll-thin { -ms-overflow-style: none; }   /* прячем полосы в старом Edge */
+
+/* --- 19.3 Реакция на нажатие: приложение «отзывается» на палец --- */
+button, .btn, .icon-btn, .chat-item, .user-row, .theme-card, .tab,
+.story-label, .quick, .msg-row .bubble {
+  touch-action: manipulation;                 /* двойной тап по кнопке тоже не зумит */
+}
+button, .btn, .icon-btn, .chat-item, .user-row, .theme-card, .tab {
+  position: relative;                         /* «волне» нажатия нужна опора внутри кнопки */
+  overflow: hidden;                           /* «волна» не вылезает за края кнопки */
+  transition: transform .12s ease, background .18s ease;   /* плавное сжатие и подсветка */
+}
+button:active, .btn:active, .icon-btn:active, .theme-card:active, .tab:active {
+  transform: scale(var(--press-scale));       /* кнопка «проседает» — тактильный отклик */
+}
+.chat-item:active, .user-row:active { background: rgba(255, 255, 255, .06); }   /* подсветка строки при нажатии */
+
+/* «Волна» от нажатия (эффект ripple, как в Android). */
+.ripple {
+  position: absolute;                         /* кладём поверх самой кнопки */
+  border-radius: 50%;                         /* круглая */
+  background: radial-gradient(circle, var(--ripple-color) 0%, transparent 70%);   /* мягкий центр */
+  transform: scale(0);                        /* начинаем с нулевого размера */
+  animation: app-ripple .55s ease-out forwards;   /* разбегается и исчезает */
+  pointer-events: none;                       /* «волна» не перехватывает нажатия */
+  z-index: 1;                                 /* поверх фона кнопки, под текстом */
+}
+@keyframes app-ripple {                       /* описание движения «волны» */
+  to { transform: scale(2.4); opacity: 0; }   /* увеличивается в 2,4 раза и растворяется */
+}
+
+/* --- 19.4 Своё меню действий над сообщением (вместо меню браузера) --- */
+.app-menu {
+  position: fixed;                            /* поверх всего окна */
+  inset: 0;                                   /* на весь экран */
+  z-index: 90;                                /* ниже окна звонка, но выше чата */
+  display: flex;                              /* центрируем карточку меню */
+  align-items: center;                        /* по вертикали */
+  justify-content: center;                    /* по горизонтали */
+  background: rgba(6, 7, 12, .45);            /* затемнение под меню */
+  backdrop-filter: blur(6px);                 /* размытие фона — как в нативных приложениях */
+  -webkit-backdrop-filter: blur(6px);         /* размытие для Safari */
+}
+.app-menu-card {
+  width: min(320px, 86vw);                    /* ширина карточки меню */
+  background: var(--surface, #16181f);        /* цвет поверхности приложения */
+  border: 1px solid var(--border, #262a36);   /* тонкая рамка */
+  border-radius: 20px;                        /* скруглённые углы */
+  padding: 10px;                              /* внутренние отступы */
+  box-shadow: 0 26px 60px rgba(0, 0, 0, .55); /* глубокая тень — карточка «висит» над интерфейсом */
+  animation: app-menu-in .18s ease-out;       /* появляется с лёгким увеличением */
+}
+@keyframes app-menu-in {                      /* появление карточки меню */
+  from { transform: scale(.92); opacity: 0; } /* начинается меньше и прозрачнее */
+  to { transform: scale(1); opacity: 1; }     /* заканчивается обычным размером */
+}
+.app-menu-title {
+  font-size: 13px;                            /* мелкая подпись над действиями */
+  color: var(--muted, #8b93a7);               /* приглушённый цвет */
+  padding: 8px 10px 10px;                     /* отступы вокруг подписи */
+  white-space: nowrap;                        /* подпись не переносится на вторую строку */
+  overflow: hidden;                           /* длинную подпись обрезаем */
+  text-overflow: ellipsis;                    /* и заканчиваем многоточием */
+  border-bottom: 1px solid rgba(255, 255, 255, .07);   /* тонкая линия под подписью */
+  margin-bottom: 6px;                         /* отступ до действий */
+}
+.app-menu-item {
+  display: flex;                              /* иконка и текст в одну строку */
+  align-items: center;                        /* выравниваем по центру строки */
+  gap: 12px;                                  /* расстояние между иконкой и текстом */
+  width: 100%;                                /* кнопка на всю ширину карточки */
+  padding: 13px 12px;                         /* крупная зона нажатия под палец */
+  background: transparent;                    /* без своего фона */
+  border: 0;                                  /* без рамки */
+  border-radius: 14px;                        /* скругление под нажатие */
+  color: var(--text, #eef1f7);                /* цвет текста приложения */
+  font: inherit;                              /* наследуем шрифт приложения */
+  font-size: 15px;                            /* размер подписи */
+  text-align: left;                           /* выравнивание по левому краю */
+  cursor: pointer;                            /* курсор-рука на компьютере */
+}
+.app-menu-item svg { width: 18px; height: 18px; }   /* размер иконок действий */
+.app-menu-item:hover { background: rgba(255, 255, 255, .06); }   /* подсветка на компьютере */
+.app-menu-item:active { background: rgba(255, 255, 255, .1); transform: scale(.985); }   /* отклик при нажатии */
+
+/* --- 19.5 Фокус с клавиатуры виден, «рамка браузера» по клику — нет --- */
+:focus { outline: none; }                     /* убираем стандартную синюю рамку браузера */
+:focus-visible { outline: 2px solid var(--accent, #7c5cff); outline-offset: 2px; }   /* но оставляем для клавиатуры (доступность) */
+
+/* --- 19.6 На тач-экранах убираем «наведение»: его не существует в приложениях --- */
+@media (hover: none) {
+  .btn:hover, .icon-btn:hover, .chat-item:hover, .app-menu-item:hover { background: inherit; }   /* hover-эффекты не нужны */
+  .ripple { animation-duration: .45s; }       /* на телефоне «волна» чуть быстрее */
+}
+
+/* =========================================================================
+   23. ИСПРАВЛЕНИЕ ВЁРСТКИ (баги из отчёта пользователя).
+   Причина бага №2: колонка чата «вырастала» выше окна, поэтому длинное
+   сообщение перекрывало поле ввода, а лента не листалась. Причина бага №1 и
+   №3: при масштабе Windows 125–150% содержимое упиралось в край окна и
+   элементы наезжали друг на друга. Ниже — жёсткие ограничения высоты и
+   прокрутка там, где нужно.
+   ========================================================================= */
+
+/* --- 23.1 Окно приложения не должно быть выше экрана --- */
+.app {
+  height: 100dvh;                        /* высота окна (dvh учитывает панели браузера) */
+  max-height: 100dvh;                    /* выше экрана — нельзя */
+  grid-template-rows: minmax(0, 1fr);    /* строка сетки сжимается, а не растёт вместе с содержимым */
+  overflow: hidden;                      /* всё лишнее прячем внутрь колонок */
+}
+html, body { height: 100%; overflow: hidden; }   /* страница целиком не прокручивается */
+
+/* --- 23.2 Колонки чата и списка: правильные ограничители высоты --- */
+.sidebar, .chat-area { min-height: 0; overflow: hidden; }   /* min-height: 0 разрешает сжиматься внутри flex/grid */
+.chat-area { display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; }   /* шапка / лента / полоска ответа / ввод */
+.messages { min-height: 0; overflow-y: auto; }         /* лента всегда листается */
+.chat-list { min-height: 0; overflow-y: auto; flex: 1 1 auto; }   /* список чатов тоже */
+.side-top, .search-wrap, .tabs-wrap, .stories-bar { flex: none; }  /* верхние блоки сайдбара не сжимаются */
+.composer { position: relative; }                      /* панель ввода всегда на своём месте */
+.composer.readonly .message-input, .composer.readonly .btn-send,
+.composer.readonly #btn-attach, .composer.readonly #btn-emoji { display: none; }   /* в канале для читателей прячем ввод */
+
+/* --- 23.3 Формы: не режем содержимое, а листаем --- */
+.auth-panel { overflow-y: auto; align-content: safe center; padding: clamp(16px, 4vh, 32px); }   /* карточка входа прокручивается */
+.modal-card { max-height: 88dvh; overflow-y: auto; }   /* окна тоже прокручиваются */
+.modal-card > * { flex: none; }                        /* и их части не сжимаются (иначе наезжают) */
+.field { gap: 8px; }                                   /* воздуха между подписью и полем больше */
+.field-label { line-height: 1.25; }                    /* подпись не «слипается» с рамкой поля */
+.auth-form { gap: 16px; }                              /* поля формы входа — с запасом */
+
+/* То же для «О себе» и палитры в профиле: раньше они касались друг друга. */
+#profile-bio { min-height: 54px; }
+.color-picker { margin: 4px 0 2px; row-gap: 10px; }
+.profile-top { flex-wrap: wrap; row-gap: 12px; }
+
+/* Короткое окно (ноутбук 1366×768 или масштаб 125%) — делаем форму компактнее. */
+@media (max-height: 760px) {
+  .auth-card { max-height: calc(100dvh - 32px); overflow-y: auto; }   /* карточка помещается и листается */
+  .auth-form { gap: 12px; }                                          /* компактнее */
+  .auth-tabs { margin-bottom: 14px; }                                /* отступ вкладок меньше */
+  .field { gap: 6px; }                                               /* и внутри полей */
+}
+
+/* =========================================================================
+   24. ВКЛАДКИ ЧАТОВ (как в Telegram) С АНИМАЦИЕЙ ПЕРЕКЛЮЧЕНИЯ.
+   ========================================================================= */
+.tabs-wrap {
+  position: relative;                    /* «бегунок» позиционируется от этого блока */
+  flex: none;                            /* полоса вкладок не сжимается */
+  padding: 0 10px 8px;                   /* отступы */
+}
+.chat-tabs {
+  display: flex;                         /* вкладки в строку */
+  gap: 6px;                              /* расстояние между ними */
+  overflow-x: auto;                      /* много вкладок — прокрутка по горизонтали */
+  scrollbar-width: none;                 /* без полосы прокрутки */
+  padding: 2px 0 6px;                    /* небольшие отступы */
+}
+.chat-tabs::-webkit-scrollbar { height: 0; }   /* полоса прокрутки вкладок скрыта */
+.chat-tab {
+  flex: none;                            /* вкладка не сжимается */
+  padding: 7px 14px;                     /* размер вкладки */
+  border-radius: 999px;                  /* «таблетка» */
+  background: rgba(255, 255, 255, .05);  /* лёгкий фон */
+  color: var(--text-2);                  /* приглушённый цвет текста */
+  font-size: 13px;                       /* размер подписи */
+  font-weight: 600;                      /* полужирный */
+  white-space: nowrap;                   /* не переносится */
+  transition: background .22s ease, color .22s ease, transform .18s ease;   /* плавный отклик */
+}
+.chat-tab:hover { background: rgba(255, 255, 255, .09); }   /* подсветка при наведении */
+.chat-tab.active {                       /* активная вкладка */
+  background: linear-gradient(135deg, rgba(124, 92, 255, .9), rgba(61, 169, 252, .85));   /* фирменный градиент */
+  color: #fff;                           /* белый текст */
+  box-shadow: 0 6px 18px rgba(108, 92, 255, .35);   /* свечение */
+}
+.chat-tab:active { transform: scale(.96); }   /* отклик на нажатие */
+.chat-tab.add { min-width: 34px; justify-content: center; font-size: 17px; padding: 5px 12px; }   /* кнопка «+» */
+.tab-underline {
+  position: absolute;                    /* «бегунок» под активной вкладкой */
+  left: 10px; bottom: 2px; height: 2px;  /* позиция и толщина */
+  width: 0;                              /* ширину задаёт JavaScript */
+  border-radius: 2px;                    /* скругление */
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);   /* градиентная линия */
+  transition: transform .3s cubic-bezier(.4, 1.3, .5, 1), width .3s cubic-bezier(.4, 1.3, .5, 1);   /* пружинистое движение */
+}
+
+/* Анимация списка чатов при смене вкладки. */
+.chat-list.slide-in { animation: chat-slide .3s cubic-bezier(.3, .9, .3, 1); }   /* сам список «влетает» */
+@keyframes chat-slide {
+  from { opacity: 0; transform: translateY(var(--slide-from, 14px)) scale(.985); }   /* начинается чуть сдвинутым */
+  to { opacity: 1; transform: none; }                                               /* и встаёт на место */
+}
+.chat-item { animation: chat-row-in .28s ease both; }   /* строки появляются друг за другом */
+@keyframes chat-row-in {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* =========================================================================
+   25. ИЗБРАННОЕ, ГРУППЫ И КАНАЛЫ.
+   ========================================================================= */
+.chat-item.saved .chat-name { color: var(--accent); }          /* «Избранное» выделено цветом */
+.avatar.saved-avatar {                                          /* аватар Избранного */
+  background: linear-gradient(135deg, #7c5cff, #3da9fc);        /* фирменный градиент */
+  color: #fff;                                                  /* белая иконка */
+  display: grid; place-items: center;                           /* центрируем закладку */
+}
+.avatar.saved-avatar svg { width: 46%; height: 46%; }           /* размер иконки */
+.avatar.room-avatar {                                           /* аватар группы или канала */
+  background: color-mix(in srgb, var(--room-color) 85%, #0b0d12);   /* цвет комнаты */
+  color: #fff;                                                  /* белая иконка */
+  display: grid; place-items: center;                           /* центр */
+}
+.avatar.room-avatar svg { width: 52%; height: 52%; }            /* размер иконки */
+.room-badge { width: 13px; height: 13px; opacity: .55; vertical-align: -2px; }   /* пометка канала в списке */
+.room-badge-txt { font-size: 11px; color: var(--text-3); margin-left: 4px; }     /* число участников */
+.bubble-author { font-size: 12.5px; font-weight: 700; color: var(--accent); margin-bottom: 3px; }   /* имя автора в группе */
+.bubble-quote {                                                 /* цитата «в ответ на…» */
+  border-left: 3px solid var(--accent);                          /* цветная полоска слева */
+  padding: 4px 8px;                                              /* отступы */
+  margin-bottom: 6px;                                            /* от текста */
+  background: rgba(255, 255, 255, .06);                          /* лёгкий фон */
+  border-radius: 8px;                                            /* скругление */
+  font-size: 12.5px;                                             /* мелкий текст */
+  line-height: 1.35;                                             /* читаемость */
+}
+.bubble-quote b { display: block; color: var(--accent); font-size: 12px; }   /* автор цитаты */
+.bubble-quote span { color: var(--text-2); }                    /* текст цитаты */
+
+.reply-bar {                                                     /* полоска ответа над полем ввода */
+  display: flex; align-items: center; gap: 10px;                  /* в строку */
+  padding: 8px clamp(12px, 4vw, 48px);                            /* отступы */
+  background: rgba(124, 92, 255, .12);                            /* подсветка */
+  border-top: 1px solid var(--stroke);                            /* разделитель */
+  font-size: 13px;                                                /* размер текста */
+}
+.reply-bar svg { width: 18px; height: 18px; color: var(--accent); flex: none; }   /* иконка ответа */
+.reply-bar .reply-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }   /* текст цитаты */
+.reply-bar .reply-text b { font-size: 12.5px; color: var(--accent); }   /* кто автор */
+.reply-bar .reply-text span { color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* сам текст в одну строку */
+
+.composer-readonly {                                             /* пояснение «пишут только админы» */
+  display: flex; align-items: center; gap: 10px;                  /* в строку */
+  color: var(--text-2); font-size: 13.5px;                        /* оформление */
+  padding: 4px 0;                                                 /* отступы */
+}
+.composer-readonly svg { width: 18px; height: 18px; color: var(--accent); }   /* иконка канала */
+
+.new-chat-actions {                                              /* быстрые действия в окне «Новый чат» */
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;        /* двумя колонками */
+}
+.new-chat-action {                                               /* кнопка действия */
+  display: flex; align-items: center; gap: 8px;                   /* иконка + подпись */
+  padding: 11px 12px;                                             /* размер */
+  border-radius: 14px;                                            /* скругление */
+  background: rgba(255, 255, 255, .05);                           /* фон */
+  color: var(--text);                                             /* цвет текста */
+  font-size: 13.5px; font-weight: 600;                            /* оформление */
+  transition: background .2s ease, transform .15s ease;           /* плавность */
+}
+.new-chat-action:hover { background: rgba(255, 255, 255, .09); }   /* наведение */
+.new-chat-action:active { transform: scale(.97); }                /* нажатие */
+.new-chat-action svg { width: 18px; height: 18px; color: var(--accent); }   /* иконка */
+
+.found-list { max-height: 190px; overflow-y: auto; margin-top: 8px; display: grid; gap: 4px; }   /* найденные люди и комнаты */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }   /* выбранные участники */
+.chip {                                                          /* «таблетка» участника */
+  padding: 4px 10px; border-radius: 999px; font-size: 12.5px;      /* оформление */
+  background: rgba(124, 92, 255, .18); color: var(--accent);       /* цвет */
+}
+.chip.muted { background: rgba(255, 255, 255, .07); color: var(--text-2); }   /* нейтральная «таблетка» */
+.members { display: grid; gap: 6px; max-height: 260px; overflow-y: auto; }   /* список участников */
+.member-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; }   /* строка участника */
+.section-title { font-size: 13px; font-weight: 700; color: var(--text-2); margin-top: 6px; }   /* подзаголовок */
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; }   /* переключатель строкой */
+.color-dot {                                                     /* кружок цвета */
+  width: 28px; height: 28px; border-radius: 50%;                   /* круг */
+  background: var(--dot); border: 2px solid transparent;           /* цвет и рамка */
+}
+.color-dot.active { border-color: #fff; transform: scale(1.06); }   /* выбранный цвет */
+.app-menu-item.danger { color: var(--danger); }                  /* пункт «Удалить» красный */
+
+/* =========================================================================
+   26. ПРИЛОЖЕНИЕ ДЛЯ КОМПЬЮТЕРА: ПОЛОСА ЗАГОЛОВКА И ПОВЕДЕНИЕ ОКНА.
+   Всё это работает ТОЛЬКО внутри приложения для ПК (класс desktop-shell на <html>):
+   сайт в браузере и телефон эти правила не затрагивают.
+   ========================================================================= */
+
+/* --- 26.1 Полоса заголовка окна (вместо системной) --- */
+.winbar {
+  display: none;                                                   /* по умолчанию полосы нет */
+  align-items: center;                                             /* содержимое по центру по вертикали */
+  justify-content: space-between;                                  /* слева название, справа кнопки */
+  height: 38px;                                                    /* высота полосы */
+  padding-left: 10px;                                              /* отступ слева */
+  background: var(--bg-2);                                         /* фон панелей приложения */
+  border-bottom: 1px solid var(--line);                            /* разделитель */
+  flex: none;                                                      /* полоса не сжимается */
+  user-select: none;                                               /* её текст не выделяется */
+}
+html.desktop-shell .winbar { display: flex; }                      /* внутри приложения полосу показываем */
+.winbar-drag { display: flex; align-items: center; gap: 9px; flex: 1; height: 100%; }   /* зона перетаскивания окна */
+.winbar-logo {                                                     /* маленький значок приложения */
+  width: 20px; height: 20px; border-radius: 6px;                   /* размер и скругление */
+  display: grid; place-items: center;                              /* значок по центру */
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));   /* фирменный градиент */
+  color: #fff;                                                     /* цвет самого значка */
+}
+.winbar-logo svg { width: 13px; height: 13px; }                    /* размер значка внутри квадрата */
+.winbar-title { font-weight: 700; font-size: 13px; letter-spacing: .2px; }   /* название приложения */
+.winbar-user { font-size: 12px; color: var(--text-3); }            /* логин вошедшего человека */
+.winbar-buttons { display: flex; height: 100%; }                   /* блок кнопок окна */
+.winbar-btn {                                                      /* кнопка управления окном */
+  width: 46px; height: 100%;                                       /* размер как у системных кнопок */
+  display: grid; place-items: center;                              /* иконка по центру */
+  color: var(--text-2);                                            /* цвет иконки */
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);   /* плавность */
+}
+.winbar-btn svg { width: 15px; height: 15px; }                     /* размер иконки */
+.winbar-btn:hover { background: var(--bg-hover); color: var(--text); }   /* подсветка при наведении */
+.winbar-btn.danger:hover { background: #e0455c; color: #fff; }     /* «закрыть» краснеет, как в Windows */
+
+/* --- 26.2 Само приложение: полоса сверху, интерфейс занимает остаток высоты --- */
+html.desktop-shell, html.desktop-shell body { height: 100%; }       /* окно приложения на всю высоту */
+html.desktop-shell body { display: flex; flex-direction: column; overflow: hidden; }   /* сверху вниз, без «дёрганья» */
+html.desktop-shell .app { flex: 1 1 auto; height: auto; min-height: 0; }              /* интерфейс занимает остаток */
+
+/* --- 26.3 «Веб-повадки» убираем: это приложение, а не сайт --- */
+html.desktop-shell, html.desktop-shell body { cursor: default; }    /* обычная стрелка, а не «палочка» для текста */
+html.desktop-shell button, html.desktop-shell a, html.desktop-shell [role="button"],
+html.desktop-shell .chat-item, html.desktop-shell .user-row, html.desktop-shell label,
+html.desktop-shell .winbar-btn { cursor: pointer; }                 /* на кликабельном — «рука» */
+html.desktop-shell input, html.desktop-shell textarea, html.desktop-shell [contenteditable="true"] { cursor: text; }   /* в полях — текстовый курсор */
+html.desktop-shell * {                                              /* всё, что не поле ввода, — */
+  user-select: none;                                                /*   мышью не выделяется */
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;                         /*   без «вспышки» при нажатии */
+  -webkit-touch-callout: none;                                      /*   без системного меню по долгому нажатию */
+}
+html.desktop-shell input, html.desktop-shell textarea, html.desktop-shell [contenteditable="true"] {
+  user-select: text;                                                /* в полях ввода выделять можно */
+  -webkit-user-select: text;
+}
+html.desktop-shell ::selection { background: rgba(124, 92, 255, .35); }   /* выделение в полях — в цвет приложения */
+
+/* --- 26.4 Тонкие полосы прокрутки, как в программах --- */
+html.desktop-shell ::-webkit-scrollbar { width: 10px; height: 10px; }
+html.desktop-shell ::-webkit-scrollbar-track { background: transparent; }
+html.desktop-shell ::-webkit-scrollbar-thumb { background: #2a3145; border-radius: 6px; border: 2px solid transparent; background-clip: content-box; }
+html.desktop-shell ::-webkit-scrollbar-thumb:hover { background: #3a4359; background-clip: content-box; }
+html.desktop-shell ::-webkit-scrollbar-corner { background: transparent; }
+
+/* --- 26.5 В приложении для ПК нижнее меню (мобильное) не нужно --- */
+html.desktop-shell #bottom-nav { display: none; }                   /* нижнее меню — это для телефона */
+
+/* --- 26.6 Шапка боковой панели: название сверху, карточка профиля — своей строкой --- */
+.side-top { flex-wrap: wrap; row-gap: 4px; }                        /* разрешаем переносить элементы на вторую строку */
+.brand-row { flex: 1 1 auto; min-width: 0; }                        /* название приложения занимает первую строку */
+.brand-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* длинное название обрезается, а не выталкивает кнопки */
+.top-actions { flex: none; margin-left: auto; }                     /* кнопки всегда справа, не сжимаются */
+.me-card { flex: 1 0 100%; }                                        /* карточка профиля — во всю ширину своей строки */
+#me-avatar { flex: none; }                                          /* аватар никогда не «сдавливается» в полоску */
+
+/* --- 27. Компактный список чатов: дополняем существующий класс .compact --- */
+body.compact .chat-item .chat-preview { display: none; }                  /* превью скрыто — только имя и время */
+body.compact .chat-item { padding-top: 6px; padding-bottom: 6px; }         /* строки ниже */
+
+
+/* --- 28. Мелкие доводки вкладок --- */
+.chat-tab { font-size: 12.5px; padding: 6px 11px; }        /* вкладки чуть компактнее — их помещается больше */
+.chat-tab.add { padding: 6px 12px; }                       /* кнопка «плюс» того же размера */
+.tabs-wrap::after {                                        /* мягкая тень справа — намёк на прокрутку вкладок */
+  content: ""; position: absolute; right: 0; top: 0; bottom: 8px; width: 22px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--bg-side, #12141c));   /* затухание к краю */
+}
+
+.winbar.dragging { cursor: grabbing; }                      /* окно тянут за полосу — курсор «взял» */
+.winbar { cursor: grab; }                                   /* за полосу можно тянуть окно */
+.winbar-btn { cursor: pointer; }                            /* кнопки полосы — обычная стрелка */
+
+/* =====================================================================
+   24. ОФОРМЛЕНИЕ НОВЫХ ВОЗМОЖНОСТЕЙ (заголовок, нижнее меню, меню чата,
+   поиск, обои, плеер музыки, кружок по голосовому, контакты)
+   ===================================================================== */
+
+/* ---------- 24.1 Заголовок «GeoMetric» сверху ---------- */
+.brand-row {
+  /* Строка с названием приложения. */
+  display: flex;                     /* выстраиваем значок, название и версию в ряд */
+  align-items: center;               /* выравниваем по центру по вертикали */
+  gap: 10px;                         /* отступ между элементами */
+  padding: 10px 14px 4px;            /* внутренние отступы */
+}
+.brand-logo {
+  /* Значок приложения. */
+  width: 30px;                       /* размер значка */
+  height: 30px;                      /* он же по высоте */
+  border-radius: 10px;               /* мягкие углы */
+  display: grid;                     /* значок по центру */
+  place-items: center;               /* по обеим осям */
+  background: linear-gradient(135deg, #ff8c42, #ff4d6d);   /* фирменный градиент */
+  color: #fff;                       /* цвет значка */
+}
+.brand-logo svg { width: 18px; height: 18px; }   /* размер картинки внутри значка */
+.brand-name {
+  /* Название приложения. */
+  font-size: 19px;                   /* крупно, как просили */
+  font-weight: 800;                  /* жирно */
+  letter-spacing: .3px;              /* чуть разрядки */
+}
+.brand-version {
+  /* Номер версии. */
+  margin-left: auto;                 /* прижимаем вправо */
+  font-size: 12px;                   /* мелко */
+  opacity: .55;                      /* не отвлекает */
+  padding: 3px 8px;                  /* внутренние отступы */
+  border-radius: 999px;              /* форма «таблетки» */
+  background: rgba(255, 255, 255, .07);   /* лёгкая подложка */
+}
+
+/* ---------- 24.2 Нижнее меню ---------- */
+.bottom-nav {
+  /* Меню из четырёх кнопок. */
+  display: none;                     /* на большом экране его нет: там всё видно и так */
+  position: fixed;                   /* приклеено к низу окна */
+  left: 0; right: 0; bottom: 0;       /* по всей ширине внизу */
+  z-index: 40;                       /* поверх остального */
+  background: rgba(12, 15, 22, .96);  /* плотный фон, чтобы читалось */
+  border-top: 1px solid rgba(255, 255, 255, .08);   /* тонкая линия сверху */
+  padding: 6px 4px calc(6px + env(safe-area-inset-bottom));   /* отступы с учётом «чёлки» */
+  backdrop-filter: blur(12px);       /* лёгкое размытие фона */
+}
+.nav-btn {
+  /* Кнопка нижнего меню. */
+  flex: 1;                           /* равная доля ширины */
+  display: flex;                     /* значок и подпись столбиком */
+  flex-direction: column;            /* именно столбиком */
+  align-items: center;               /* по центру */
+  gap: 3px;                          /* отступ */
+  background: none;                  /* без фона */
+  border: 0;                         /* без рамки */
+  color: var(--muted, #8b93a7);      /* спокойный цвет */
+  font-size: 11px;                   /* мелкая подпись */
+  padding: 6px 0;                    /* внутренние отступы */
+  border-radius: 14px;               /* мягкие углы */
+  transition: color .18s, transform .18s;   /* плавность */
+}
+.nav-btn svg { width: 22px; height: 22px; }   /* размер значка */
+.nav-btn.active { color: var(--accent, #ff8c42); }   /* выбранная кнопка — акцентным цветом */
+.nav-btn:active { transform: scale(.94); }    /* отклик на нажатие */
+
+@media (max-width: 860px) {
+  /* На телефоне нижнее меню показываем, а списку оставляем место снизу. */
+  .bottom-nav { display: flex; }              /* включаем меню */
+  .sidebar { padding-bottom: 74px; }          /* чтобы список чатов не залезал под меню */
+  .chat-area { padding-bottom: 0; }           /* переписка занимает экран целиком */
+  .composer { margin-bottom: 66px; }          /* поле ввода выше меню */
+}
+
+/* ---------- 24.3 Лист действий («три точки», обои, контакты) ---------- */
+.sheet {
+  /* Карточка со списком действий. */
+  width: min(460px, 94vw);           /* ширина карточки */
+  max-height: 86vh;                  /* не выше экрана */
+  overflow: auto;                    /* если не влезло — прокрутка */
+  background: #12161f;               /* фон карточки */
+  border: 1px solid rgba(255, 255, 255, .08);   /* тонкая рамка */
+  border-radius: 22px;               /* скругления */
+  padding: 14px;                     /* внутренние отступы */
+  display: flex;                     /* содержимое столбиком */
+  flex-direction: column;            /* именно столбиком */
+  gap: 8px;                          /* отступ между строками */
+  animation: sheetUp .22s ease-out;  /* плавное появление снизу */
+}
+@keyframes sheetUp {                  /* сама анимация появления */
+  from { transform: translateY(18px); opacity: 0; }   /* из положения чуть ниже */
+  to { transform: translateY(0); opacity: 1; }        /* в обычное положение */
+}
+.sheet-top {
+  /* Шапка листа: название и крестик. */
+  display: flex;                     /* в ряд */
+  align-items: center;               /* по центру */
+  gap: 10px;                         /* отступ */
+  margin-bottom: 4px;                /* отступ снизу */
+}
+.sheet-title {
+  /* Название листа. */
+  font-size: 17px;                   /* крупно */
+  font-weight: 700;                  /* жирно */
+  flex: 1;                           /* занимает всё свободное место */
+}
+.sheet-item {
+  /* Строка действия. */
+  display: flex;                     /* значок и подпись в ряд */
+  align-items: center;               /* по центру */
+  gap: 12px;                         /* отступ */
+  padding: 13px 12px;                /* внутренние отступы */
+  border: 0;                         /* без рамки */
+  border-radius: 14px;               /* скругления */
+  background: rgba(255, 255, 255, .04);   /* лёгкий фон */
+  color: inherit;                    /* цвет текста как везде */
+  font-size: 15px;                   /* размер текста */
+  text-align: left;                  /* текст по левому краю */
+  transition: background .16s, transform .16s;   /* плавность */
+}
+.sheet-item svg { width: 20px; height: 20px; opacity: .85; }   /* значки действий */
+.sheet-item:active { transform: scale(.985); }                  /* отклик на нажатие */
+.sheet-item.danger { color: #ff6b81; }                          /* опасные действия — красным */
+
+/* ---------- 24.4 Поиск по переписке ---------- */
+.chat-search {
+  /* Полоса поиска под шапкой чата. */
+  display: flex;                     /* поле и крестик в ряд */
+  align-items: center;               /* по центру */
+  gap: 8px;                          /* отступ */
+  padding: 8px 12px;                 /* внутренние отступы */
+  background: rgba(255, 255, 255, .04);   /* лёгкий фон */
+  position: relative;                /* чтобы список результатов лёг под полосой */
+}
+.chat-search .input { flex: 1; }     /* поле растягивается */
+.chat-search-results {
+  /* Список найденных сообщений. */
+  position: absolute;                /* поверх ленты */
+  top: 100%; left: 8px; right: 8px;  /* под полосой поиска */
+  z-index: 30;                       /* поверх сообщений */
+  max-height: 45vh;                  /* не больше половины экрана */
+  overflow: auto;                    /* прокрутка */
+  background: #141924;               /* фон списка */
+  border: 1px solid rgba(255, 255, 255, .08);   /* рамка */
+  border-radius: 16px;               /* скругления */
+  padding: 6px;                      /* отступы */
+}
+.search-hit {
+  /* Найденное сообщение. */
+  display: flex;                     /* время и текст в ряд */
+  gap: 10px;                         /* отступ */
+  width: 100%;                       /* на всю ширину */
+  text-align: left;                  /* по левому краю */
+  background: none;                  /* без фона */
+  border: 0;                         /* без рамки */
+  color: inherit;                    /* обычный цвет */
+  padding: 9px 10px;                 /* внутренние отступы */
+  border-radius: 12px;               /* скругления */
+}
+.search-hit .hit-time { opacity: .6; font-size: 12px; }   /* время находки */
+.search-hit .hit-text { flex: 1; }                        /* сам текст */
+.msg-row.found .bubble {
+  /* Подсветка найденного сообщения в ленте. */
+  outline: 2px solid var(--accent, #ff8c42);   /* заметная рамка */
+  outline-offset: 2px;                          /* чуть дальше от пузыря */
+}
+
+/* ---------- 24.5 Обои чата ---------- */
+.wallpaper-colors {
+  /* Готовые цвета обоев. */
+  display: flex;                     /* в ряд */
+  flex-wrap: wrap;                   /* с переносом */
+  gap: 10px;                         /* отступы */
+  padding: 6px 2px 12px;             /* внутренние отступы */
+}
+.wp-color {
+  /* Кружок с цветом. */
+  width: 42px; height: 42px;         /* размер */
+  border-radius: 50%;                /* круг */
+  border: 2px solid rgba(255, 255, 255, .14);   /* светлая кайма */
+}
+.wp-color.active { border-color: var(--accent, #ff8c42); }   /* выбранный цвет */
+.wallpaper-actions { display: flex; gap: 8px; padding-bottom: 10px; }   /* кнопки действий с обоями */
+.wallpaper-scope {
+  /* Переключатель «у меня / у обоих». */
+  display: flex;                     /* в ряд */
+  gap: 6px;                          /* отступ */
+  background: rgba(255, 255, 255, .05);   /* фон переключателя */
+  padding: 4px;                      /* внутренние отступы */
+  border-radius: 14px;               /* скругления */
+}
+.seg-btn {
+  /* Кнопка переключателя. */
+  flex: 1;                           /* равные доли */
+  border: 0;                         /* без рамки */
+  background: none;                  /* без фона */
+  color: inherit;                    /* обычный цвет */
+  padding: 9px 6px;                  /* внутренние отступы */
+  border-radius: 11px;               /* скругления */
+  font-size: 14px;                   /* размер текста */
+}
+.seg-btn.active { background: var(--accent, #ff8c42); color: #14161d; font-weight: 600; }   /* выбранная кнопка */
+
+/* ---------- 24.6 Плеер музыки и кружок по голосовому ---------- */
+.music-msg {
+  /* Плеер присланной музыки. */
+  display: flex;                     /* кнопка, полоса и время в ряд */
+  align-items: center;               /* по центру */
+  gap: 10px;                         /* отступ */
+  min-width: 230px;                  /* чтобы не был слишком узким */
+}
+.music-play {
+  /* Кнопка «слушать». */
+  width: 40px; height: 40px;         /* размер */
+  border-radius: 50%;                /* круг */
+  border: 0;                         /* без рамки */
+  background: var(--accent, #ff8c42);   /* акцентный фон */
+  color: #14161d;                    /* тёмный значок */
+  display: grid; place-items: center; /* значок по центру */
+}
+.music-play svg { width: 18px; height: 18px; }   /* размер значка */
+.music-body { flex: 1; min-width: 0; }           /* тело плеера занимает место */
+.music-title {
+  /* Название файла. */
+  font-size: 14px;                   /* размер */
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;   /* длинное имя обрезаем */
+}
+.music-bar {
+  /* Полоса прогресса. */
+  height: 4px;                       /* тонкая */
+  border-radius: 4px;                /* скругления */
+  background: rgba(255, 255, 255, .18);   /* фон полосы */
+  margin-top: 6px;                   /* отступ сверху */
+  overflow: hidden;                  /* прогресс не вылезает */
+}
+.music-bar i { display: block; height: 100%; width: 0; background: var(--accent, #ff8c42); transition: width .2s linear; }   /* сам прогресс */
+.music-time { font-size: 12px; opacity: .7; }    /* время звучания */
+.voice-circle {
+  /* «Кружок», который показывается по тапу на голосовое. */
+  position: absolute;                /* поверх пузыря */
+  inset: 0;                          /* на всю площадь пузыря */
+  display: flex;                     /* содержимое столбиком */
+  flex-direction: column;            /* именно столбиком */
+  align-items: center;               /* по центру */
+  justify-content: center;           /* по центру по вертикали */
+  gap: 8px;                          /* отступ */
+  border-radius: 50%;                /* форма круга */
+  background: radial-gradient(circle at 50% 30%, #2a3242, #141821);   /* фон круга */
+  animation: vcPop .2s ease-out;     /* появление */
+}
+@keyframes vcPop { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }   /* анимация круга */
+.voice-circle .vc-avatar { width: 84px; height: 84px; border-radius: 50%; overflow: hidden; }   /* аватарка внутри круга */
+.voice-circle .vc-wave { display: flex; align-items: flex-end; gap: 3px; height: 22px; }        /* «волна» звука */
+.voice-circle .vc-wave i { width: 3px; background: var(--accent, #ff8c42); border-radius: 2px; animation: vcWave .8s infinite ease-in-out; }   /* живые полоски */
+.voice-circle .vc-wave i:nth-child(odd) { animation-delay: .15s; }   /* сдвиг анимации */
+.voice-circle .vc-wave i:nth-child(3n) { animation-delay: .3s; }     /* и ещё сдвиг */
+@keyframes vcWave { 0%, 100% { transform: scaleY(.5); } 50% { transform: scaleY(1); } }   /* дыхание полосок */
+.voice-circle .vc-hint { font-size: 11px; opacity: .6; }              /* подсказка под кругом */
+.voice-msg.as-circle {
+  /* Пузырь, развёрнутый в кружок. */
+  position: relative;                /* чтобы круг легёл поверх */
+  min-height: 210px;                 /* высота под круг */
+  display: grid; place-items: center; /* содержимое по центру */
+  border-radius: 26px;               /* мягкие углы */
+}
+.voice-msg.as-circle .voice-play { width: 46px; height: 46px; border-radius: 50%; background: var(--accent, #ff8c42); color: #14161d; }   /* большая кнопка игры */
+
+/* ---------- 24.7 Контакты ---------- */
+.contacts-list { display: flex; flex-direction: column; gap: 6px; max-height: 56vh; overflow: auto; }   /* список контактов */
+.contact-row {
+  /* Одна строка контакта. */
+  display: flex;                     /* аватар и текст в ряд */
+  align-items: center;               /* по центру */
+  gap: 12px;                         /* отступ */
+  width: 100%;                       /* на всю ширину */
+  text-align: left;                  /* по левому краю */
+  border: 0;                         /* без рамки */
+  background: rgba(255, 255, 255, .04);   /* лёгкий фон */
+  color: inherit;                    /* обычный цвет */
+  padding: 10px;                     /* внутренние отступы */
+  border-radius: 14px;               /* скругления */
+}
+.contact-body { display: flex; flex-direction: column; }   /* имя и логин столбиком */
+.contact-body b { font-size: 15px; }                       /* имя */
+.contact-body i { font-size: 12px; opacity: .6; font-style: normal; }   /* логин */
+
+/* ---------- 24.8 Настройка жеста записи ---------- */
+#btn-mic.recording {                                   /* пока идёт запись — */
+  background: #ff4d6d;                                 /* кнопка краснеет */
+  color: #fff;                                         /* значок белый */
+  animation: micPulse 1.1s infinite;                   /* и слегка пульсирует */
+}
+@keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 77, 109, .5); } 70% { box-shadow: 0 0 0 12px rgba(255, 77, 109, 0); } }   /* сама пульсация */
+.rec-hint.swipe .rec-hint-arrow { transform: translateY(-8px); animation: hintUp 1s infinite; }   /* подсказка «веди вверх» */
+.rec-hint.locked { border-color: rgba(255, 140, 66, .7); }   /* закреплённая запись — акцентная рамка */
+@keyframes hintUp { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }   /* движение стрелки */
+
+/* ============================================================================
+   11. ДОБАВЛЕНО ПО ЗАМЕЧАНИЯМ ВЛАДЕЛЬЦА (GeoMetric 1.0)
+   ----------------------------------------------------------------------------
+   Здесь:
+     • темы дотянуты на все поверхности (раньше часть элементов оставалась тёмной);
+     • выдвижная панель слева (три полоски) с созданием чата, группы, канала;
+     • окна QR-кода, автоудаления и своей темы;
+     • вкладки списка чатов теперь листаются вбок и удаляются;
+     • записи звонков в переписке занимают всю ширину и не режутся;
+     • крестики в настройках и профиле не уезжают при листании;
+     • поля описания можно тянуть только вверх и вниз.
+   ========================================================================== */
+
+/* --- 11.1 Темы: все основные поверхности берут цвета из переменных темы --- */
+.sidebar,                                  /* левая панель */
+.chat-header,                              /* шапка переписки */
+.composer,                                 /* поле ввода */
+.sheet,                                    /* выезжающие листы (меню, настройки) */
+.modal-head,                               /* шапки окон */
+.chat-item.active,                         /* выбранный чат */
+.device-row, .bot-row,                     /* строки списков */
+.days, .msg-day {                          /* подписи дат в переписке */
+  background-color: var(--bg-2);           /* фон берём из темы, а не жёсткий */
+  color: var(--text);                      /* цвет текста — тоже из темы */
+}
+.chat-item:hover,                          /* наведение на чат */
+.drawer-item:hover,                        /* наведение на пункт панели */
+.sheet-item:hover {                        /* наведение на пункт меню */
+  background-color: var(--bg-hover);       /* подсветка из темы */
+}
+.bubble.in,                                /* входящее сообщение */
+.chat-item,                                /* строка чата */
+.search-box,                               /* поле поиска */
+.input, .search, .composer textarea {      /* все поля ввода */
+  background-color: var(--bg-3);           /* фон полей и пузырей — из темы */
+  color: var(--text);                      /* текст из темы */
+}
+.bubble.out {                              /* своё сообщение */
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));   /* градиент из акцента темы */
+  color: #fff;                             /* на акценте текст всегда белый */
+}
+.story-viewer,                             /* просмотр историй */
+.call-overlay {                            /* экран звонка */
+  background: linear-gradient(180deg, var(--bg), var(--bg-2));   /* фон из темы вместо чёрного */
+}
+.tab-underline { background: var(--accent); }        /* «бегунок» вкладок — цвет темы */
+.chat-tab.active { color: var(--accent); }           /* активная вкладка — цвет темы */
+
+/* --- 11.2 Звонки: запись в переписке занимает всю строку и не режется --- */
+.msg-row .call-log {                       /* запись звонка вместо пузыря */
+  display: flex;                           /* иконка и текст в строку */
+  align-items: center;                     /* выравниваем по центру */
+  gap: 10px;                               /* отступ между иконкой и текстом */
+  width: 100%;                             /* во всю ширину ленты */
+  max-width: 100%;                         /* не даём обрезать */
+  padding: 10px 14px;                      /* внутренние отступы */
+  border-radius: var(--r-md);              /* скругление как у пузырей */
+  background: var(--bg-3);                 /* фон из темы */
+  color: var(--text);                      /* текст из темы */
+  font-size: 13.5px;                       /* аккуратный размер */
+  text-align: left;                        /* текст по левому краю */
+  overflow: visible;                       /* ничего не обрезаем */
+  white-space: normal;                     /* разрешаем переносы */
+}
+.msg-row .call-log .call-log-text {        /* тексты записи звонка */
+  display: flex;                           /* столбик */
+  flex-direction: column;                  /* заголовок над временем */
+  min-width: 0;                            /* разрешаем сжатие внутри flex */
+  flex: 1 1 auto;                          /* занимаем всё свободное место */
+}
+.msg-row .call-log .call-title {           /* заголовок «Исходящий звонок» */
+  font-weight: 620;                        /* чуть жирнее */
+  white-space: normal;                     /* переносим слова, а не режем */
+  overflow-wrap: anywhere;                 /* длинные слова тоже переносим */
+}
+.msg-row .call-log .call-sub {             /* подпись с длительностью и временем */
+  color: var(--text-3);                    /* цвет подписи из темы */
+  font-size: 12px;                         /* мельче заголовка */
+  white-space: normal;                     /* перенос разрешён */
+}
+.msg-row .call-log-icon { flex: none; }    /* иконка звонка не сжимается */
+.msg-row .call-log.missed .call-title { color: var(--danger); }   /* пропущенный — красным */
+
+/* --- 11.3 Выдвижная панель слева (три полоски) --- */
+.drawer { position: fixed; inset: 0; z-index: 96; display: block; }        /* слой панели поверх приложения */
+.drawer-back { position: absolute; inset: 0; background: rgba(0, 0, 0, .45); }   /* затемнение всей площади под панелью */
+.drawer-panel {                           /* сама панель */
+  position: relative;                     /* панель поверх затемнения */
+  z-index: 2;                             /* и выше него в стопке слоёв */
+  width: 264px;                           /* ширина панели */
+  max-width: 78vw;                        /* на телефоне — не шире экрана */
+  height: 100%;                           /* на всю высоту */
+  background: var(--bg-2);                /* фон из темы */
+  border-right: 1px solid var(--line);    /* разделительная линия */
+  padding: 14px;                          /* внутренние отступы */
+  display: flex;                          /* столбик пунктов */
+  flex-direction: column;                 /* сверху вниз */
+  gap: 6px;                               /* отступ между пунктами */
+  animation: drawer-in .22s var(--ease);  /* плавный выезд слева */
+}
+@keyframes drawer-in { from { transform: translateX(-100%); } to { transform: translateX(0); } }   /* выезд слева */
+.drawer-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }   /* шапка панели */
+.drawer-title { font-weight: 700; font-size: 16px; }                     /* заголовок панели */
+.drawer-item {                            /* пункт панели */
+  display: flex;                          /* иконка и подпись в строку */
+  align-items: center;                    /* выравнивание по центру */
+  gap: 12px;                              /* отступ между иконкой и текстом */
+  padding: 12px 12px;                     /* внутренние отступы */
+  border-radius: var(--r-md);             /* скругление */
+  background: transparent;                /* без фона */
+  color: var(--text);                     /* цвет текста из темы */
+  border: none;                           /* без рамки */
+  font-size: 15px;                        /* размер подписи */
+  text-align: left;                       /* текст по левому краю */
+}
+.drawer-item svg { width: 20px; height: 20px; color: var(--accent); }    /* значки пунктов */
+
+/* --- 11.4 Окна QR-кода, автоудаления и своей темы --- */
+.qr-sheet { text-align: center; }                                        /* содержимое по центру */
+.qr-box {                                /* рамка вокруг QR-кода */
+  display: grid; place-items: center;                                    /* центрируем картинку */
+  background: #fff;                      /* QR-код читается только на белом */
+  border-radius: var(--r-md);            /* скругление */
+  padding: 14px;                         /* отступы внутри рамки */
+  margin: 10px auto;                     /* отступы снаружи */
+  width: fit-content;                    /* по размеру картинки */
+}
+.qr-box img { width: 220px; height: 220px; image-rendering: pixelated; }   /* сам код */
+.qr-hint { color: var(--text-3); font-size: 13px; margin-bottom: 10px; }   /* подсказка под кодом */
+.qr-link-row { display: flex; gap: 8px; align-items: center; }            /* ссылка и кнопки в строку */
+.qr-link-row .input { flex: 1 1 auto; min-width: 0; }                     /* ссылка занимает всё место */
+.sheet-note { color: var(--text-3); font-size: 13px; margin: 4px 0 10px; }   /* пояснение в листе */
+.field-label { color: var(--text-2); font-size: 13px; margin: 8px 0 4px; }   /* подписи полей своей темы */
+.ad-custom { display: flex; gap: 8px; align-items: center; margin-top: 8px; }   /* свой срок автоудаления */
+.ad-custom .input { flex: 1 1 auto; }                                     /* поля растягиваются */
+
+/* --- 11.5 Вкладки списка чатов: листаются вбок и удаляются --- */
+.chat-tabs {                              /* полоса вкладок */
+  display: flex;                          /* вкладки в строку */
+  gap: 6px;                               /* отступ между ними */
+  overflow-x: auto;                       /* можно листать вбок */
+  overflow-y: hidden;                     /* по вертикали не листаем */
+  scrollbar-width: none;                  /* полосу прокрутки прячем (Firefox) */
+  padding: 0 2px 6px;                     /* небольшой отступ */
+  scroll-behavior: smooth;                /* плавное листание */
+}
+.chat-tabs::-webkit-scrollbar { height: 0; }                             /* прячем полосу прокрутки (Chrome/Safari) */
+.chat-tab { flex: none; position: relative; }                            /* вкладки не сжимаются */
+.chat-tab .tab-x {                        /* крестик удаления своей вкладки */
+  margin-left: 6px;                       /* отступ от названия */
+  opacity: .65;                           /* не бросается в глаза */
+  font-weight: 700;                       /* заметный символ */
+}
+.chat-tab .tab-x:hover { opacity: 1; color: var(--danger); }             /* при наведении — красный */
+.tab-hint { color: var(--text-3); font-size: 12px; padding: 0 4px 6px; }   /* подсказка про удаление */
+
+/* --- 11.6 Крестики окон не уезжают при листании --- */
+.sheet-top, .modal-head {                 /* шапки листов и окон */
+  position: sticky;                       /* «прилипают» к верху */
+  top: 0;                                 /* остаются на месте при прокрутке */
+  z-index: 5;                             /* поверх содержимого */
+  background: var(--bg-2);                /* свой фон, чтобы под ними не просвечивало */
+}
+.modal .sheet, .modal-head { border-radius: var(--r-lg); }               /* аккуратные углы */
+
+/* --- 11.7 Поля описания тянем только вверх и вниз --- */
+textarea.input, textarea, .sheet textarea {   /* все многострочные поля */
+  resize: vertical;                       /* тянуть можно только по вертикали */
+  max-width: 100%;                        /* шире окна не станет */
+}
+
+/* --- 11.8 Значки устройств в списке --- */
+.device-row { display: flex; align-items: center; gap: 10px; }           /* строка устройства */
+.device-icon {                            /* значок устройства */
+  width: 38px; height: 38px;              /* размер кружка */
+  border-radius: 12px;                    /* форма */
+  display: grid; place-items: center;     /* центрируем значок */
+  background: var(--bg-hover);            /* фон из темы */
+  color: var(--accent);                   /* цвет значка из темы */
+  position: relative;                     /* для маленького значка браузера */
+  flex: none;                             /* не сжимается */
+}
+.device-icon svg { width: 20px; height: 20px; }                          /* размер значка */
+.device-icon .dev-browser {               /* маленький значок браузера внутри */
+  position: absolute; right: -3px; bottom: -3px;                          /* в уголке кружка */
+  width: 16px; height: 16px; border-radius: 6px;                          /* размер и форма */
+  display: grid; place-items: center;                                     /* центрируем */
+  background: var(--bg-2); border: 1px solid var(--line);                 /* рамка, чтобы не сливалось */
+}
+.device-icon .dev-browser svg { width: 11px; height: 11px; }             /* совсем маленький значок */
+.device-ip { color: var(--text-3); font-size: 12px; }                    /* строка с адресом и регионом */
+
+/* --- 11.9 Полоса «включено автоудаление» в шапке переписки --- */
+.autodelete-banner {                       /* сама полоска */
+  margin: 8px 12px 0;                      /* отступы от краёв */
+  padding: 8px 12px;                       /* внутренние отступы */
+  border-radius: var(--r-sm);              /* аккуратные углы */
+  background: var(--accent-soft);          /* мягкая подложка из темы */
+  color: var(--text-2);                    /* цвет текста из темы */
+  font-size: 12.5px;                       /* некрупный текст */
+  text-align: center;                      /* по центру */
+}
