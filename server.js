@@ -490,6 +490,12 @@ function attachUser(socket, acc) {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
+app.get('/geo-style.css', (req, res) => {
+  res.sendFile(path.join(__dirname, 'geo-style.css'));
+});
+app.get('/geo-design.css', (req, res) => {
+  res.sendFile(path.join(__dirname, 'geo-design.css'));
+});
 app.get('/ping', (req, res) => res.send('Server is alive!'));
 app.get('/livekit-status', (req, res) => res.json({ enabled: livekitEnabled() }));
 
