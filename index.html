@@ -3,252 +3,242 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NMessenger</title>
+<title>NMessenger | Premium</title>
+<!-- Подключаем современные шрифты и иконки -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" />
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-  body { background: #0d0d0d; color: #fff; height: 100vh; overflow: hidden; }
-  
-  /* Экран входа */
+  :root {
+    --bg-main: #0f1115;
+    --bg-sidebar: #17191f;
+    --bg-panel: #21242d;
+    --accent: #5865F2; /* Цвет Discord */
+    --accent-hover: #4752C4;
+    --text-main: #f2f3f5;
+    --text-muted: #949ba4;
+    --danger: #ed4245;
+    --success: #23a559;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+  body { background: var(--bg-main); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; }
+
+  /* Скроллбары */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #3f4147; border-radius: 10px; }
+
+  /* Экран логина (Стеклянный эффект) */
   #loginScreen {
-    display: flex; justify-content: center; align-items: center;
-    height: 100vh; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    position: fixed; inset: 0; background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover;
+    display: flex; justify-content: center; align-items: center; z-index: 1000;
   }
-  .login-box {
-    background: #1e1e2e; padding: 40px; border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5); text-align: center; width: 350px;
-    border: 1px solid #2a2a3e;
+  .login-glass {
+    background: rgba(23, 25, 31, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    padding: 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1);
+    width: 100%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
   }
-  .login-box h1 { color: #a78bfa; margin-bottom: 10px; font-size: 32px; }
-  .login-box p { color: #888; margin-bottom: 25px; font-size: 14px; }
-  .login-box input {
-    width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #333;
-    background: #16161f; color: #fff; font-size: 16px; margin-bottom: 15px; outline: none;
+  .login-glass h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; background: linear-gradient(135deg, #fff, #a5a5a5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .login-glass p { color: var(--text-muted); margin-bottom: 30px; }
+  .login-glass input {
+    width: 100%; padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.2); color: white; font-size: 16px; margin-bottom: 20px; outline: none; transition: 0.3s;
   }
-  .login-box input:focus { border-color: #a78bfa; }
-  .login-box button {
-    width: 100%; padding: 14px; border-radius: 10px; border: none;
-    background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
-    color: #fff; font-size: 16px; font-weight: bold; cursor: pointer;
-    transition: transform 0.2s;
+  .login-glass input:focus { border-color: var(--accent); background: rgba(0,0,0,0.4); }
+  .login-glass button {
+    width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--accent);
+    color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s;
   }
-  .login-box button:hover { transform: translateY(-2px); }
-  
-  /* Основной экран */
-  #mainScreen { display: none; height: 100vh; }
-  .app { display: flex; height: 100vh; }
-  
+  .login-glass button:hover { background: var(--accent-hover); transform: translateY(-2px); }
+
   /* Боковая панель */
-  .sidebar {
-    width: 280px; background: #14141c; border-right: 1px solid #2a2a3e;
-    display: flex; flex-direction: column;
-  }
-  .sidebar-header {
-    padding: 20px; border-bottom: 1px solid #2a2a3e;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .avatar {
-    width: 45px; height: 45px; border-radius: 50%;
-    background: linear-gradient(135deg, #a78bfa, #7c3aed);
-    display: flex; align-items: center; justify-content: center;
-    font-weight: bold; font-size: 18px;
-  }
-  .user-info h3 { font-size: 16px; }
-  .user-info span { font-size: 12px; color: #4ade80; }
+  .sidebar { width: 300px; background: var(--bg-sidebar); display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); z-index: 10; }
+  .brand { padding: 20px; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
   
-  .sidebar-title {
-    padding: 15px 20px 10px; color: #666; font-size: 12px;
-    text-transform: uppercase; font-weight: bold;
-  }
+  .user-profile { padding: 20px; display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.1); }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; color: white; }
+  .avatar-me { background: linear-gradient(135deg, var(--accent), #b147c4); }
+  .user-info h3 { font-size: 15px; font-weight: 600; }
+  .user-info span { font-size: 12px; color: var(--success); display: flex; align-items: center; gap: 4px; }
+  .user-info span::before { content: ''; display: block; width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
+
+  .nav-title { padding: 20px 20px 10px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
   .online-list { flex: 1; overflow-y: auto; padding: 0 10px; }
   .online-user {
-    padding: 12px 15px; border-radius: 10px; display: flex;
-    align-items: center; gap: 12px; cursor: pointer; transition: background 0.2s;
+    padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 12px; margin-bottom: 4px; transition: 0.2s; cursor: pointer;
   }
-  .online-user:hover { background: #1e1e2e; }
-  .status-dot {
-    width: 10px; height: 10px; border-radius: 50%; background: #4ade80;
-  }
+  .online-user:hover { background: rgba(255,255,255,0.05); }
+  .online-user .avatar { width: 32px; height: 32px; font-size: 14px; background: var(--bg-panel); }
   
-  .call-button {
-    margin: 15px; padding: 15px; border-radius: 12px; border: none;
-    background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
-    color: #fff; font-size: 15px; font-weight: bold; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
+  .call-action { padding: 20px; }
+  .btn-call {
+    width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--success); color: white; font-weight: 600; font-size: 15px;
+    display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(35, 165, 89, 0.3);
   }
-  .call-button:hover { opacity: 0.9; }
-  .call-button.end { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
+  .btn-call:hover { background: #1e8f4c; transform: translateY(-2px); }
+  .btn-call.in-call { background: var(--danger); box-shadow: 0 4px 15px rgba(237, 66, 69, 0.3); }
+  .btn-call.in-call:hover { background: #c9383b; }
+
+  /* Главная область чата */
+  .chat-container { flex: 1; display: flex; flex-direction: column; position: relative; }
+  .chat-header { padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); background: var(--bg-main); z-index: 5; }
+  .chat-header h2 { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .chat-header .status { font-size: 14px; color: var(--text-muted); background: var(--bg-panel); padding: 4px 12px; border-radius: 20px; }
+
+  .messages { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
   
-  /* Область чата */
-  .chat-area { flex: 1; display: flex; flex-direction: column; background: #0d0d15; }
-  .chat-header {
-    padding: 20px; border-bottom: 1px solid #2a2a3e;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .chat-header h2 { color: #a78bfa; }
+  .msg-wrapper { display: flex; flex-direction: column; max-width: 70%; }
+  .msg-wrapper.them { align-self: flex-start; }
+  .msg-wrapper.me { align-self: flex-end; align-items: flex-end; }
   
-  .messages {
-    flex: 1; overflow-y: auto; padding: 20px;
-    display: flex; flex-direction: column; gap: 12px;
-  }
-  .messages::-webkit-scrollbar { width: 8px; }
-  .messages::-webkit-scrollbar-thumb { background: #2a2a3e; border-radius: 4px; }
+  .msg-info { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: flex; gap: 8px; align-items: center; }
   
-  .message {
-    max-width: 60%; padding: 12px 16px; border-radius: 15px;
-    background: #1e1e2e; word-wrap: break-word;
+  .msg-bubble { padding: 12px 18px; border-radius: 18px; font-size: 15px; line-height: 1.5; position: relative; word-wrap: break-word; }
+  .msg-wrapper.them .msg-bubble { background: var(--bg-panel); border-bottom-left-radius: 4px; }
+  .msg-wrapper.me .msg-bubble { background: var(--accent); color: white; border-bottom-right-radius: 4px; }
+
+  .sys-msg { align-self: center; background: rgba(255,255,255,0.05); padding: 6px 16px; border-radius: 20px; font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+
+  .chat-input { padding: 20px 30px; background: var(--bg-main); }
+  .input-box {
+    display: flex; align-items: center; background: var(--bg-panel); border-radius: 16px; padding: 8px 8px 8px 20px; transition: 0.2s; border: 1px solid transparent;
   }
-  .message.own {
-    align-self: flex-end;
-    background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+  .input-box:focus-within { border-color: rgba(88, 101, 242, 0.5); }
+  .input-box input { flex: 1; background: transparent; border: none; color: white; font-size: 15px; outline: none; }
+  .input-box button {
+    width: 40px; height: 40px; border-radius: 12px; border: none; background: var(--accent); color: white;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
   }
-  .message .name { font-size: 12px; color: #a78bfa; margin-bottom: 4px; font-weight: bold; }
-  .message.own .name { color: #f0f0f0; }
-  .message .time { font-size: 10px; color: #888; margin-top: 4px; text-align: right; }
-  .message.own .time { color: #ddd; }
+  .input-box button:hover { background: var(--accent-hover); transform: scale(1.05); }
+
+  /* Видео-оверлей */
+  #videoOverlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 17, 21, 0.95);
+    backdrop-filter: blur(10px); z-index: 50; display: none; flex-direction: column;
+  }
+  #videoOverlay.active { display: flex; }
   
-  .system-message {
-    align-self: center; padding: 6px 15px; background: #1a1a2e;
-    border-radius: 20px; font-size: 12px; color: #888;
-  }
+  .video-header { padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
+  .video-grid { flex: 1; padding: 20px 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; overflow-y: auto; }
   
-  .input-area {
-    padding: 20px; border-top: 1px solid #2a2a3e; display: flex; gap: 10px;
-  }
-  .input-area input {
-    flex: 1; padding: 14px; border-radius: 25px; border: 1px solid #333;
-    background: #1e1e2e; color: #fff; font-size: 15px; outline: none;
-  }
-  .input-area input:focus { border-color: #a78bfa; }
-  .input-area button {
-    padding: 14px 25px; border-radius: 25px; border: none;
-    background: linear-gradient(135deg, #a78bfa, #7c3aed);
-    color: #fff; font-weight: bold; cursor: pointer;
-  }
+  .video-card { background: var(--bg-panel); border-radius: 16px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); aspect-ratio: 16/9; border: 1px solid rgba(255,255,255,0.05); }
+  .video-card video { width: 100%; height: 100%; object-fit: cover; }
+  .video-card .badge { position: absolute; bottom: 16px; left: 16px; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
   
-  /* Область звонков */
-  #videoArea {
-    display: none; position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%; background: rgba(0,0,0,0.95);
-    z-index: 100; padding: 20px;
-  }
-  #videoArea.active { display: flex; flex-direction: column; }
-  .video-header {
-    display: flex; justify-content: space-between; align-items: center;
-    color: #fff; padding: 10px 20px;
-  }
-  .video-grid {
-    flex: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 15px; padding: 20px; overflow-y: auto;
-  }
-  .video-container {
-    background: #1a1a2e; border-radius: 15px; overflow: hidden;
-    position: relative; aspect-ratio: 16/9;
-  }
-  .video-container video { width: 100%; height: 100%; object-fit: cover; }
-  .video-container .label {
-    position: absolute; bottom: 10px; left: 10px;
-    background: rgba(0,0,0,0.7); padding: 5px 12px; border-radius: 8px;
-    color: #fff; font-size: 14px;
-  }
-  .controls {
-    display: flex; justify-content: center; gap: 15px; padding: 20px;
-  }
-  .ctrl-btn {
-    width: 55px; height: 55px; border-radius: 50%; border: none;
-    background: #2a2a3e; color: #fff; font-size: 20px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .ctrl-btn:hover { background: #3a3a4e; }
-  .ctrl-btn.end { background: #ef4444; }
-  .ctrl-btn.off { background: #666; }
+  .video-controls { padding: 30px; display: flex; justify-content: center; gap: 20px; }
+  .ctrl-btn { width: 60px; height: 60px; border-radius: 50%; border: none; background: var(--bg-panel); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 24px; }
+  .ctrl-btn:hover { background: #2f3340; transform: translateY(-4px); }
+  .ctrl-btn.off { background: rgba(255,255,255,0.1); color: var(--text-muted); }
+  .ctrl-btn.end { background: var(--danger); }
+  .ctrl-btn.end:hover { background: #c9383b; }
 </style>
 </head>
 <body>
 
-<!-- Экран входа -->
+<!-- Экран логина -->
 <div id="loginScreen">
-  <div class="login-box">
-    <h1>💬 NMessenger</h1>
-    <p>Чат и звонки без границ</p>
-    <input type="text" id="usernameInput" placeholder="Введи свое имя..." maxlength="20">
-    <button onclick="login()">Войти</button>
+  <div class="login-glass">
+    <h1>NMessenger</h1>
+    <p>Добро пожаловать в защищенное пространство</p>
+    <input type="text" id="usernameInput" placeholder="Как вас зовут?" maxlength="20">
+    <button onclick="login()">Продолжить</button>
   </div>
 </div>
 
-<!-- Основной экран -->
-<div id="mainScreen">
-  <div class="app">
-    <!-- Боковая панель -->
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <div class="avatar" id="myAvatar">?</div>
-        <div class="user-info">
-          <h3 id="myName">-</h3>
-          <span>● Online</span>
-        </div>
-      </div>
-      <div class="sidebar-title">Онлайн</div>
-      <div class="online-list" id="onlineList"></div>
-      <button class="call-button" id="callBtn" onclick="toggleCall()">
-        📞 Начать звонок
+<!-- Левая панель -->
+<aside class="sidebar">
+  <div class="brand">
+    <span class="material-symbols-outlined" style="color: var(--accent)">forum</span>
+    NMessenger
+  </div>
+  
+  <div class="user-profile">
+    <div class="avatar avatar-me" id="myAvatar">?</div>
+    <div class="user-info">
+      <h3 id="myName">User</h3>
+      <span>В сети</span>
+    </div>
+  </div>
+
+  <div class="nav-title">Участники онлайн</div>
+  <div class="online-list" id="onlineList">
+    <!-- Список загружается через JS -->
+  </div>
+
+  <div class="call-action">
+    <button class="btn-call" id="callBtn" onclick="toggleCall()">
+      <span class="material-symbols-outlined">call</span>
+      <span>Начать аудио/видео</span>
+    </button>
+  </div>
+</aside>
+
+<!-- Главный чат -->
+<main class="chat-container">
+  <header class="chat-header">
+    <h2><span class="material-symbols-outlined" style="color: var(--text-muted)">tag</span> Общая комната</h2>
+    <div class="status" id="onlineCount">0 участников</div>
+  </header>
+
+  <div class="messages" id="messages">
+    <div class="sys-msg"><span class="material-symbols-outlined" style="font-size:16px;">shield</span> Сообщения защищены сквозным шифрованием (LiveKit)</div>
+  </div>
+
+  <div class="chat-input">
+    <div class="input-box">
+      <input type="text" id="msgInput" placeholder="Написать в Общая комната..." onkeypress="if(event.key==='Enter')sendMessage()">
+      <button onclick="sendMessage()"><span class="material-symbols-outlined">send</span></button>
+    </div>
+  </div>
+
+  <!-- Оверлей видеозвонка -->
+  <div id="videoOverlay">
+    <header class="video-header">
+      <h2><span class="material-symbols-outlined">videocam</span> Активный звонок</h2>
+      <div class="status" style="background:var(--accent); padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;">В эфире</div>
+    </header>
+    
+    <div class="video-grid" id="videoGrid"></div>
+    
+    <div class="video-controls">
+      <button class="ctrl-btn" id="micBtn" onclick="toggleMic()">
+        <span class="material-symbols-outlined">mic</span>
+      </button>
+      <button class="ctrl-btn" id="camBtn" onclick="toggleCam()">
+        <span class="material-symbols-outlined">videocam</span>
+      </button>
+      <button class="ctrl-btn end" onclick="endCall()">
+        <span class="material-symbols-outlined">call_end</span>
       </button>
     </div>
-    
-    <!-- Область чата -->
-    <div class="chat-area">
-      <div class="chat-header">
-        <h2># Общий чат</h2>
-        <span id="onlineCount">0 онлайн</span>
-      </div>
-      <div class="messages" id="messages"></div>
-      <div class="input-area">
-        <input type="text" id="msgInput" placeholder="Написать сообщение..." onkeypress="if(event.key==='Enter')sendMessage()">
-        <button onclick="sendMessage()">Отправить</button>
-      </div>
-    </div>
   </div>
-</div>
-
-<!-- Область видеозвонков -->
-<div id="videoArea">
-  <div class="video-header">
-    <h2>🎥 Групповой звонок</h2>
-    <span id="callRoomName">Комната: main</span>
-  </div>
-  <div class="video-grid" id="videoGrid"></div>
-  <div class="controls">
-    <button class="ctrl-btn" id="micBtn" onclick="toggleMic()">🎤</button>
-    <button class="ctrl-btn" id="camBtn" onclick="toggleCam()">📹</button>
-    <button class="ctrl-btn end" onclick="endCall()">📞</button>
-  </div>
-</div>
+</main>
 
 <script>
   const socket = io();
   let myUsername = '';
-  let currentRoom = null;
   let livekitRoom = null;
   let micEnabled = true;
   let camEnabled = true;
 
-  // Вход в чат
   function login() {
     const input = document.getElementById('usernameInput');
     const name = input.value.trim();
-    if (!name) { alert('Введи имя!'); return; }
+    if (!name) return alert('Пожалуйста, введите имя');
     
     myUsername = name;
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainScreen').style.display = 'block';
+    document.getElementById('loginScreen').style.opacity = '0';
+    setTimeout(() => { document.getElementById('loginScreen').style.display = 'none'; }, 300);
+    
     document.getElementById('myName').textContent = name;
     document.getElementById('myAvatar').textContent = name[0].toUpperCase();
     
     socket.emit('user_join', name);
   }
 
-  // Отправка сообщения
   function sendMessage() {
     const input = document.getElementById('msgInput');
     const text = input.value.trim();
@@ -258,180 +248,147 @@
     input.value = '';
   }
 
-  // Получение сообщений
   socket.on('receive_message', (data) => {
+    const isMe = data.user === myUsername;
     const messages = document.getElementById('messages');
-    const div = document.createElement('div');
-    div.className = 'message' + (data.user === myUsername ? ' own' : '');
-    div.innerHTML = `
-      <div class="name">${data.user}</div>
-      <div>${escapeHtml(data.text)}</div>
-      <div class="time">${data.time}</div>
+    
+    const wrapper = document.createElement('div');
+    wrapper.className = `msg-wrapper ${isMe ? 'me' : 'them'}`;
+    
+    wrapper.innerHTML = `
+      <div class="msg-info">
+        ${isMe ? '' : `<strong>${data.user}</strong>`}
+        <span>${data.time}</span>
+      </div>
+      <div class="msg-bubble">${escapeHtml(data.text)}</div>
     `;
-    messages.appendChild(div);
+    
+    messages.appendChild(wrapper);
     messages.scrollTop = messages.scrollHeight;
   });
 
-  // Системные сообщения
   socket.on('system_message', (text) => {
     const messages = document.getElementById('messages');
-    const div = document.createElement('div');
-    div.className = 'system-message';
-    div.textContent = text;
-    messages.appendChild(div);
+    messages.innerHTML += `<div class="sys-msg">${text}</div>`;
     messages.scrollTop = messages.scrollHeight;
   });
 
-  // Обновление списка онлайн
   socket.on('users_update', (users) => {
     const list = document.getElementById('onlineList');
     list.innerHTML = '';
     users.forEach(user => {
-      const div = document.createElement('div');
-      div.className = 'online-user';
-      div.innerHTML = `
-        <div class="avatar" style="width:35px;height:35px;font-size:14px">${user[0].toUpperCase()}</div>
-        <div style="flex:1">${user}</div>
-        <div class="status-dot"></div>
+      list.innerHTML += `
+        <div class="online-user">
+          <div class="avatar">${user[0].toUpperCase()}</div>
+          <span style="flex:1; font-size:14px;">${user}</span>
+        </div>
       `;
-      list.appendChild(div);
     });
-    document.getElementById('onlineCount').textContent = users.length + ' онлайн';
+    document.getElementById('onlineCount').textContent = `${users.length} участников`;
   });
 
-  // Входящий звонок
+  // Логика звонков
   socket.on('incoming_call', (data) => {
-    if (confirm(`📞 ${data.from} начал звонок! Присоединиться?`)) {
-      joinCall(data.room);
+    if (confirm(`📞 ${data.from} начал звонок в общей комнате. Присоединиться?`)) {
+      joinCall('main-room');
     }
   });
 
-  // Кнопка звонка
   async function toggleCall() {
     if (livekitRoom) {
       endCall();
     } else {
-      const roomName = 'main-room';
-      socket.emit('call_started', { from: myUsername, room: roomName });
-      await joinCall(roomName);
+      socket.emit('call_started', { from: myUsername, room: 'main-room' });
+      await joinCall('main-room');
     }
   }
 
-  // Присоединение к звонку
   async function joinCall(roomName) {
     try {
+      const btn = document.getElementById('callBtn');
+      btn.innerHTML = `<span class="material-symbols-outlined">hourglass_empty</span> Подключение...`;
+      
       const response = await fetch('/get-livekit-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ roomName, participantName: myUsername })
       });
-      
       const { token, url } = await response.json();
       
-      livekitRoom = new LivekitClient.Room({
-        adaptiveStream: true,
-        dynacast: true,
-      });
-
+      livekitRoom = new LivekitClient.Room({ adaptiveStream: true, dynacast: true });
       livekitRoom.on(LivekitClient.RoomEvent.TrackSubscribed, handleTrackSubscribed);
       livekitRoom.on(LivekitClient.RoomEvent.ParticipantDisconnected, handleParticipantLeft);
 
       await livekitRoom.connect(url, token);
       await livekitRoom.localParticipant.enableCameraAndMicrophone();
 
-      // Показываем локальное видео
       const videoTrack = livekitRoom.localParticipant.getTrackPublication(LivekitClient.Track.Source.Camera);
-      if (videoTrack && videoTrack.track) {
-        addVideo(videoTrack.track, myUsername + ' (Вы)', 'local');
-      }
+      if (videoTrack && videoTrack.track) addVideo(videoTrack.track, myUsername + ' (Вы)', 'local');
 
-      document.getElementById('videoArea').classList.add('active');
-      document.getElementById('callRoomName').textContent = 'Комната: ' + roomName;
-      document.getElementById('callBtn').textContent = '📞 Завершить';
-      document.getElementById('callBtn').classList.add('end');
-      currentRoom = roomName;
+      document.getElementById('videoOverlay').classList.add('active');
+      btn.className = 'btn-call in-call';
+      btn.innerHTML = `<span class="material-symbols-outlined">call_end</span> Завершить звонок`;
     } catch (err) {
-      console.error(err);
-      alert('Ошибка подключения к звонку: ' + err.message);
+      alert('Ошибка подключения: ' + err.message);
+      endCall();
     }
   }
 
-  // Обработка входящих видео/аудио
   function handleTrackSubscribed(track, publication, participant) {
-    if (track.kind === 'video' || track.kind === 'audio') {
-      addVideo(track, participant.identity, participant.sid);
-    }
+    if (track.kind === 'video' || track.kind === 'audio') addVideo(track, participant.identity, participant.sid);
   }
 
-  // Добавление видео на экран
   function addVideo(track, name, id) {
-    const grid = document.getElementById('videoGrid');
-    let container = document.getElementById('video-' + id);
-    
+    let container = document.getElementById('vid-' + id);
     if (!container) {
       container = document.createElement('div');
-      container.className = 'video-container';
-      container.id = 'video-' + id;
-      const label = document.createElement('div');
-      label.className = 'label';
-      label.textContent = name;
-      container.appendChild(label);
-      grid.appendChild(container);
+      container.className = 'video-card';
+      container.id = 'vid-' + id;
+      container.innerHTML = `<div class="badge"><span class="material-symbols-outlined" style="font-size:16px;">person</span> ${name}</div>`;
+      document.getElementById('videoGrid').appendChild(container);
     }
-    
-    const element = track.attach();
-    container.insertBefore(element, container.firstChild);
+    const el = track.attach();
+    container.insertBefore(el, container.firstChild);
   }
 
-  // Участник вышел
   function handleParticipantLeft(participant) {
-    const el = document.getElementById('video-' + participant.sid);
+    const el = document.getElementById('vid-' + participant.sid);
     if (el) el.remove();
   }
 
-  // Завершение звонка
   function endCall() {
-    if (livekitRoom) {
-      livekitRoom.disconnect();
-      livekitRoom = null;
-    }
-    document.getElementById('videoArea').classList.remove('active');
+    if (livekitRoom) livekitRoom.disconnect();
+    livekitRoom = null;
+    document.getElementById('videoOverlay').classList.remove('active');
     document.getElementById('videoGrid').innerHTML = '';
-    document.getElementById('callBtn').textContent = '📞 Начать звонок';
-    document.getElementById('callBtn').classList.remove('end');
-    currentRoom = null;
+    const btn = document.getElementById('callBtn');
+    btn.className = 'btn-call';
+    btn.innerHTML = `<span class="material-symbols-outlined">call</span> Начать аудио/видео`;
   }
 
-  // Микрофон
   async function toggleMic() {
     if (!livekitRoom) return;
     micEnabled = !micEnabled;
     await livekitRoom.localParticipant.setMicrophoneEnabled(micEnabled);
-    document.getElementById('micBtn').classList.toggle('off', !micEnabled);
-    document.getElementById('micBtn').textContent = micEnabled ? '🎤' : '🔇';
+    const btn = document.getElementById('micBtn');
+    btn.classList.toggle('off', !micEnabled);
+    btn.innerHTML = `<span class="material-symbols-outlined">${micEnabled ? 'mic' : 'mic_off'}</span>`;
   }
 
-  // Камера
   async function toggleCam() {
     if (!livekitRoom) return;
     camEnabled = !camEnabled;
     await livekitRoom.localParticipant.setCameraEnabled(camEnabled);
-    document.getElementById('camBtn').classList.toggle('off', !camEnabled);
-    document.getElementById('camBtn').textContent = camEnabled ? '📹' : '🚫';
+    const btn = document.getElementById('camBtn');
+    btn.classList.toggle('off', !camEnabled);
+    btn.innerHTML = `<span class="material-symbols-outlined">${camEnabled ? 'videocam' : 'videocam_off'}</span>`;
   }
 
-  // Безопасность (защита от XSS)
   function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
-
-  // Enter для входа
-  document.getElementById('usernameInput').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') login();
-  });
 </script>
-
 </body>
 </html>
