@@ -2,340 +2,554 @@
 <html lang="ru" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#0b0d12" />
+  <meta name="description" content="NMessenger — личные сообщения, звонки, каналы и боты." />
   <title>NMessenger</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230DBD8B'/%3E%3Cpath fill='white' d='M8 10.5h4.2l3.8 7.4 3.8-7.4H24v11h-3.2v-6.2L16.6 22h-1.2l-4.2-6.7v6.7H8z'/%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237c5cff'/%3E%3Cpath fill='white' d='M7 8.2A2.2 2.2 0 0 1 9.2 6h13.6A2.2 2.2 0 0 1 25 8.2v9.2a2.2 2.2 0 0 1-2.2 2.2h-7.4L9 24v-4.4H9.2A2.2 2.2 0 0 1 7 17.4z'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/geo-style.css" />
+  <link rel="stylesheet" href="/geo-design.css" />
+  <style>
+/* Bridge: keep our extra widgets on top of GeoMetric CSS. */
+body, #app, .sidebar, .chat-header, .chat-item, .space, .set-nav, .modal-h {
+  user-select: none; -webkit-user-select: none;
+}
+.msg-text, .msg-text *, .message-input, textarea, input, .auth-card, .auth-card * {
+  user-select: text; -webkit-user-select: text;
+}
+.badge:empty { display: none; }
+#totalUnread:empty { display: none; }
+
+.brand-row {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; min-width: 0;
+}
+.brand-row .brand-logo {
+  width: 34px; height: 34px; border-radius: 10px;
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff; flex: none;
+  box-shadow: 0 8px 20px var(--accent-soft);
+}
+.brand-row .brand-logo svg { width: 18px; height: 18px; }
+.brand-name { font-size: 17px; font-weight: 750; letter-spacing: -.3px; }
+.brand-version { font-size: 11px; color: var(--text-3); }
+
+#meAvatar { width: 46px; height: 46px; }
+.me-card { text-align: left; cursor: pointer; }
+
+.pw-wrap { position: relative; }
+.pw-wrap .input { padding-right: 42px; width: 100%; }
+.pw-wrap .eye {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 32px; height: 32px; border-radius: 8px; color: var(--text-3);
+  display: grid; place-items: center;
+}
+
+#authBtn {
+  background: linear-gradient(135deg, var(--g, #6c5cff), #8a6bff 45%, var(--g2, #37b6ff));
+  box-shadow: 0 12px 28px rgba(108, 92, 255, .35);
+  border: none; width: 100%;
+}
+#loginError { min-height: 18px; }
+
+.panel-view { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+.chat-list, #chatList, #peopleList { flex: 1; overflow-y: auto; padding: 4px 8px 16px; }
+
+.chat-item { display: flex; align-items: center; gap: 11px; }
+.online-dot.off, .dot.off { background: #5b6573; }
+
+.set-nav { display: flex; flex-direction: column; gap: 2px; padding: 8px; overflow: auto; }
+.set-nav button {
+  text-align: left; padding: 11px 12px; border-radius: 12px;
+  font-size: 14px; color: var(--text-2); font-weight: 550;
+}
+.set-nav button:hover, .set-nav button.on { background: var(--accent-soft); color: var(--text); }
+.set-page { flex: 1; overflow-y: auto; padding: 22px 24px 32px; max-width: 680px; }
+.set-page h3 { font-size: 22px; font-weight: 750; margin-bottom: 14px; }
+.set-block {
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 18px;
+  padding: 16px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px;
+}
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; }
+.switch {
+  width: 42px; height: 24px; background: var(--bg-3); border-radius: 12px;
+  position: relative; flex-shrink: 0; border: 1px solid var(--line);
+}
+.switch.on { background: var(--accent); border-color: transparent; }
+.switch i {
+  position: absolute; top: 2px; left: 2px; width: 18px; height: 18px;
+  border-radius: 50%; background: #fff; transition: left .15s;
+}
+.switch.on i { left: 20px; }
+.btn-danger {
+  height: 40px; border-radius: 12px; background: rgba(255,77,109,.14);
+  color: var(--danger); font-weight: 650; border: 1px solid rgba(255,77,109,.3); padding: 0 14px;
+}
+.btn-sec {
+  height: 40px; border-radius: 12px; background: var(--bg-3); color: var(--text);
+  font-weight: 650; padding: 0 14px; border: 1px solid var(--line);
+}
+.theme-picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 8px; }
+.theme-picks button {
+  min-height: 64px; border-radius: 14px; border: 1px solid var(--line);
+  font-size: 12.5px; font-weight: 650; padding: 10px 8px;
+  display: grid; justify-items: center; gap: 8px; background: var(--bg-3);
+}
+.theme-picks button.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.sw { width: 28px; height: 28px; border-radius: 9px; display: block; }
+.sw-dark { background: linear-gradient(135deg, #7c5cff, #11141c); }
+.sw-light { background: linear-gradient(135deg, #6d4dff, #f6f7fb); }
+.sw-amoled { background: linear-gradient(135deg, #8b5cff, #000); }
+.sw-blue { background: linear-gradient(135deg, #3b82f6, #0a1020); }
+.sw-emerald { background: linear-gradient(135deg, #10b981, #071410); }
+.sw-ocean { background: linear-gradient(135deg, #06b6d4, #061318); }
+.sw-rose { background: linear-gradient(135deg, #ec4899, #170a12); }
+.sw-sunset { background: linear-gradient(135deg, #f97316, #170f07); }
+.sw-coffee { background: linear-gradient(135deg, #c08457, #12100e); }
+.sw-graphite { background: linear-gradient(135deg, #6b7280, #101217); }
+.sw-lavender { background: linear-gradient(135deg, #7c3aed, #f7f5ff); }
+.sw-mint { background: linear-gradient(135deg, #0f9d63, #f2fbf6); }
+.sess-row {
+  display: flex; justify-content: space-between; gap: 8px; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px;
+}
+.avatar-edit { display: flex; align-items: center; gap: 12px; }
+
+#chatView, #settingsMain { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
+.secret-banner {
+  background: var(--accent-soft); color: var(--text-2); font-size: 12.5px; text-align: center;
+  padding: 8px 16px; border-bottom: 1px solid var(--line);
+}
+.sel-bar {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  background: var(--glass); border-bottom: 1px solid var(--line); font-size: 13px; flex-shrink: 0;
+  backdrop-filter: blur(16px);
+}
+.timeline.messages { flex: 1; min-height: 0; }
+
+.msg.msg-row { display: flex; }
+.msg .bubble, .msg .msg-body { max-width: min(620px, 76%); }
+.msg.picked .bubble, .msg.picked .msg-body {
+  outline: 2px solid var(--accent); box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.msg-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg-text a, a.mention { color: #8ab4ff; cursor: pointer; text-decoration: none; }
+a.mention { font-weight: 700; color: #4c9aff; }
+a.mention:hover { text-decoration: underline; }
+.msg.out .msg-text a, .msg.out a.mention, .msg-row.out .msg-text a { color: #e8eeff; }
+.msg-text.deleted { color: var(--text-3); font-style: italic; }
+.edited { font-size: 11px; opacity: .8; }
+.msg-img { margin-top: 4px; max-width: min(420px, 68vw); max-height: 360px; border-radius: 14px; cursor: zoom-in; display: block; object-fit: cover; }
+.file-card {
+  margin-top: 4px; display: flex; align-items: center; gap: 10px;
+  background: rgba(0,0,0,.18); border: 1px solid var(--line); border-radius: 12px;
+  padding: 8px 10px; max-width: 360px; text-decoration: none; color: inherit;
+}
+.msg.out .file-card { background: rgba(255,255,255,.12); }
+.file-card .ext {
+  width: 36px; height: 36px; border-radius: 10px; background: var(--accent-soft);
+  color: var(--accent); display: grid; place-items: center; font-size: 10px; font-weight: 700;
+}
+.file-card .fn { font-size: 13px; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-card .fs { font-size: 11px; color: var(--text-3); }
+.quote {
+  border-left: 3px solid var(--accent); padding: 4px 8px; margin: 0 0 6px;
+  background: var(--accent-soft); border-radius: 0 10px 10px 0; cursor: pointer;
+}
+.msg.out .quote { border-left-color: #fff; background: rgba(255,255,255,.14); }
+.quote .qn { font-size: 12px; font-weight: 650; color: var(--accent); }
+.msg.out .quote .qn { color: #fff; }
+.quote .qt { font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.reacts { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.reacts button { font-size: 13px; background: var(--bg-3); border-radius: 12px; padding: 2px 8px; }
+.msg.out .reacts button { background: rgba(255,255,255,.16); }
+.reacts button.mine { outline: 1px solid var(--accent); }
+.ticks { display: inline-flex; align-items: center; color: inherit; line-height: 0; opacity: .85; }
+.ticks svg { display: block; }
+.ticks.one { width: 11px; overflow: hidden; }
+.ticks.two { width: 16px; }
+.ticks.read { color: #d6e8ff; opacity: 1; }
+.sys { text-align: center; color: var(--text-3); font-size: 12.5px; padding: 10px 16px; }
+.hl { background: rgba(124, 92, 255, .28); border-radius: 3px; }
+
+.call-chip, .call-log {
+  margin: 8px auto; display: inline-flex; align-items: center; gap: 10px;
+  background: var(--bg-3); border: 1px solid var(--line); border-radius: 999px;
+  padding: 9px 16px 9px 12px; max-width: 78%;
+}
+.msg.call-row { justify-content: center; }
+.msg.call-row .bubble { background: transparent; border: 0; box-shadow: none; padding: 0; max-width: 100%; }
+.call-chip .ic {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft);
+  color: var(--accent); display: grid; place-items: center;
+}
+.call-chip.missed .ic { background: rgba(255, 77, 109, .15); color: var(--danger); }
+
+.sub-bar, .composer-readonly {
+  text-align: center; padding: 14px; color: var(--text-2); font-size: 13.5px;
+}
+.char-count { font-size: 11px; color: var(--text-3); text-align: right; padding: 0 18px 8px; }
+.char-count.warn { color: var(--danger); }
+#sendBtn:disabled { opacity: .35; filter: grayscale(.4); }
+
+.overlay {
+  position: fixed; inset: 0; background: rgba(6, 8, 14, .62); z-index: 40;
+  display: flex; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(8px);
+}
+.overlay .modal {
+  width: min(460px, 100%); background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 28px; box-shadow: var(--shadow-3); overflow: hidden;
+  max-height: calc(100vh - 32px); display: flex; flex-direction: column;
+}
+.modal-h {
+  padding: 16px 18px; display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--line); font-weight: 700; font-size: 16px;
+}
+.modal-body { padding: 14px 18px 18px; overflow: auto; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 0 18px 16px; }
+.btn-ghost { height: 36px; padding: 0 14px; border-radius: 12px; color: var(--text-2); font-weight: 600; }
+.btn-ok {
+  height: 36px; padding: 0 16px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; font-weight: 700;
+}
+.seg { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.seg button { flex: 1; min-width: 72px; height: 36px; border-radius: 12px; font-weight: 650; font-size: 13px; }
+.seg button.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.seg button.off { border: 1px solid var(--line); color: var(--text-2); background: var(--bg-3); }
+.check-row { display: flex; align-items: center; gap: 10px; padding: 8px 4px; cursor: pointer; }
+.profile-card { text-align: center; }
+.profile-card .avatar { margin: 8px auto 10px; }
+.profile-card .un { color: var(--text-2); font-size: 13px; margin: 4px 0 8px; }
+.row {
+  display: flex; align-items: center; gap: 11px; padding: 11px 12px; margin: 3px 0;
+  border-radius: 16px; cursor: pointer; position: relative;
+}
+.row:hover { background: var(--bg-hover); }
+.row-main { min-width: 0; flex: 1; }
+.row-name { font-weight: 650; }
+.row-preview { font-size: 13px; color: var(--text-2); }
+
+.menu, .ctx {
+  position: absolute; background: var(--bg-2); border: 1px solid var(--line); border-radius: 16px;
+  min-width: 220px; box-shadow: var(--shadow-3); z-index: 90; overflow: hidden;
+}
+.menu { right: 12px; top: 56px; }
+.menu button, .ctx button { display: block; width: 100%; text-align: left; padding: 10px 14px; font-size: 14px; }
+.menu button:hover, .ctx button:hover { background: var(--bg-hover); }
+.menu button.danger, .ctx button.danger { color: var(--danger); }
+
+.emoji-pop {
+  position: absolute; bottom: 96px; left: clamp(12px, 4vw, 48px);
+  width: min(340px, calc(100% - 72px)); max-height: 220px; overflow: auto;
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 20px;
+  padding: 12px; display: grid; grid-template-columns: repeat(8, 1fr);
+  gap: 4px; box-shadow: var(--shadow-3); z-index: 20;
+}
+.emoji-pop button { font-size: 21px; height: 36px; border-radius: 9px; }
+.react-pop {
+  position: absolute; background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 20px; padding: 4px; display: flex; gap: 2px; box-shadow: var(--shadow-3); z-index: 25;
+}
+.react-pop button { font-size: 20px; width: 36px; height: 36px; border-radius: 18px; }
+
+.inchat-search {
+  position: absolute; left: 8px; right: 8px; top: 8px; bottom: 8px;
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 14px;
+  display: flex; align-items: center; gap: 6px; padding: 0 8px; z-index: 5;
+}
+.inchat-search input { flex: 1; background: transparent; border: 0; outline: none; color: var(--text); min-width: 0; }
+
+.qr-box { display: grid; place-items: center; padding: 8px; }
+.qr-box svg, .qr-box img { width: 220px; height: 220px; background: #fff; border-radius: 12px; padding: 8px; }
+
+#incoming { position: fixed; inset: 0; z-index: 60; background: rgba(8,10,18,.7); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(12px); }
+.incoming-card {
+  background: linear-gradient(180deg, rgba(28, 33, 52, .96), rgba(17, 21, 34, .98));
+  border-radius: 26px; padding: 28px 32px; text-align: center; width: min(360px, calc(100% - 24px));
+  border: 1px solid var(--stroke, rgba(255,255,255,.12)); box-shadow: var(--shadow-3);
+}
+.pulse {
+  width: 88px; height: 88px; border-radius: 50%; margin: 0 auto 14px; display: grid; place-items: center;
+  color: #fff; font-size: 32px; font-weight: 700; animation: pulse 1.6s ease-out infinite; overflow: hidden;
+}
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(124, 92, 255, .45); } 100% { box-shadow: 0 0 0 18px rgba(124, 92, 255, 0); } }
+.round { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; }
+.round.accept { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.round.reject, .round.hang { background: var(--danger); color: #fff; }
+.round.mute, .round.cam, .round.share { background: var(--bg-3); color: var(--text); border: 1px solid var(--line); }
+.round.off { background: #3a414d; color: #ff8b90; }
+.call-actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+#call { position: fixed; inset: 0; z-index: 55; background: #0b0d10; display: flex; flex-direction: column; }
+.call-stage { flex: 1; position: relative; display: grid; place-items: center; overflow: hidden; min-height: 0; }
+#remoteMedia { width: 100%; height: 100%; display: grid; place-items: center; }
+#remoteMedia video { width: 100%; height: 100%; object-fit: cover; background: #000; }
+#localVideo {
+  position: absolute; right: 16px; bottom: 16px; width: 200px; height: 140px; object-fit: cover;
+  border-radius: 16px; background: #111; border: 1px solid var(--line); transform: scaleX(-1); z-index: 4;
+}
+#localVideo.screen { transform: none; }
+.call-placeholder { text-align: center; color: var(--text-2); z-index: 1; }
+.call-placeholder .big {
+  width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 12px;
+  display: grid; place-items: center; color: #fff; font-size: 42px; font-weight: 700; overflow: hidden;
+}
+.call-bar {
+  height: 96px; display: flex; align-items: center; justify-content: center; gap: 12px;
+  background: linear-gradient(transparent, rgba(0,0,0,.55)); flex-shrink: 0; z-index: 5;
+}
+.call-title { position: absolute; top: 18px; left: 0; right: 0; text-align: center; font-weight: 650; text-shadow: 0 2px 8px #000; z-index: 2; }
+.q-pop {
+  position: absolute; bottom: 100px; background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 16px; padding: 8px; z-index: 6; min-width: 180px; box-shadow: var(--shadow-3);
+}
+.q-pop button { display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 10px; font-size: 13px; }
+#lightbox { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.86); display: flex; align-items: center; justify-content: center; padding: 24px; }
+#lightbox img { max-width: 100%; max-height: 100%; border-radius: 12px; }
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--bg-3); color: var(--text); padding: 10px 16px; border-radius: 14px;
+  font-size: 13px; z-index: 80; max-width: min(420px, calc(100% - 24px)); text-align: center;
+  border: 1px solid var(--line);
+}
+
+.icon-btn.active { color: var(--accent); background: var(--accent-soft); }
+.nav-btn { position: relative; }
+.nav-btn .badge {
+  position: absolute; top: 2px; right: calc(50% - 22px);
+  min-width: 16px; height: 16px; padding: 0 4px; font-size: 10px;
+}
+
+@media (max-width: 820px) {
+  .sidebar.hidden-mobile { display: none !important; }
+  #localVideo { width: 112px; height: 80px; }
+}
+
+  </style>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.6.1/dist/livekit-client.umd.js"></script>
-  <style>
-    :root, html[data-theme="dark"] {
-      --accent: #0dbd8b; --accent-soft: rgba(13,189,139,.16); --blue: #368bd6; --warn: #ff4b55;
-      --sidebar: #15171b; --roomlist: #1f2329; --timeline: #181b21; --composer: #1c2026;
-      --hover: rgba(255,255,255,.045); --hover-2: rgba(255,255,255,.08); --sel: #343a46;
-      --text: #edf3ff; --text-2: #a1b2d1; --text-3: #7e8ba0; --line: rgba(161,178,209,.12);
-      --input: #111317; --border: #2b313c; --shadow: 0 12px 40px rgba(0,0,0,.45);
-      --space: 56px; --list: 280px; --font: Inter,"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
-      --msg-size: 15px; --on-accent: #04281d;
-    }
-    html[data-theme="midnight"] {
-      --sidebar: #07080a; --roomlist: #0e1116; --timeline: #0b0d10; --composer: #12151b;
-      --sel: #1e2530; --input: #08090c; --border: #222833; --text: #f2f5fa; --text-2: #8b9bb3;
-    }
-    html[data-theme="light"] {
-      --sidebar: #2e3640; --roomlist: #f3f5f8; --timeline: #ffffff; --composer: #f6f7f9;
-      --hover: rgba(0,0,0,.04); --hover-2: rgba(0,0,0,.07); --sel: #e2e8f0;
-      --text: #1a1d21; --text-2: #5b6573; --text-3: #7a8494; --line: rgba(30,40,50,.12);
-      --input: #fff; --border: #d5dbe3; --shadow: 0 12px 40px rgba(0,0,0,.12); --on-accent: #04281d;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
-    body, #app, .panel, .chat-head, .row, .space, .set-nav, .modal-h {
-      user-select: none; -webkit-user-select: none;
-    }
-    .msg-text, .msg-text *, .composer textarea, input, textarea, .login-card, .login-card * {
-      user-select: text; -webkit-user-select: text;
-    }
-    body { font-family: var(--font); background: var(--timeline); color: var(--text); overflow: hidden; -webkit-font-smoothing: antialiased; }
-    button, input, textarea { font-family: inherit; }
-    button { cursor: pointer; border: 0; background: none; color: inherit; }
-    img { max-width: 100%; }
-    .hidden { display: none !important; }
-    input, textarea { color: var(--text); }
-
-    #login { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center;
-      background: radial-gradient(1200px 600px at 20% -10%, rgba(13,189,139,.18), transparent 50%), #101317; }
-    .login-card { width: min(420px, calc(100% - 32px)); background: #1a1d23; border: 1px solid var(--line); border-radius: 12px; padding: 32px 28px 24px; box-shadow: var(--shadow); }
-    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-    .brand-mark { width: 44px; height: 44px; border-radius: 10px; background: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
-    .brand h1 { font-size: 22px; font-weight: 700; letter-spacing: -.03em; }
-    .brand p { color: var(--text-2); font-size: 13px; margin-top: 2px; }
-    .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: #111317; border-radius: 10px; padding: 4px; margin-bottom: 8px; }
-    .auth-tabs button { height: 36px; border-radius: 8px; font-weight: 650; font-size: 14px; color: var(--text-2); }
-    .auth-tabs button.on { background: #2a303a; color: var(--text); }
-    .field { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
-    .field label { font-size: 12px; color: var(--text-2); }
-    .field input, .modal input[type=text], .modal input[type=password], .settings input, .settings textarea, .set-page input, .set-page textarea, .set-page select {
-      background: var(--input); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 11px 12px; font-size: 15px; outline: none; width: 100%;
-    }
-    .field input:focus, .modal input:focus, .settings input:focus, .set-page input:focus, .set-page textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-    .pw-wrap { position: relative; }
-    .pw-wrap input { padding-right: 42px; }
-    .pw-wrap .eye { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 8px; color: var(--text-3); display: grid; place-items: center; }
-    .btn-primary { margin-top: 18px; width: 100%; height: 42px; border-radius: 8px; background: var(--accent); color: var(--on-accent); font-weight: 650; font-size: 15px; }
-    .btn-primary:hover { filter: brightness(1.08); }
-    .btn-primary:disabled { opacity: .55; cursor: default; }
-    .login-error { min-height: 18px; margin-top: 10px; color: var(--warn); font-size: 13px; }
-    .login-hint { margin-top: 8px; color: var(--text-3); font-size: 12px; }
-    .boot { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; background: #101317; color: var(--text-2); gap: 10px; }
-    .spin { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    #app { height: 100%; display: flex; min-height: 0; }
-    .space { width: var(--space); flex-shrink: 0; background: var(--sidebar); display: flex; flex-direction: column; align-items: center; padding: 10px 0 12px; gap: 6px; }
-    .space-logo { width: 36px; height: 36px; border-radius: 10px; background: var(--accent); display: grid; place-items: center; margin-bottom: 8px; }
-    .space-btn { width: 42px; height: 42px; border-radius: 12px; color: var(--text-2); display: grid; place-items: center; position: relative; }
-    .space-btn:hover { background: var(--hover-2); color: var(--text); }
-    .space-btn.active { background: #2a303a; color: var(--accent); }
-    .space-btn .badge { position: absolute; top: 4px; right: 4px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--accent); color: var(--on-accent); font-size: 10px; font-weight: 700; display: grid; place-items: center; }
-    .space-btn .badge:empty { display: none; }
-    .space .spacer { flex: 1; }
-    .space-avatar, .avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 14px; color: #fff; flex-shrink: 0; position: relative; }
-    .space-avatar img, .avatar img { border-radius: 50%; }
-    .avatar { width: 42px; height: 42px; font-size: 16px; }
-    .avatar.sm { width: 28px; height: 28px; font-size: 12px; }
-    .avatar.md { width: 36px; height: 36px; font-size: 14px; }
-    .avatar.lg { width: 72px; height: 72px; font-size: 28px; }
-    .avatar img, .space-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-    .panel { width: var(--list); flex-shrink: 0; background: var(--roomlist); display: flex; flex-direction: column; border-right: 1px solid var(--line); min-width: 0; min-height: 0; }
-    .panel-view { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
-    .panel-head { padding: 14px 14px 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .panel-head h2 { font-size: 18px; font-weight: 700; letter-spacing: -.02em; flex: 1; }
-    .icon-btn { width: 32px; height: 32px; border-radius: 8px; color: var(--text-2); display: grid; place-items: center; flex-shrink: 0; }
-    .icon-btn:hover { background: var(--hover-2); color: var(--text); }
-    .search-wrap { padding: 0 12px 10px; position: relative; flex-shrink: 0; }
-    .search-wrap svg { position: absolute; left: 24px; top: 11px; color: var(--text-3); pointer-events: none; }
-    .search-wrap input { width: 100%; background: var(--input); border: 1px solid var(--border); color: var(--text); border-radius: 20px; padding: 8px 12px 8px 36px; font-size: 13px; outline: none; }
-    .list { flex: 1; overflow-y: auto; padding: 4px 8px 12px; min-height: 0; }
-    .list::-webkit-scrollbar, .timeline::-webkit-scrollbar, .modal-body::-webkit-scrollbar, .set-page::-webkit-scrollbar { width: 8px; }
-    .list::-webkit-scrollbar-thumb, .timeline::-webkit-scrollbar-thumb, .modal-body::-webkit-scrollbar-thumb, .set-page::-webkit-scrollbar-thumb { background: #3a414d; border-radius: 8px; }
-
-    .row { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 10px; cursor: pointer; user-select: none; }
-    .row:hover { background: var(--hover); }
-    .row.active { background: var(--sel); }
-    .dot { position: absolute; right: -1px; bottom: -1px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); border: 2px solid var(--roomlist); }
-    .dot.off { background: #5b6573; }
-    .row-main { min-width: 0; flex: 1; }
-    .row-top { display: flex; align-items: baseline; gap: 8px; }
-    .row-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .row-time { margin-left: auto; font-size: 11px; color: var(--text-3); flex-shrink: 0; }
-    .row-bottom { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
-    .row-preview { font-size: 13px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
-    .unread { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--accent); color: var(--on-accent); font-size: 11px; font-weight: 700; display: grid; place-items: center; flex-shrink: 0; }
-    .empty-hint { color: var(--text-3); font-size: 13px; padding: 24px 16px; text-align: center; line-height: 1.5; }
-    .lock { font-size: 12px; }
-
-    .main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: var(--timeline); }
-    .chat-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-2); gap: 10px; padding: 24px; text-align: center; }
-    .chat-empty h3 { color: var(--text); font-size: 20px; font-weight: 650; }
-    .chat-empty p { max-width: 360px; font-size: 14px; line-height: 1.5; }
-    #chatView, #settingsMain { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
-    .chat-head { min-height: 64px; display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--line); flex-shrink: 0; position: relative; }
-    .back-btn { display: none; }
-    .chat-head .who { flex: 1; min-width: 0; cursor: pointer; }
-    .chat-head .who .name { font-weight: 650; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .chat-head .who .status { font-size: 12px; color: var(--text-2); margin-top: 1px; }
-    .chat-head .who .status.on { color: var(--accent); }
-    .inchat-search { position: absolute; left: 8px; right: 8px; top: 8px; bottom: 8px; background: var(--roomlist); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; gap: 6px; padding: 0 8px; z-index: 5; }
-    .inchat-search input { flex: 1; background: transparent; border: 0; outline: none; color: var(--text); font-size: 14px; min-width: 0; }
-
-    .timeline { flex: 1; overflow-y: auto; padding: 12px 0 8px; min-height: 0; }
-    .day-sep { display: flex; align-items: center; gap: 12px; margin: 14px 20px; color: var(--text-3); font-size: 12px; }
-    .day-sep:before, .day-sep:after { content: ""; flex: 1; height: 1px; background: var(--line); }
-    .msg { display: flex; gap: 10px; padding: 3px 16px; position: relative; }
-    .msg:hover { background: var(--hover); }
-    .msg.cont { padding-top: 0; }
-    .msg.cont > .avatar { visibility: hidden; height: 0; }
-    .msg-body { min-width: 0; flex: 1; padding: 2px 0 4px; }
-    .msg-meta { display: flex; align-items: center; gap: 8px; }
-    .msg-name { font-size: 14px; font-weight: 650; }
-    .msg-when { margin-left: auto; display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0; }
-    .msg-time { font-size: 11px; color: var(--text-3); }
-    .ticks { display: inline-flex; align-items: center; color: var(--text-3); line-height: 0; }
-    .ticks svg { display: block; }
-    .ticks.one { width: 11px; overflow: hidden; }
-    .ticks.two { width: 16px; }
-    .ticks.read { color: var(--accent); }
-    .msg-text { font-size: var(--msg-size); line-height: 1.45; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; margin-top: 2px; }
-    .msg-text a, a.mention { color: #5aa2ff; cursor: pointer; text-decoration: none; }
-    a.mention { font-weight: 700; color: #4c9aff; }
-    a.mention:hover { text-decoration: underline; }
-    .msg.picked { background: var(--accent-soft); }
-    .sel-bar {
-      display: flex; align-items: center; gap: 8px; padding: 8px 12px;
-      background: var(--roomlist); border-bottom: 1px solid var(--line); font-size: 13px; flex-shrink: 0;
-    }
-    .folder-row {
-      display: flex; gap: 6px; padding: 0 12px 10px; overflow-x: auto; flex-shrink: 0;
-    }
-    .folder-row::-webkit-scrollbar { height: 0; }
-    .folder-chip {
-      flex-shrink: 0; height: 28px; padding: 0 10px; border-radius: 14px;
-      font-size: 12px; font-weight: 650; color: var(--text-2); background: var(--hover);
-      display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
-    }
-    .folder-chip.on { background: var(--accent-soft); color: var(--accent); }
-    .qr-box { display: grid; place-items: center; padding: 8px; }
-    .qr-box svg, .qr-box img { width: 220px; height: 220px; background: #fff; border-radius: 8px; padding: 8px; }
-    .sub-bar { text-align: center; padding: 12px; color: var(--text-2); font-size: 13px; }
-    .msg-text.deleted { color: var(--text-3); font-style: italic; }
-    .edited { font-size: 11px; color: var(--text-3); }
-    .msg-img { margin-top: 6px; max-width: min(420px, 68vw); max-height: 360px; border-radius: 10px; cursor: zoom-in; display: block; object-fit: cover; }
-    .file-card { margin-top: 6px; display: flex; align-items: center; gap: 10px; background: var(--composer); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; max-width: 360px; text-decoration: none; color: inherit; }
-    .file-card .ext { width: 36px; height: 36px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-size: 10px; font-weight: 700; }
-    .file-card .fn { font-size: 13px; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .file-card .fs { font-size: 11px; color: var(--text-3); }
-    .quote { border-left: 3px solid var(--accent); padding: 4px 8px; margin: 4px 0 6px; background: var(--accent-soft); border-radius: 0 8px 8px 0; cursor: pointer; }
-    .quote .qn { font-size: 12px; font-weight: 650; color: var(--accent); }
-    .quote .qt { font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .reacts { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-    .reacts button { font-size: 13px; background: var(--sel); border-radius: 12px; padding: 2px 8px; }
-    .reacts button.mine { background: var(--accent-soft); outline: 1px solid var(--accent); }
-    .call-chip { margin-top: 4px; display: inline-flex; align-items: center; gap: 8px; background: var(--composer); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; }
-    .call-chip .ic { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
-    .call-chip.missed .ic { background: rgba(255,75,85,.15); color: var(--warn); }
-    .sys { text-align: center; color: var(--text-3); font-size: 12px; padding: 10px 16px; }
-    .secret-banner { background: rgba(13,189,139,.08); color: var(--text-2); font-size: 12px; text-align: center; padding: 8px 16px; border-bottom: 1px solid var(--line); }
-
-    .typing { min-height: 20px; padding: 0 24px; font-size: 12px; color: var(--accent); flex-shrink: 0; }
-    .reply-bar, .edit-bar { margin: 0 16px 6px; padding: 8px 10px; border-left: 3px solid var(--accent); background: var(--composer); border-radius: 0 8px 8px 0; display: flex; align-items: center; gap: 8px; }
-    .reply-bar .meta, .edit-bar .meta { flex: 1; min-width: 0; }
-    .reply-bar .t, .edit-bar .t { font-size: 12px; font-weight: 650; color: var(--accent); }
-    .reply-bar .s, .edit-bar .s { font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .composer { padding: 4px 16px 12px; display: flex; align-items: flex-end; gap: 6px; flex-shrink: 0; }
-    .composer .box { flex: 1; min-width: 0; background: var(--composer); border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: flex-end; padding: 4px; }
-    .composer textarea { flex: 1; resize: none; border: 0; background: transparent; min-height: 40px; max-height: 140px; padding: 10px 8px; line-height: 1.35; font-size: 15px; outline: none; width: 100%; }
-    .send { width: 40px; height: 40px; border-radius: 10px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; flex-shrink: 0; }
-    .send:disabled { opacity: .4; background: #2a303a; color: var(--text-3); }
-    .char-count { font-size: 11px; color: var(--text-3); text-align: right; padding: 0 20px 8px; flex-shrink: 0; }
-    .char-count.warn { color: var(--warn); }
-    .emoji-pop { position: absolute; bottom: 72px; left: 56px; width: min(320px, calc(100% - 72px)); max-height: 220px; overflow: auto; background: var(--roomlist); border: 1px solid var(--line); border-radius: 12px; padding: 8px; display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; box-shadow: var(--shadow); z-index: 20; }
-    .emoji-pop button { font-size: 22px; height: 36px; border-radius: 6px; }
-    .react-pop { position: absolute; background: var(--roomlist); border: 1px solid var(--line); border-radius: 20px; padding: 4px; display: flex; gap: 2px; box-shadow: var(--shadow); z-index: 25; }
-    .react-pop button { font-size: 20px; width: 36px; height: 36px; border-radius: 18px; }
-
-    .set-nav { display: flex; flex-direction: column; gap: 2px; padding: 8px; }
-    .set-nav button { text-align: left; padding: 10px 12px; border-radius: 8px; font-size: 14px; color: var(--text-2); }
-    .set-nav button:hover, .set-nav button.on { background: var(--sel); color: var(--text); }
-    .set-page { flex: 1; overflow-y: auto; padding: 20px 24px 32px; max-width: 640px; }
-    .set-page h3 { font-size: 20px; margin-bottom: 14px; }
-    .set-block { background: var(--roomlist); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
-    .toggle { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; }
-    .switch { width: 40px; height: 22px; background: #3a414d; border-radius: 11px; position: relative; flex-shrink: 0; }
-    .switch.on { background: var(--accent); }
-    .switch i { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left .15s; }
-    .switch.on i { left: 20px; }
-    .btn-danger { height: 40px; border-radius: 8px; background: rgba(255,75,85,.12); color: #ff8b90; font-weight: 650; }
-    .btn-sec { height: 40px; border-radius: 8px; background: var(--sel); color: var(--text); font-weight: 650; padding: 0 14px; }
-    .theme-picks { display: flex; gap: 8px; }
-    .theme-picks button { flex: 1; height: 64px; border-radius: 10px; border: 2px solid var(--border); font-size: 12px; }
-    .theme-picks button.on { border-color: var(--accent); }
-    .sess-row { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
-    .avatar-edit { display: flex; align-items: center; gap: 12px; }
-
-    .overlay { position: fixed; inset: 0; background: rgba(8,10,14,.62); z-index: 40; display: flex; align-items: center; justify-content: center; padding: 16px; }
-    .modal { width: min(440px, 100%); background: var(--roomlist); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; max-height: calc(100vh - 32px); display: flex; flex-direction: column; }
-    .modal-h { padding: 16px 18px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); font-weight: 700; }
-    .modal-body { padding: 14px 18px 18px; overflow: auto; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 0 18px 16px; }
-    .btn-ghost { height: 36px; padding: 0 14px; border-radius: 8px; color: var(--text-2); font-weight: 600; }
-    .btn-ok { height: 36px; padding: 0 16px; border-radius: 8px; background: var(--accent); color: var(--on-accent); font-weight: 700; }
-    .seg { display: flex; gap: 8px; margin-bottom: 12px; }
-    .seg button { flex: 1; height: 36px; border-radius: 8px; font-weight: 650; }
-    .seg button.on { background: var(--accent); color: var(--on-accent); }
-    .seg button.off { border: 1px solid var(--line); color: var(--text-2); }
-    .check-row { display: flex; align-items: center; gap: 10px; padding: 8px 4px; cursor: pointer; }
-    .profile-card { text-align: center; }
-    .profile-card .avatar { margin: 8px auto 10px; }
-    .profile-card .un { color: var(--text-2); font-size: 13px; margin: 4px 0 8px; }
-
-    #incoming { position: fixed; inset: 0; z-index: 60; background: rgba(8,10,14,.7); display: flex; align-items: center; justify-content: center; }
-    .incoming-card { background: var(--roomlist); border-radius: 16px; padding: 28px 32px; text-align: center; width: min(360px, calc(100% - 24px)); border: 1px solid var(--line); box-shadow: var(--shadow); }
-    .pulse { width: 88px; height: 88px; border-radius: 50%; margin: 0 auto 14px; display: grid; place-items: center; color: #fff; font-size: 32px; font-weight: 700; animation: pulse 1.6s ease-out infinite; overflow: hidden; }
-    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(13,189,139,.45); } 100% { box-shadow: 0 0 0 18px rgba(13,189,139,0); } }
-    .round { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; }
-    .round.accept { background: var(--accent); color: var(--on-accent); }
-    .round.reject, .round.hang { background: var(--warn); color: #fff; }
-    .round.mute, .round.cam, .round.share { background: #2a303a; color: var(--text); }
-    .round.off { background: #3a414d; color: #ff8b90; }
-    .call-actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
-    #call { position: fixed; inset: 0; z-index: 55; background: #0b0d10; display: flex; flex-direction: column; }
-    .call-stage { flex: 1; position: relative; display: grid; place-items: center; overflow: hidden; min-height: 0; }
-    #remoteMedia { width: 100%; height: 100%; display: grid; place-items: center; }
-    #remoteMedia video { width: 100%; height: 100%; object-fit: cover; background: #000; }
-    #localVideo { position: absolute; right: 16px; bottom: 16px; width: 200px; height: 140px; object-fit: cover; border-radius: 12px; background: #111; border: 1px solid var(--line); transform: scaleX(-1); z-index: 4; }
-    #localVideo.screen { transform: none; }
-    .call-placeholder { text-align: center; color: var(--text-2); z-index: 1; }
-    .call-placeholder .big { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 12px; display: grid; place-items: center; color: #fff; font-size: 42px; font-weight: 700; overflow: hidden; }
-    .call-bar { height: 96px; display: flex; align-items: center; justify-content: center; gap: 12px; background: linear-gradient(transparent, rgba(0,0,0,.55)); flex-shrink: 0; z-index: 5; }
-    .call-title { position: absolute; top: 18px; left: 0; right: 0; text-align: center; font-weight: 650; text-shadow: 0 2px 8px #000; z-index: 2; }
-    .q-pop { position: absolute; bottom: 100px; background: var(--roomlist); border: 1px solid var(--line); border-radius: 12px; padding: 8px; z-index: 6; min-width: 180px; box-shadow: var(--shadow); }
-    .q-pop button { display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; font-size: 13px; }
-    .q-pop button:hover { background: var(--hover-2); }
-
-    #lightbox { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.86); display: flex; align-items: center; justify-content: center; padding: 24px; }
-    #lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; }
-    .menu, .ctx { position: absolute; background: var(--roomlist); border: 1px solid var(--line); border-radius: 10px; min-width: 220px; box-shadow: var(--shadow); z-index: 90; overflow: hidden; }
-    .menu { right: 12px; top: 56px; }
-    .menu button, .ctx button { display: block; width: 100%; text-align: left; padding: 10px 14px; font-size: 14px; }
-    .menu button:hover, .ctx button:hover { background: var(--hover-2); }
-    .menu button.danger, .ctx button.danger { color: #ff8b90; }
-    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #2a303a; color: #edf3ff; padding: 10px 16px; border-radius: 8px; font-size: 13px; z-index: 80; max-width: min(420px, calc(100% - 24px)); text-align: center; }
-    .hl { background: rgba(13,189,139,.28); border-radius: 3px; }
-
-    @media (max-width: 760px) {
-      .panel { width: auto; flex: 1; }
-      .main.noconv { display: none; }
-      .panel.hidden-mobile { display: none; }
-      .back-btn { display: grid; }
-      .space { width: 48px; }
-      #localVideo { width: 112px; height: 80px; }
-    }
-  </style>
 </head>
 <body>
-  <div id="boot" class="boot hidden"><div class="spin"></div> Входим…</div>
-  <div id="login">
-    <form class="login-card" id="authForm">
-      <div class="brand">
-        <div class="brand-mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 6h4.4L12 14.2 15.6 6H20v12h-3.2v-7.2L13.3 18h-2.6L6.2 10.8V18H4V6z" fill="#04281d"/></svg></div>
-        <div><h1>NMessenger</h1><p>Личные сообщения и звонки</p></div>
-      </div>
-      <div class="auth-tabs">
-        <button type="button" class="on" id="tabLogin">Вход</button>
-        <button type="button" id="tabRegister">Регистрация</button>
-      </div>
-      <div class="field"><label for="username">Логин</label><input id="username" maxlength="24" autocomplete="username" placeholder="username" autofocus /></div>
-      <div class="field hidden" id="dnField"><label for="displayName">Отображаемое имя</label><input id="displayName" maxlength="32" autocomplete="nickname" /></div>
-      <div class="field"><label for="password">Пароль</label>
-        <div class="pw-wrap"><input id="password" type="password" maxlength="72" autocomplete="current-password" /><button class="eye" type="button" id="eye1">👁</button></div>
-      </div>
-      <div class="field hidden" id="pw2Field"><label for="password2">Повторите пароль</label>
-        <div class="pw-wrap"><input id="password2" type="password" maxlength="72" autocomplete="new-password" /><button class="eye" type="button" id="eye2">👁</button></div>
-      </div>
-      <button class="btn-primary" id="authBtn" type="submit">Войти</button>
-      <div class="login-error" id="loginError"></div>
-      <div class="login-hint" id="loginHint">Сессия сохранится на этом устройстве.</div>
-    </form>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Определения переиспользуемых символов. -->
+    <symbol id="i-logo" viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9.6a1.5 1.5 0 0 1-1.5 1.5H9.8l-4.2 3.3A1 1 0 0 1 4 19.1V5.5Z" fill="currentColor"/><circle cx="9" cy="10" r="1.3" fill="#fff"/><circle cx="12" cy="10" r="1.3" fill="#fff"/><circle cx="15" cy="10" r="1.3" fill="#fff"/></symbol>
+    <!-- Логотип-«облачко сообщения». -->
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.4"/><path d="m16 16 4 4"/></symbol>
+    <!-- Лупа (поиск). -->
+    <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L20 8l-4-4L4 16v4Z"/><path d="M14.5 5.5 18.5 9.5"/></symbol>
+    <!-- Карандаш (новый чат). -->
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="8.6"/><path d="M12 8.4v7.2M8.4 12h7.2"/></symbol>
+    <!-- Плюс в круге (добавить историю). -->
+    <symbol id="i-phone" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 3.5c.6 0 1.1.35 1.35.9l1.25 2.75c.25.5.15 1.1-.2 1.55l-1.1 1.3a12.6 12.6 0 0 0 5.1 5.05l1.3-1.1c.45-.4 1.05-.5 1.6-.25l2.75 1.25c.55.25.9.75.9 1.35v2.4c0 .95-.8 1.75-1.75 1.7C11.3 20 4 12.7 3.5 5.25A1.7 1.7 0 0 1 5.2 3.5h1.4Z"/></symbol>
+    <!-- Трубка (аудиозвонок). -->
+    <symbol id="i-video" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="6.4" width="12.6" height="11.2" rx="2.6"/><path d="M15.6 11.2 21 8v8l-5.4-3.2Z"/></symbol>
+    <!-- Камера (видеозвонок). -->
+    <symbol id="i-send" viewBox="0 0 24 24" fill="currentColor"><path d="M20.6 3.7 3.9 10.3c-.7.3-.7 1.3.1 1.5l6 1.9 1.9 6c.2.7 1.2.8 1.5 0l8.2-16Z"/></symbol>
+    <!-- Самолётик (отправить). -->
+    <symbol id="i-smile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.2 9.8h.01M14.8 9.8h.01"/><path d="M8.8 14.1a4.3 4.3 0 0 0 6.4 0"/></symbol>
+    <!-- Смайлик (эмодзи). -->
+    <symbol id="i-clip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M19.5 11.6 11.7 19.4a4.6 4.6 0 0 1-6.5-6.5l7.9-7.9a3.2 3.2 0 0 1 4.5 4.5l-7.9 7.9a1.8 1.8 0 0 1-2.5-2.5l7.1-7.1"/></symbol>
+    <!-- Скрепка (прикрепить файл). -->
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+    <!-- Крестик (закрыть). -->
+    <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5 7.5 12l7 7"/></symbol>
+    <!-- Стрелка назад. -->
+    <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5l7 6.5-7 6.5"/></symbol>
+    <!-- Стрелка «вперёд» (пункты настроек). -->
+    <symbol id="i-sticker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13v5a2 2 0 0 1-2 2h-5l-8-8V6a2 2 0 0 1 2-2h5z"/><path d="M20 13h-5a2 2 0 0 0-2 2v5"/></symbol>
+    <!-- Значок стикера. -->
+    <symbol id="i-bot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 8V5"/><circle cx="12" cy="4" r="1.4"/><path d="M9 13h.01M15 13h.01"/><path d="M9.5 16.5h5"/></symbol>
+    <!-- Значок бота. -->
+    <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 1 1-4 0v-.07a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 1 1 0-4h.07A1.7 1.7 0 0 0 4.63 8.6a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.56V3a2 2 0 1 1 4 0v.07a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.24.63.85 1.05 1.53 1.05H21a2 2 0 1 1 0 4h-.07a1.7 1.7 0 0 0-1.53 1.05Z"/></symbol>
+    <!-- Шестерёнка (настройки). -->
+    <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <!-- Три полоски: меню создания чатов и тем. -->
+    <symbol id="i-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M8.5 20h7M12 16.5V20"/></symbol>
+    <!-- Значок компьютера: так помечаются устройства-компьютеры в списке устройств. -->
+    <symbol id="i-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><path d="M13.5 13.5h3v3h-3zM19 13.5h1.5M13.5 19.5V21M19 18v3M17 16h1"/></symbol>
+    <!-- Значок QR-кода: показать свой код или код собеседника. -->
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16 5.5a3 3 0 0 1 0 5.6M17.5 19.5c0-2-.6-3.4-1.6-4.4"/></symbol>
+    <!-- Значок «люди»: показывает, сколько человек пользуется ботом. -->
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10" width="15" height="10.5" rx="2.6"/><path d="M8 10V7.8a4 4 0 0 1 8 0V10"/></symbol>
+    <!-- Значок закрытого замка (не используется в интерфейсе). -->
+    <symbol id="i-unlock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10" width="15" height="10.5" rx="2.6"/><path d="M8 10V7.8a4 4 0 0 1 7.5-1.9"/></symbol>
+    <!-- Значок открытого замка (не используется в интерфейсе). -->
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3.5 5 6.4v5.3c0 4.2 2.9 7.6 7 8.8 4.1-1.2 7-4.6 7-8.8V6.4L12 3.5Z"/><path d="m9.2 12 2 2 3.6-3.8"/></symbol>
+    <!-- Щит (безопасность). -->
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 10a5.5 5.5 0 0 1 11 0c0 4 1.5 5.5 1.5 5.5H5S6.5 14 6.5 10Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></symbol>
+    <!-- Колокольчик (уведомления). -->
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.8 20c.9-3.6 3.8-5.6 7.2-5.6s6.3 2 7.2 5.6"/></symbol>
+    <!-- Силуэт (профиль). -->
+    <symbol id="i-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.4 0 2-.8 2-1.7 0-1.6-1.7-1.9-1.7-3.3 0-1 .8-1.7 1.9-1.7h1.9c2.1 0 3.4-1.4 3.4-3.3C19.5 6.6 16.2 3.5 12 3.5Z"/><circle cx="8.6" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="8" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.4" cy="10" r="1.1" fill="currentColor" stroke="none"/></symbol>
+    <!-- Глобус (выбор языка интерфейса). -->
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.4 3.6 8.5S14.4 18.1 12 20.5c-2.4-2.4-3.6-5.4-3.6-8.5S9.6 5.9 12 3.5Z"/></symbol>
+    <!-- Палитра (тема оформления). -->
+    <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></symbol>
+    <!-- Микрофон включён. -->
+    <symbol id="i-mic-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M4 3.5l16.5 17"/></symbol>
+    <!-- Микрофон выключен. -->
+    <symbol id="i-cam" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="6.4" width="12.6" height="11.2" rx="2.6"/><path d="M15.6 11.2 21 8v8l-5.4-3.2Z"/></symbol>
+    <!-- Камера включена. -->
+    <symbol id="i-cam-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="6.4" width="12.6" height="11.2" rx="2.6"/><path d="M15.6 11.2 21 8v8l-5.4-3.2Z"/><path d="M4 3.5l16.5 17" stroke-linecap="round"/></symbol>
+    <!-- Камера выключена. -->
+    <symbol id="i-phone-in" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 3.5c.6 0 1.1.35 1.35.9l1.25 2.75c.25.5.15 1.1-.2 1.55l-1.1 1.3a12.6 12.6 0 0 0 5.1 5.05l1.3-1.1c.45-.4 1.05-.5 1.6-.25l2.75 1.25c.55.25.9.75.9 1.35v2.4c0 .95-.8 1.75-1.75 1.7C11.3 20 4 12.7 3.5 5.25A1.7 1.7 0 0 1 5.2 3.5h1.4Z"/><path d="M14 9.8h5m0 0-2.2-2.2M19 9.8l-2.2 2.2" stroke="#0b0d12" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <!-- Входящий звонок (трубка со стрелкой внутрь). -->
+    <symbol id="i-phone-out" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 3.5c.6 0 1.1.35 1.35.9l1.25 2.75c.25.5.15 1.1-.2 1.55l-1.1 1.3a12.6 12.6 0 0 0 5.1 5.05l1.3-1.1c.45-.4 1.05-.5 1.6-.25l2.75 1.25c.55.25.9.75.9 1.35v2.4c0 .95-.8 1.75-1.75 1.7C11.3 20 4 12.7 3.5 5.25A1.7 1.7 0 0 1 5.2 3.5h1.4Z"/><path d="M19 4.6h-5m0 0 2.2-2.2M14 4.6l2.2 2.2" stroke="#0b0d12" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <!-- Исходящий звонок (трубка со стрелкой наружу). -->
+    <symbol id="i-phone-missed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5 6 5.6a1.6 1.6 0 0 1 2 .1l1.6 1.5c.5.5.6 1.3.2 1.9l-.6.9a11 11 0 0 0 3.6 3.5l.9-.6c.6-.4 1.4-.3 1.9.2l1.5 1.6c.5.5.5 1.4 0 2l-1.9 2.4a1.6 1.6 0 0 1-1.8.5C9 18.3 5.7 15 3 9.3a1.6 1.6 0 0 1 .5-1.8Z"/><path d="M15 3.5h5.5M20.5 3.5V9"/></symbol>
+    <!-- Пропущенный звонок (перечёркнутая стрелка). -->
+    <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1Z"/></symbol>
+    <!-- Закладка — для Избранного. -->
+    <symbol id="i-broadcast" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1Z"/><path d="M17 8a5 5 0 0 1 0 8"/></symbol>
+    <!-- Рупор — для каналов. -->
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M21 20v-1.5a4 4 0 0 0-3-3.87"/><path d="M15.5 4.2a3.5 3.5 0 0 1 0 6.6"/></symbol>
+    <!-- Группа людей — для групп. -->
+    <symbol id="i-reply" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7 4 12l5 5"/><path d="M4 12h9a7 7 0 0 1 7 7v1"/></symbol>
+    <!-- Стрелка влево — «ответить». -->
+    <symbol id="i-maximize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="4.5" width="15" height="15" rx="2.5"/></symbol>
+    <!-- Квадрат — «развернуть окно». -->
+    <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H8l-4 3v-6.5A8 8 0 0 1 12 4h1a8 8 0 0 1 8 8Z"/></symbol>
+    <!-- Облачко сообщения — логотип. -->
+    <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6.8h16M9.5 6.8V4.6h5v2.2M6.4 6.8 7.4 20h9.2l1-13.2"/></symbol>
+    <!-- Корзина (удалить историю). -->
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
+    <!-- Галочка (доставлено). -->
+    <symbol id="i-double-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 12.5 4 4L14 8"/><path d="m9.5 16.5 8-8.5 4 4"/></symbol>
+    <!-- Двойная галочка (прочитано). -->
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2.5 12S6 6.5 12 6.5 21.5 12 21.5 12 18 17.5 12 17.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.8"/></symbol>
+    <!-- Глаз (просмотры истории). -->
+    <symbol id="i-photo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="3"/><circle cx="9" cy="10.5" r="1.6"/><path d="m5 17 4.5-4.2L13 16l2.6-2.4L20 17.5"/></symbol>
+    <!-- Картинка. -->
+    <symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4.5h3.5A1.5 1.5 0 0 1 20 6v12a1.5 1.5 0 0 1-1.5 1.5H15"/><path d="M10.5 8 6.5 12l4 4M6.5 12H15"/></symbol>
+    <!-- Выход из аккаунта. -->
+    <symbol id="i-dots" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5.2" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="18.8" r="1.9"/></symbol>
+    <!-- Иконка «три точки». -->
+    <symbol id="i-restore" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8h9v9H8z"/><path d="M8 16H5.6A1.6 1.6 0 0 1 4 14.4V6.6A1.6 1.6 0 0 1 5.6 5h7.8A1.6 1.6 0 0 1 15 6.6V8"/></symbol>
+    <!-- Два квадрата: вернуть окну прежний размер. -->
+    <symbol id="i-minimize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 12h12"/></symbol>
+    <!-- Свернуть окно звонка. -->
+    <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="2.4"/><path d="M15.5 5.5H6.5a2 2 0 0 0-2 2v9"/></symbol>
+    <!-- Копировать логин. -->
+    <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="12" r="3.6"/><path d="M11.6 12H21m-3 0v3.2M15 12v2.2"/></symbol>
+    <!-- Значок ключа. -->
+    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10m0 0 4-4m-4 4-4-4M5 19h14"/></symbol>
+    <!-- Установить приложение. -->
+  </defs>
+</svg>
+
+  <div id="boot" class="splash hidden">
+    <div class="splash-inner">
+      <div class="splash-logo"><svg><use href="#i-logo"></use></svg></div>
+      <div class="splash-name">NMessenger</div>
+      <div class="splash-loader"><span></span></div>
+    </div>
   </div>
 
-  <div id="app" class="hidden">
-    <nav class="space">
-      <div class="space-logo" title="NMessenger"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 6h4.4L12 14.2 15.6 6H20v12h-3.2v-7.2L13.3 18h-2.6L6.2 10.8V18H4V6z" fill="#04281d"/></svg></div>
-      <button class="space-btn active" data-view="chats" title="Чаты"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7A2.5 2.5 0 0 1 17.5 16H9l-4 3.5V6.5z"/></svg><span class="badge" id="totalUnread"></span></button>
-      <button class="space-btn" data-view="people" title="Люди"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M4 18c0-2.8 2.2-4.5 5-4.5s5 1.7 5 4.5"/></svg></button>
-      <button class="space-btn" data-view="fav" title="Избранное" id="tabFav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3.5l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 16.2 6.8 18.4l.9-5.4L3.8 9.2l5.4-.8L12 3.5z"/></svg></button>
-      <div class="spacer"></div>
-      <button class="space-btn" data-view="settings" title="Настройки"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 3.5v2.2M12 18.3v2.2M4.9 6.5l1.6 1.6M17.5 15.9l1.6 1.6M3.5 12h2.2M18.3 12h2.2M4.9 17.5l1.6-1.6M17.5 8.1l1.6-1.6"/></svg></button>
-      <div class="space-avatar" id="meAvatar">?</div>
-    </nav>
-
-    <aside class="panel" id="panel">
-      <div class="panel-view" id="viewChats">
-        <div class="panel-head"><h2>Чаты</h2>
-          <button class="icon-btn" id="newChatBtn" title="Новый чат"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></button>
+  <div id="login" class="auth">
+    <div class="auth-art">
+      <div class="auth-art-inner">
+        <div class="brand">
+          <div class="brand-logo"><svg><use href="#i-logo"></use></svg></div>
+          <div class="brand-title">NMessenger</div>
         </div>
-        <div class="search-wrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg><input id="searchChats" placeholder="Поиск чатов" /></div>
-        <div class="folder-row" id="folderRow"></div>
-        <div class="list" id="chatList"></div>
+        <h2 class="auth-headline">Общайтесь так,<br />чтобы это осталось <span>только вашим</span></h2>
+        <ul class="auth-features">
+          <li><svg><use href="#i-smile"></use></svg><div><b>Свои стикеры и боты</b><span>Собирайте наборы и запускайте ботов по API-ключу</span></div></li>
+          <li><svg><use href="#i-phone"></use></svg><div><b>Звонки и видеозвонки</b><span>Камера, экран и запись звонка в истории</span></div></li>
+          <li><svg><use href="#i-lock"></use></svg><div><b>Секретные чаты</b><span>Сквозное шифрование на устройствах, без общего лобби</span></div></li>
+          <li><svg><use href="#i-shield"></use></svg><div><b>Приватность под контролем</b><span>Можно скрыть статус «в сети» и время последнего визита</span></div></li>
+        </ul>
       </div>
+    </div>
+    <div class="auth-panel">
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button id="tabLogin" class="tab active" type="button">Вход</button>
+          <button id="tabRegister" class="tab" type="button">Регистрация</button>
+        </div>
+        <form id="authForm" class="auth-form" autocomplete="off">
+          <label class="field hidden" id="dnField">
+            <span class="field-label">Как вас зовут</span>
+            <input id="displayName" class="input" type="text" placeholder="Например, Анна" maxlength="32" autocomplete="nickname" />
+          </label>
+          <label class="field">
+            <span class="field-label">Логин</span>
+            <input id="username" class="input" type="text" placeholder="латиница и цифры" maxlength="24" autocomplete="username" autofocus />
+          </label>
+          <label class="field">
+            <span class="field-label">Пароль</span>
+            <div class="pw-wrap">
+              <input id="password" class="input" type="password" placeholder="минимум 6 символов" maxlength="72" autocomplete="current-password" />
+              <button class="eye" type="button" id="eye1">👁</button>
+            </div>
+          </label>
+          <label class="field hidden" id="pw2Field">
+            <span class="field-label">Повторите пароль</span>
+            <div class="pw-wrap">
+              <input id="password2" class="input" type="password" placeholder="ещё раз" maxlength="72" autocomplete="new-password" />
+              <button class="eye" type="button" id="eye2">👁</button>
+            </div>
+          </label>
+          <div id="loginHint" class="auth-note">
+            <svg><use href="#i-key"></use></svg>
+            <span>Пароль защищает вашу переписку. Сессия сохранится на этом устройстве.</span>
+          </div>
+          <button id="authBtn" class="btn btn-primary" type="submit">Войти</button>
+          <div id="loginError" class="auth-error"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <aside class="sidebar panel" id="panel">
+      <header class="side-top">
+        <div class="brand-row">
+          <span class="brand-logo"><svg><use href="#i-logo"></use></svg></span>
+          <span class="brand-name">NMessenger</span>
+          <span class="badge" id="totalUnread"></span>
+        </div>
+        <button class="me-card" id="meBlock" type="button" title="Профиль">
+          <div class="avatar" id="meAvatar">?</div>
+          <div class="me-info">
+            <div class="me-name" id="meName">—</div>
+            <div class="me-sub" id="meSub">@username</div>
+          </div>
+        </button>
+        <div class="top-actions">
+          <button class="icon-btn active" data-view="chats" type="button" title="Чаты"><svg><use href="#i-chat"></use></svg></button>
+          <button class="icon-btn" id="newChatBtn" type="button" title="Новый чат"><svg><use href="#i-edit"></use></svg></button>
+          <button class="icon-btn" data-view="people" type="button" title="Люди"><svg><use href="#i-users"></use></svg></button>
+          <button class="icon-btn" data-view="fav" id="tabFav" type="button" title="Избранное"><svg><use href="#i-bookmark"></use></svg></button>
+          <button class="icon-btn" data-view="settings" type="button" title="Настройки"><svg><use href="#i-settings"></use></svg></button>
+        </div>
+      </header>
+
+      <div class="panel-view" id="viewChats">
+        <div class="search-wrap">
+          <div class="search-box">
+            <svg><use href="#i-search"></use></svg>
+            <input id="searchChats" class="search" type="text" placeholder="Поиск по чатам" />
+          </div>
+        </div>
+        <div class="tabs-wrap">
+          <div class="chat-tabs" id="folderRow"></div>
+        </div>
+        <div class="chat-list" id="chatList"></div>
+      </div>
+
       <div class="panel-view hidden" id="viewPeople">
-        <div class="panel-head"><h2>Люди</h2></div>
-        <div class="search-wrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg><input id="searchPeople" placeholder="Найти пользователя" /></div>
-        <div class="list" id="peopleList"></div>
+        <div class="search-wrap">
+          <div class="search-box">
+            <svg><use href="#i-search"></use></svg>
+            <input id="searchPeople" class="search" type="text" placeholder="Найти пользователя" />
+          </div>
+        </div>
+        <div class="chat-list" id="peopleList"></div>
       </div>
+
       <div class="panel-view hidden" id="viewSettings">
-        <div class="panel-head"><h2>Настройки</h2></div>
         <div class="set-nav">
           <button type="button" class="on" data-page="profile">Профиль</button>
           <button type="button" data-page="sessions">Сессии</button>
@@ -349,10 +563,12 @@
       </div>
     </aside>
 
-    <section class="main noconv" id="main">
-      <div class="chat-empty" id="emptyState">
+    <main class="chat-area main noconv" id="main">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-art"><svg><use href="#i-logo"></use></svg></div>
         <h3>Выберите чат</h3>
-        <p>Личные сообщения, секретные чаты и группы. Общего канала нет.</p>
+        <p>Или найдите собеседника по логину и начните переписку.</p>
+        <button class="btn btn-primary btn-sm" id="emptyFind" type="button">Найти собеседника</button>
       </div>
 
       <div id="settingsMain" class="hidden">
@@ -360,14 +576,21 @@
       </div>
 
       <div id="chatView" class="hidden">
-        <header class="chat-head">
-          <button class="icon-btn back-btn" id="backBtn" title="Назад">←</button>
-          <div id="headAvatarWrap"></div>
-          <div class="who" id="headWho"><div class="name" id="headName">—</div><div class="status" id="headStatus"></div></div>
-          <button class="icon-btn" id="searchMsgBtn" title="Поиск">🔍</button>
-          <button class="icon-btn" id="callAudioBtn" title="Звонок">📞</button>
-          <button class="icon-btn" id="callVideoBtn" title="Видео">🎥</button>
-          <button class="icon-btn" id="chatMenuBtn" title="Ещё">⋯</button>
+        <header class="chat-header chat-head">
+          <button class="icon-btn only-mobile back-btn" id="backBtn" type="button" title="Назад"><svg><use href="#i-back"></use></svg></button>
+          <button class="peer-card" id="headWho" type="button">
+            <div id="headAvatarWrap"></div>
+            <div class="peer-info">
+              <div class="peer-name name" id="headName">—</div>
+              <div class="peer-status status" id="headStatus"></div>
+            </div>
+          </button>
+          <div class="chat-actions">
+            <button class="icon-btn" id="searchMsgBtn" type="button" title="Поиск"><svg><use href="#i-search"></use></svg></button>
+            <button class="icon-btn" id="callAudioBtn" type="button" title="Звонок"><svg><use href="#i-phone"></use></svg></button>
+            <button class="icon-btn" id="callVideoBtn" type="button" title="Видео"><svg><use href="#i-video"></use></svg></button>
+            <button class="icon-btn" id="chatMenuBtn" type="button" title="Ещё"><svg><use href="#i-dots"></use></svg></button>
+          </div>
           <div class="menu hidden" id="chatMenu">
             <button type="button" id="pinChatBtn">Закрепить</button>
             <button type="button" id="muteChatBtn">Без звука</button>
@@ -383,7 +606,7 @@
           <div class="inchat-search hidden" id="inSearch">
             <input id="inSearchInput" placeholder="Поиск в этом чате" />
             <span id="inSearchCount" style="font-size:12px;color:var(--text-3)"></span>
-            <button class="icon-btn" type="button" id="inSearchClose">✕</button>
+            <button class="icon-btn" type="button" id="inSearchClose"><svg><use href="#i-x"></use></svg></button>
           </div>
         </header>
         <div class="secret-banner hidden" id="secretBanner">🔒 Секретный чат · сообщения шифруются на устройствах (E2E)</div>
@@ -393,30 +616,40 @@
           <button class="btn-sec" type="button" id="selStar" style="height:32px">В избранное</button>
           <button class="btn-danger" type="button" id="selDel" style="height:32px;padding:0 10px">Удалить</button>
           <span style="flex:1"></span>
-          <button class="icon-btn" type="button" id="selCancel">✕</button>
+          <button class="icon-btn" type="button" id="selCancel"><svg><use href="#i-x"></use></svg></button>
         </div>
-        <div class="timeline" id="timeline"></div>
-        <div class="typing" id="typingLine"></div>
-        <div class="reply-bar hidden" id="replyBar"><div class="meta"><div class="t" id="replyName"></div><div class="s" id="replyText"></div></div><button class="icon-btn" id="cancelReply">✕</button></div>
-        <div class="edit-bar hidden" id="editBar"><div class="meta"><div class="t">Редактирование</div><div class="s" id="editPreview"></div></div><button class="icon-btn" id="cancelEdit">✕</button></div>
+        <div class="messages timeline" id="timeline"></div>
+        <div class="typing-line typing" id="typingLine"></div>
+        <div class="reply-bar hidden" id="replyBar"><div class="meta"><div class="t" id="replyName"></div><div class="s" id="replyText"></div></div><button class="icon-btn" id="cancelReply"><svg><use href="#i-x"></use></svg></button></div>
+        <div class="edit-bar hidden" id="editBar"><div class="meta"><div class="t">Редактирование</div><div class="s" id="editPreview"></div></div><button class="icon-btn" id="cancelEdit"><svg><use href="#i-x"></use></svg></button></div>
         <div class="composer">
-          <button class="icon-btn" id="attachBtn" title="Изображение">🖼</button>
-          <button class="icon-btn" id="fileBtn" title="Файл">📎</button>
-          <button class="icon-btn" id="emojiBtn" title="Эмодзи">☺</button>
-          <div class="box"><textarea id="msgInput" rows="1" maxlength="4000" placeholder="Написать сообщение…"></textarea></div>
-          <button class="send" id="sendBtn" disabled>➤</button>
+          <div class="composer-row">
+            <button class="icon-btn" id="emojiBtn" type="button" title="Эмодзи"><svg><use href="#i-smile"></use></svg></button>
+            <textarea id="msgInput" class="message-input" rows="1" maxlength="4000" placeholder="Сообщение"></textarea>
+            <button class="icon-btn" id="attachBtn" type="button" title="Изображение"><svg><use href="#i-photo"></use></svg></button>
+            <button class="icon-btn" id="fileBtn" type="button" title="Файл"><svg><use href="#i-clip"></use></svg></button>
+            <button class="btn-send" id="sendBtn" type="button" disabled title="Отправить"><svg><use href="#i-send"></use></svg></button>
+          </div>
         </div>
         <div class="char-count" id="charCount">0 / 4000</div>
-        <div class="sub-bar hidden" id="channelSub">Подписчик канала · писать могут только админы</div>
-        <div class="emoji-pop hidden" id="emojiPop"></div>
+        <div class="composer-readonly sub-bar hidden" id="channelSub">Писать могут только администраторы канала</div>
+        <div class="emoji-panel emoji-pop hidden" id="emojiPop"></div>
         <input type="file" id="fileInput" accept="image/*" hidden />
         <input type="file" id="anyFileInput" hidden />
         <input type="file" id="avatarInput" accept="image/*" hidden />
       </div>
-    </section>
+    </main>
+
+    <nav class="bottom-nav" id="bottom-nav">
+      <button class="nav-btn active" data-view="chats" type="button"><svg><use href="#i-chat"></use></svg><span>Чаты</span></button>
+      <button class="nav-btn" data-view="people" type="button"><svg><use href="#i-users"></use></svg><span>Контакты</span></button>
+      <button class="nav-btn" data-view="fav" type="button"><svg><use href="#i-bookmark"></use></svg><span>Избранное</span></button>
+      <button class="nav-btn" data-view="settings" type="button"><svg><use href="#i-settings"></use></svg><span>Настройки</span></button>
+    </nav>
   </div>
 
-  <div class="overlay hidden" id="newChatModal">
+
+<div class="overlay hidden" id="newChatModal">
     <div class="modal">
       <div class="modal-h"><span id="modalTitle">Новый чат</span><span style="flex:1"></span><button class="icon-btn" id="closeModalBtn">✕</button></div>
       <div class="modal-body">
@@ -539,9 +772,10 @@
   </div>
   <div class="toast hidden" id="toast"></div>
 
-  <script>
+  
+<script>
   (() => {
-    const COLORS = ['#368bd6','#ac3ba8','#03b381','#e64f7a','#ff812d','#2dc2c5','#5c56f5','#74d12c'];
+    const COLORS = ['#7c5cff','#37b6ff','#35c88f','#ec4899','#f97316','#06b6d4','#a855f7','#3b82f6'];
     const ALL_EMOJI = ['😀','😁','😂','😊','😍','😘','😎','🤔','😴','😭','😡','👍','👎','👏','🙏','🔥','❤️','✨','🎉','✅','⭐','👀','💯','👋','📌','📷','🚀','💻'];
     const REACTS = ['👍','❤️','😂','😮','😢','🔥'];
     const TEXT_MAX = 4000;
@@ -708,7 +942,7 @@
 
     function setAuthMode(mode) {
       state.mode = mode; const reg = mode === 'register';
-      $('tabLogin').classList.toggle('on', !reg); $('tabRegister').classList.toggle('on', reg);
+      $('tabLogin').classList.toggle('active', !reg); $('tabRegister').classList.toggle('active', reg);
       $('dnField').classList.toggle('hidden', !reg); $('pw2Field').classList.toggle('hidden', !reg);
       $('authBtn').textContent = reg ? 'Создать аккаунт' : 'Войти';
       $('loginError').textContent = '';
@@ -743,6 +977,8 @@
       if (state.me.avatar) $('meAvatar').innerHTML = `<img src="${esc(state.me.avatar)}" alt="">`;
       else { $('meAvatar').innerHTML = ''; $('meAvatar').style.background = col; $('meAvatar').textContent = initial(state.me.displayName); }
       $('meAvatar').title = state.me.displayName;
+      const mn = $('meName'); if (mn) mn.textContent = state.me.displayName || state.me.username;
+      const ms = $('meSub'); if (ms) ms.textContent = '@' + (state.me.username || '');
     }
     async function enterApp(payload) {
       state.me = payload.user;
@@ -834,7 +1070,7 @@
     setInterval(updateTyping, 800);
 
     function renderTabs() {
-      document.querySelectorAll('.space-btn[data-view]').forEach((b) => b.classList.toggle('active', b.dataset.view === state.view));
+      document.querySelectorAll('[data-view]').forEach((b) => b.classList.toggle('active', b.dataset.view === state.view));
       $('viewChats').classList.toggle('hidden', state.view !== 'chats' && state.view !== 'fav');
       $('viewPeople').classList.toggle('hidden', state.view !== 'people');
       $('viewSettings').classList.toggle('hidden', state.view !== 'settings');
@@ -865,7 +1101,7 @@
     function renderFolders() {
       const row = $('folderRow'); if (!row) return;
       const all = builtinFolders().concat(state.folders || []);
-      row.innerHTML = all.map((f) => `<button type="button" class="folder-chip ${state.folderId === f.id ? 'on' : ''}" data-fid="${esc(f.id)}">${esc(f.name)}</button>`).join('');
+      row.innerHTML = all.map((f) => `<button type="button" class="chat-tab ${state.folderId === f.id ? 'active' : ''}" data-fid="${esc(f.id)}">${esc(f.name)}</button>`).join('');
       row.querySelectorAll('[data-fid]').forEach((b) => b.onclick = () => { state.folderId = b.dataset.fid; renderFolders(); renderChatList(); });
     }
     function folderMatch(c) {
@@ -901,18 +1137,19 @@
           const name = c.type === 'group' || c.type === 'fav' || c.type === 'channel' ? c.name : labelOf(peer);
           const on = (c.type === 'dm' || c.type === 'secret') && isOnline(peer);
           const avName = c.type === 'fav' ? myName() : peer;
-          return `<div class="row ${c.id === state.activeId ? 'active' : ''}" data-id="${esc(c.id)}">
-            ${avatarNode(avName, '')}${c.type === 'dm' || c.type === 'secret' ? '' : ''}
-            <div class="row-main">
-              <div class="row-top"><div class="row-name">${c.type === 'secret' ? '🔒 ' : ''}${c.type === 'fav' ? '⭐ ' : ''}${c.type === 'channel' ? '📢 ' : ''}${esc(name)}</div><div class="row-time">${esc(c.lastMessage?.time || '')}</div></div>
-              <div class="row-bottom"><div class="row-preview">${esc(c.lastMessage?.text || 'Нет сообщений')}</div>${c.muted ? '🔕' : ''}${c.unread ? `<span class="unread">${c.unread}</span>` : ''}</div>
-            </div></div>`;
+          return `<div class="chat-item ${c.id === state.activeId ? 'active' : ''}" data-id="${esc(c.id)}">
+            <div class="chat-avatar-wrap">${avatarNode(avName, '')}</div>
+            <div class="chat-body">
+              <div class="chat-line"><div class="chat-name">${c.type === 'secret' ? '🔒 ' : ''}${c.type === 'fav' ? '⭐ ' : ''}${c.type === 'channel' ? '📢 ' : ''}${esc(name)}</div><div class="chat-time">${esc(c.lastMessage?.time || '')}</div></div>
+              <div class="chat-preview"><span class="txt">${esc(c.lastMessage?.text || 'Нет сообщений')}</span></div>
+            </div>
+            ${c.unread ? `<span class="badge">${c.unread}</span>` : ''}</div>`;
         }).join('');
-        $('chatList').querySelectorAll('.row').forEach((row, i) => {
+        $('chatList').querySelectorAll('.chat-item').forEach((row, i) => {
           const c = list[i]; const peer = convPeer(c);
           const wrap = row.querySelector('.avatar');
           if ((c.type === 'dm' || c.type === 'secret') && wrap) {
-            const d = document.createElement('span'); d.className = 'dot' + (isOnline(peer) ? '' : ' off'); wrap.appendChild(d);
+            const d = document.createElement('span'); d.className = 'online-dot' + (isOnline(peer) ? '' : ' off'); wrap.appendChild(d);
           }
         });
       }
@@ -926,14 +1163,14 @@
         .sort((a, b) => (b.online - a.online) || (a.displayName || '').localeCompare(b.displayName || '', 'ru'));
       if (!list.length) { $('peopleList').innerHTML = `<div class="empty-hint">Никого нет</div>`; return; }
       $('peopleList').innerHTML = list.map((u) => `
-        <div class="row" data-user="${esc(u.username)}">
-          ${avatarNode(u.username, '')}
-          <div class="row-main"><div class="row-name">${u.isBot ? '🤖 ' : ''}${esc(u.displayName)}${isBlocked(u.username) ? ' · блок' : ''}</div>
-          <div class="row-preview">${u.isBot ? 'бот' : (u.online ? 'в сети' : lastSeenText(u.username))} · @${esc(u.username)}</div></div>
+        <div class="chat-item" data-user="${esc(u.username)}">
+          <div class="chat-avatar-wrap">${avatarNode(u.username, '')}</div>
+          <div class="chat-body"><div class="chat-line"><div class="chat-name">${u.isBot ? '🤖 ' : ''}${esc(u.displayName)}${isBlocked(u.username) ? ' · блок' : ''}</div></div>
+          <div class="chat-preview"><span class="txt">${u.isBot ? 'бот' : (u.online ? 'в сети' : lastSeenText(u.username))} · @${esc(u.username)}</span></div></div>
         </div>`).join('');
-      $('peopleList').querySelectorAll('.row').forEach((row) => {
+      $('peopleList').querySelectorAll('.chat-item').forEach((row) => {
         const wrap = row.querySelector('.avatar'); const u = userByName(row.dataset.user);
-        if (wrap && u) { const d = document.createElement('span'); d.className = 'dot' + (u.online ? '' : ' off'); wrap.appendChild(d); }
+        if (wrap && u) { const d = document.createElement('span'); d.className = 'online-dot' + (u.online ? '' : ' off'); wrap.appendChild(d); }
       });
     }
     function renderHeader() {
@@ -943,11 +1180,11 @@
       $('headAvatarWrap').innerHTML = avatarNode(conv.type === 'fav' ? myName() : (conv.type === 'channel' || conv.type === 'group' ? conv.name : peer), 'md');
       $('headName').textContent = (conv.type === 'secret' ? '🔒 ' : conv.type === 'channel' ? '📢 ' : '') + name;
       const st = $('headStatus');
-      if (conv.type === 'group') { st.className = 'status'; st.textContent = conv.participants.length + ' · @' + (conv.handle || ''); }
-      else if (conv.type === 'channel') { st.className = 'status'; st.textContent = (conv.subscribers || conv.participants.length) + ' подп. · @' + (conv.handle || ''); }
-      else if (conv.type === 'fav') { st.className = 'status'; st.textContent = 'Сохранённые сообщения'; }
-      else if (conv.type === 'secret') { st.className = 'status'; st.textContent = 'E2E · ' + lastSeenText(peer); }
-      else { const on = isOnline(peer); st.className = 'status' + (on ? ' on' : ''); st.textContent = lastSeenText(peer); }
+      if (conv.type === 'group') { st.className = 'peer-status status'; st.textContent = conv.participants.length + ' · @' + (conv.handle || ''); }
+      else if (conv.type === 'channel') { st.className = 'peer-status status'; st.textContent = (conv.subscribers || conv.participants.length) + ' подп. · @' + (conv.handle || ''); }
+      else if (conv.type === 'fav') { st.className = 'peer-status status'; st.textContent = 'Сохранённые сообщения'; }
+      else if (conv.type === 'secret') { st.className = 'peer-status status'; st.textContent = 'E2E · ' + lastSeenText(peer); }
+      else { const on = isOnline(peer); st.className = 'peer-status status' + (on ? ' on online' : ''); st.textContent = lastSeenText(peer); }
       $('secretBanner').classList.toggle('hidden', conv.type !== 'secret');
       $('pinChatBtn').textContent = conv.pinned ? 'Открепить' : 'Закрепить';
       $('muteChatBtn').textContent = conv.muted ? 'Включить звук' : 'Без звука';
@@ -991,15 +1228,18 @@
         if (q && !bodyText.toLowerCase().includes(q.toLowerCase())) return;
         if (q) matchN++;
         const prev = msgs[i - 1]; const day = formatDay(m.ts);
-        if (day !== lastDay) { html += `<div class="day-sep">${esc(day)}</div>`; lastDay = day; }
+        if (day !== lastDay) { html += `<div class="msg-day day-sep">${esc(day)}</div>`; lastDay = day; }
         if (m.type === 'system') { html += `<div class="sys">${esc(m.text)}</div>`; return; }
+        const mine = m.from === myName();
         const cont = !q && prev && prev.from === m.from && prev.type !== 'system' && prev.type !== 'call' && m.type !== 'call' && (m.ts - prev.ts) < 300000;
         const col = colorFor(m.from); const reacts = Object.entries(m.reactions || {});
+        const showName = !mine && !cont && (conv.type === 'group' || conv.type === 'channel');
         let inner = '';
         if (m.deleted) inner = `<div class="msg-text deleted">Сообщение удалено</div>`;
         else if (m.type === 'call') {
           const missed = m.call && m.call.status !== 'answered';
-          inner = `<div class="call-chip ${missed ? 'missed' : ''}"><div class="ic">${m.call?.video ? '🎥' : '📞'}</div><div><div>${esc(m.text)}</div></div></div>`;
+          html += `<div class="msg msg-row call-row ${state.selected.has(m.id) ? 'picked' : ''}" data-id="${esc(m.id)}"><div class="bubble"><div class="call-chip call-log ${missed ? 'missed' : ''}"><div class="ic">${m.call?.video ? '🎥' : '📞'}</div><div><div>${esc(m.text)}</div><div class="bubble-time">${esc(m.time)}</div></div></div></div></div>`;
+          return;
         } else if (m.type === 'secret' && plain.fail) inner = `<div class="msg-text deleted">🔒 Не удалось расшифровать</div>`;
         else {
           const t = m.type === 'secret' ? (plain.type || 'text') : m.type;
@@ -1009,13 +1249,15 @@
           if (t === 'image' && file?.url) inner += `<img class="msg-img" src="${esc(file.url)}" alt="" />`;
           if (t === 'file' && file) inner += `<a class="file-card" href="${esc(file.url)}" download="${esc(file.name)}" target="_blank" rel="noopener"><div class="ext">${esc((file.name.split('.').pop() || 'FILE').slice(0,4).toUpperCase())}</div><div><div class="fn">${esc(file.name)}</div><div class="fs">${fmtSize(file.size || 0)}</div></div></a>`;
           if (text && t !== 'image') inner += `<div class="msg-text">${linkify(text, q)}</div>`;
+          else if (text && t === 'image') inner += `<div class="msg-text">${linkify(text, q)}</div>`;
         }
         if (reacts.length) inner += `<div class="reacts">${reacts.map(([e, arr]) => `<button data-react="${esc(e)}" class="${arr.includes(myName()) ? 'mine' : ''}">${e} ${arr.length}</button>`).join('')}</div>`;
-        html += `<div class="msg ${cont ? 'cont' : ''} ${state.selected.has(m.id) ? 'picked' : ''}" data-id="${esc(m.id)}">
-          ${avatarNode(m.from, 'sm')}
-          <div class="msg-body">
-            ${cont ? '' : `<div class="msg-meta"><span class="msg-name" style="color:${col}">${esc(labelOf(m.from))}</span><span class="msg-when"><span class="msg-time">${esc(m.time)}</span>${m.edited ? '<span class="edited">изм.</span>' : ''}${ticksHtml(m, conv)}</span></div>`}
+        html += `<div class="msg msg-row ${mine ? 'out' : 'in'} ${cont ? 'cont grouped' : ''} ${state.selected.has(m.id) ? 'picked' : ''}" data-id="${esc(m.id)}">
+          ${mine || cont ? '' : avatarNode(m.from, 'sm')}
+          <div class="bubble">
+            ${showName ? `<div class="msg-name" style="color:${col}">${esc(labelOf(m.from))}</div>` : ''}
             ${inner}
+            <div class="bubble-time"><span>${esc(m.time)}</span>${m.edited ? '<span class="edited">изм.</span>' : ''}${ticksHtml(m, conv)}</div>
           </div>
         </div>`;
       });
@@ -1032,7 +1274,8 @@
       $('chatView').classList.toggle('hidden', !show);
       $('settingsMain').classList.add('hidden');
       $('main').classList.toggle('noconv', !show && state.view !== 'settings');
-      if (window.innerWidth <= 760) $('panel').classList.toggle('hidden-mobile', show);
+      $('main').classList.toggle('open', !!show);
+      if (window.innerWidth <= 820) $('panel').classList.toggle('hidden-mobile', show);
       else $('panel').classList.remove('hidden-mobile');
     }
     function openConversation(id) {
@@ -1046,7 +1289,13 @@
       $('chatMenu').classList.add('hidden');
     }
 
-    document.querySelectorAll('.space-btn[data-view]').forEach((b) => {
+    const meBlock = $('meBlock');
+    if (meBlock) meBlock.addEventListener('click', () => { state.view = 'settings'; state.setPage = 'profile'; renderTabs(); });
+    const emptyFind = $('emptyFind');
+    if (emptyFind) emptyFind.addEventListener('click', () => { $('newChatBtn').click(); });
+    const brandRow = document.querySelector('.brand-row');
+    if (brandRow) brandRow.addEventListener('click', () => { state.view = 'chats'; renderTabs(); });
+    document.querySelectorAll('[data-view]').forEach((b) => {
       b.addEventListener('click', () => {
         const v = b.dataset.view;
         if (v === 'fav') { state.view = 'chats'; renderTabs(); state.pendingOpen = true; socket.emit('open_fav'); return; }
@@ -1058,9 +1307,9 @@
     });
     $('searchChats').addEventListener('input', renderChatList);
     $('searchPeople').addEventListener('input', renderPeople);
-    $('chatList').addEventListener('click', (e) => { const row = e.target.closest('.row'); if (row) openConversation(row.dataset.id); });
+    $('chatList').addEventListener('click', (e) => { const row = e.target.closest('.chat-item, .row'); if (row) openConversation(row.dataset.id); });
     $('peopleList').addEventListener('click', (e) => {
-      const row = e.target.closest('.row'); if (!row) return;
+      const row = e.target.closest('.chat-item, .row'); if (!row) return;
       state.pendingOpen = true; socket.emit('open_dm', row.dataset.user); state.view = 'chats'; renderTabs();
     });
     $('backBtn').onclick = () => { state.activeId = null; showChat(false); renderChatList(); };
@@ -1101,10 +1350,15 @@
         $('swSound').onclick = () => { const v = !state.settings.sound; socket.emit('update_settings', { sound: v }); state.settings.sound = v; $('swSound').classList.toggle('on', v); };
         $('vol').oninput = () => { const v = Number($('vol').value); state.settings.soundVolume = v; socket.emit('update_settings', { soundVolume: v }); };
       } else if (page === 'themes') {
-        p.innerHTML = `<h3>Темы</h3><div class="set-block"><div class="theme-picks">
-          <button type="button" data-th="dark" class="${s.theme==='dark'?'on':''}">Тёмная</button>
-          <button type="button" data-th="midnight" class="${s.theme==='midnight'?'on':''}">Ночь</button>
-          <button type="button" data-th="light" class="${s.theme==='light'?'on':''}">Светлая</button>
+        const themes = [
+          ['dark','Тёмная','sw-dark'],['light','Светлая','sw-light'],['amoled','AMOLED','sw-amoled'],
+          ['blue','Синяя','sw-blue'],['emerald','Изумруд','sw-emerald'],['ocean','Морская','sw-ocean'],
+          ['rose','Розовая','sw-rose'],['sunset','Закат','sw-sunset'],['coffee','Кофейная','sw-coffee'],
+          ['graphite','Графит','sw-graphite'],['lavender','Лаванда','sw-lavender'],['mint','Мятная','sw-mint']
+        ];
+        const cur = s.theme === 'midnight' ? 'amoled' : (s.theme || 'dark');
+        p.innerHTML = `<h3>Оформление</h3><div class="set-block"><div class="theme-picks">
+          ${themes.map(([id, name, sw]) => `<button type="button" data-th="${id}" class="${cur===id?'on':''}"><span class="sw ${sw}"></span>${name}</button>`).join('')}
         </div></div>`;
         p.querySelectorAll('[data-th]').forEach((b) => b.onclick = () => { state.settings.theme = b.dataset.th; applyTheme(); socket.emit('update_settings', { theme: b.dataset.th }); renderSettingsPage(); });
       } else if (page === 'privacy') {
@@ -1671,5 +1925,5 @@
     });
   })();
   </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a418febe3e31bd6b',t:'MTc5MDQ5NjI0MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4192fa00d01a1aa',t:'MTc5MDQ5ODI0Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
