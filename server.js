@@ -465,6 +465,209 @@ function fileRef(id) {
   };
 }
 
+
+/* ===================== NMessenger additions: helpers ===================== */
+const NAME_MAX = 48;
+const ABOUT_MAX = 140;
+function convOwner(conv) {
+  return conv.owner || (conv.type === 'group' || conv.type === 'channel' ? conv.participants[0] : null);
+}
+function isConvOwner(conv, user) {
+  const o = convOwner(conv);
+  return !!o && key(o) === key(user);
+}
+function isConvAdmin(conv, user) {
+  return isConvOwner(conv, user) || (conv.admins || []).some((a) => key(a) === key(user));
+}
+function broadcastConv(conv) {
+  for (const p of conv.participants) emitToUser(p, 'conversation_upsert', convForClient(conv, p));
+}
+function displayOf(username) {
+  const a = accounts.get(key(username));
+  return a ? a.displayName || a.username : String(username);
+}
+function sysMessage(conv, text) {
+  const sys = { id: uid(), conversationId: conv.id, from: 'system', type: 'system', text, ts: Date.now(), time: timeLabel() };
+  conv.messages.push(sys);
+  if (conv.messages.length > 500) conv.messages.splice(0, conv.messages.length - 500);
+  conv.lastMessage = { text: sys.text, ts: sys.ts, from: 'system', time: sys.time };
+  persist();
+  for (const p of conv.participants) emitToUser(p, 'receive_message', sys);
+  return sys;
+}
+function sendAsBot(conv, botUsername, text) {
+  const ts = Date.now();
+  const msg = { id: uid(), conversationId: conv.id, from: botUsername, type: 'text', text: String(text).slice(0, TEXT_MAX), ts, time: timeLabel(ts), reactions: {}, edited: false, deleted: false };
+  conv.lastMessage = { text: msg.text, ts, from: botUsername, time: msg.time };
+  pushMessage(conv, msg);
+  return msg;
+}
+function createBotAccount(owner, username, displayName) {
+  username = norm(username);
+  displayName = norm(displayName) || username;
+  if (!validUsername(username) || !/bot$/i.test(username) || username.length < 5) {
+    return { error: 'Username бота: 5–24 символа (латиница, цифры, . _ -), должен оканчиваться на «bot»' };
+  }
+  if (accounts.has(key(username)) || handleTaken(username)) return { error: 'Такой username уже занят' };
+  const token = 'nmbot:' + crypto.randomBytes(18).toString('hex');
+  const dummy = hashPassword(crypto.randomBytes(16).toString('hex'));
+  const acc = {
+    username, displayName: displayName.slice(0, 32), about: 'Бот', avatar: '', pubKey: null, isBot: true, botOwner: owner, botToken: token,
+    passHash: dummy.hash, salt: dummy.salt, createdAt: Date.now(), lastSeen: Date.now(), settings: defaultSettings(), blocked: [],
+  };
+  accounts.set(key(username), acc);
+  persist();
+  io.emit('users_update', listUsers());
+  emitToUser(owner, 'bots_ok', botsOf(owner));
+  return { acc };
+}
+
+/* ===================== BotFather (системный бот) ===================== */
+const BOTFATHER = 'botfather';
+const bfState = new Map();
+function ensureSystemBots() {
+  if (accounts.has(BOTFATHER)) return;
+  const dummy = hashPassword(crypto.randomBytes(16).toString('hex'));
+  accounts.set(BOTFATHER, {
+    username: 'BotFather', displayName: 'BotFather', about: 'Создаю ботов и выдаю API-ключи. Напишите /help', avatar: '', pubKey: null,
+    isBot: true, system: true, botOwner: 'system', botToken: 'nmbot:' + crypto.randomBytes(18).toString('hex'),
+    passHash: dummy.hash, salt: dummy.salt, createdAt: Date.now(), lastSeen: Date.now(), settings: defaultSettings(), blocked: [],
+  });
+  persist();
+}
+const BF_HELP = `Я BotFather — создаю ботов для NMessenger и выдаю им API-ключи.
+
+**Команды:**
+/newbot — создать нового бота
+/mybots — мои боты
+/token — показать API-ключ
+/revoke — выпустить новый ключ (старый перестанет работать)
+/setname — изменить имя бота
+/setabout — изменить описание
+/setuserpic — сменить аватар (пришлите фото)
+/deletebot — удалить бота
+/cancel — отменить текущее действие`;
+function bfApiHelp(acc) {
+  return `**API-ключ** @${acc.username} — никому не показывайте:
+\`${acc.botToken}\`
+
+**Отправить сообщение:**
+\`\`\`
+curl -X POST {ORIGIN}/api/bot/${acc.botToken}/sendMessage \\
+  -H "Content-Type: application/json" \\
+  -d '{"chat_id":"ID_чата_или_username","text":"Привет!"}'
+\`\`\`
+**Информация о боте:** \`GET {ORIGIN}/api/bot/${acc.botToken}/me\`
+
+chat_id — ID чата из его информации (например group:abc123) или username пользователя. В группу или канал бота добавляют через информацию о чате → «Добавить бота».`;
+}
+function botFatherHandle(username, conv, msg) {
+  const uk = key(username);
+  const reply = (t) => sendAsBot(conv, 'BotFather', t);
+  const text = String(msg.text || '').trim();
+  const lower = text.toLowerCase();
+  const st = bfState.get(uk);
+  const myBots = () => Array.from(accounts.values()).filter((a) => a.isBot && key(a.botOwner) === uk);
+  const findMine = (name) => { const n = key(String(name || '').replace(/^@/, '')); return myBots().find((b) => key(b.username) === n) || null; };
+  const botsChanged = () => { persist(); io.emit('users_update', listUsers()); emitToUser(username, 'bots_ok', botsOf(username)); };
+  function runCmd(c, b, tail) {
+    tail = String(tail || '').trim();
+    switch (c) {
+      case '/token': return reply(bfApiHelp(b));
+      case '/revoke': b.botToken = 'nmbot:' + crypto.randomBytes(18).toString('hex'); botsChanged(); return reply(`Новый ключ для @${b.username} выпущен, старый больше не работает.\n\n` + bfApiHelp(b));
+      case '/setname':
+        if (tail) { if (tail.length > 32) return reply('Имя: до 32 символов.'); b.displayName = tail; botsChanged(); return reply(`Имя обновлено: **${tail}**`); }
+        bfState.set(uk, { step: 'setname_value', bot: b.username }); return reply(`Пришлите новое имя для @${b.username} (до 32 символов).`);
+      case '/setabout':
+        if (tail) { if (tail.length > ABOUT_MAX) return reply(`Описание: до ${ABOUT_MAX} символов.`); b.about = tail; botsChanged(); return reply('Описание обновлено.'); }
+        bfState.set(uk, { step: 'setabout_value', bot: b.username }); return reply(`Пришлите описание для @${b.username} (до ${ABOUT_MAX} символов).`);
+      case '/setuserpic': bfState.set(uk, { step: 'userpic', bot: b.username }); return reply(`Пришлите фото — оно станет аватаром @${b.username}.`);
+      case '/deletebot': bfState.set(uk, { step: 'delete_confirm', bot: b.username }); return reply(`Удалить @${b.username}? Это необратимо: бот исчезнет из всех чатов, а ключ перестанет работать.\n\nДля подтверждения пришлите: **Да, удалить**`);
+    }
+    return reply('Не знаю такой команды. Список: /help');
+  }
+  if (lower === '/cancel') { bfState.delete(uk); return reply(st ? 'Действие отменено.' : 'Нечего отменять.'); }
+  if (st && !text.startsWith('/')) {
+    switch (st.step) {
+      case 'newbot_name': {
+        if (msg.type !== 'text' || !text) return reply('Пришлите имя бота текстом.');
+        if (text.length > 32) return reply('Слишком длинно — до 32 символов. Попробуйте ещё раз.');
+        bfState.set(uk, { step: 'newbot_username', name: text });
+        const hint = slug(text).replace(/[^a-z0-9_]/g, '').replace(/bot$/, '').slice(0, 16) || 'my';
+        return reply(`Хорошо. Теперь username бота — латиница, цифры и «_», 5–24 символа, обязательно оканчивается на **bot**. Например: \`${hint}_bot\``);
+      }
+      case 'newbot_username': {
+        const r = createBotAccount(username, text.replace(/^@/, ''), st.name);
+        if (r.error) return reply(r.error + '\nПопробуйте другой username или /cancel.');
+        bfState.delete(uk);
+        return reply(`Готово! Бот **${r.acc.displayName}** создан: @${r.acc.username}\n\n` + bfApiHelp(r.acc));
+      }
+      case 'pick': {
+        const b = findMine(text);
+        if (!b) return reply('Такого бота у вас нет. Пришлите @username из /mybots или /cancel.');
+        bfState.delete(uk);
+        return runCmd(st.cmd, b, st.rest || '');
+      }
+      case 'setname_value': {
+        const b = findMine(st.bot); bfState.delete(uk);
+        if (!b) return reply('Бот не найден.');
+        if (!text || text.length > 32) return reply('Имя: 1–32 символа. Попробуйте /setname ещё раз.');
+        b.displayName = text; botsChanged(); return reply(`Имя обновлено: **${text}**`);
+      }
+      case 'setabout_value': {
+        const b = findMine(st.bot); bfState.delete(uk);
+        if (!b) return reply('Бот не найден.');
+        if (text.length > ABOUT_MAX) return reply(`Описание: до ${ABOUT_MAX} символов. Попробуйте /setabout ещё раз.`);
+        b.about = text; botsChanged(); return reply('Описание обновлено.');
+      }
+      case 'userpic': {
+        const b = findMine(st.bot); bfState.delete(uk);
+        if (!b) return reply('Бот не найден.');
+        if (msg.type !== 'image' || !msg.file || !msg.file.url) return reply('Нужно прислать именно фото. Попробуйте /setuserpic ещё раз.');
+        b.avatar = msg.file.url; botsChanged(); return reply('Аватар обновлён.');
+      }
+      case 'delete_confirm': {
+        const b = findMine(st.bot); bfState.delete(uk);
+        if (!b) return reply('Бот не найден.');
+        if (lower !== 'да, удалить') return reply('Удаление отменено.');
+        accounts.delete(key(b.username)); botsChanged();
+        return reply(`Бот @${b.username} удалён.`);
+      }
+    }
+  }
+  if (st && text.startsWith('/')) bfState.delete(uk);
+  if (!text.startsWith('/')) return reply('Я понимаю только команды. Список: /help');
+  const parts = text.split(/\s+/);
+  const c = parts[0].toLowerCase();
+  const rest = parts.slice(1).join(' ');
+  if (c === '/start' || c === '/help') return reply((c === '/start' ? `Привет, ${displayOf(username)}! ` : '') + BF_HELP);
+  if (c === '/newbot') { bfState.set(uk, { step: 'newbot_name' }); return reply('Отлично, создаём нового бота. Как его назовём? Пришлите имя (до 32 символов).'); }
+  if (c === '/mybots') {
+    const bots = myBots();
+    if (!bots.length) return reply('У вас пока нет ботов. Создайте первого: /newbot');
+    return reply('**Ваши боты:**\n' + bots.map((b) => `• ${b.displayName} — @${b.username}`).join('\n') + `\n\nУправление: /token, /revoke, /setname, /setabout, /setuserpic, /deletebot — можно сразу с @username, например \`/token @${bots[0].username}\``);
+  }
+  if (['/token', '/revoke', '/setname', '/setabout', '/setuserpic', '/deletebot'].includes(c)) {
+    const bots = myBots();
+    if (!bots.length) return reply('У вас пока нет ботов. Создайте: /newbot');
+    let b = null;
+    let tail = rest;
+    const m = rest.match(/^@?(\S+)\s*([\s\S]*)$/);
+    if (m && findMine(m[1])) { b = findMine(m[1]); tail = m[2]; }
+    else if (bots.length === 1) b = bots[0];
+    if (!b) { bfState.set(uk, { step: 'pick', cmd: c, rest }); return reply('Какой бот? Пришлите @username:\n' + bots.map((x) => '• @' + x.username).join('\n')); }
+    return runCmd(c, b, tail);
+  }
+  return reply('Не знаю такой команды. Список: /help');
+}
+
+/* ===================== Вход по QR-коду ===================== */
+const qrLogins = new Map();
+function qrCleanup() {
+  const now = Date.now();
+  for (const [id, q] of qrLogins) if (now - q.createdAt > 3 * 60 * 1000) qrLogins.delete(id);
+}
+
 function attachUser(socket, acc) {
   const username = acc.username;
   usersBySocket.set(socket.id, username);
@@ -714,6 +917,35 @@ app.post(
   }
 );
 
+app.post('/api/qr/new', (req, res) => {
+  qrCleanup();
+  if (qrLogins.size > 500) return res.status(429).json({ error: 'Слишком много запросов' });
+  const id = uid() + crypto.randomBytes(6).toString('hex');
+  const secret = crypto.randomBytes(16).toString('hex');
+  qrLogins.set(id, { secret, createdAt: Date.now(), token: null, username: null, ua: req.headers['user-agent'], ip: req.ip });
+  res.json({ id, secret, ttl: 180000 });
+});
+app.get('/api/qr/status/:id', (req, res) => {
+  qrCleanup();
+  const q = qrLogins.get(req.params.id);
+  if (!q || q.secret !== String(req.query.secret || '')) return res.status(404).json({ error: 'expired' });
+  if (!q.token) return res.json({ status: 'pending' });
+  qrLogins.delete(req.params.id);
+  const acc = accounts.get(key(q.username));
+  res.json({ status: 'approved', token: q.token, user: publicAccount(acc, acc.username) });
+});
+app.post('/api/qr/approve', (req, res) => {
+  const acc = bearerAcc(req);
+  if (!acc) return res.status(401).json({ error: 'Не авторизован' });
+  qrCleanup();
+  const q = qrLogins.get(String(req.body?.id || ''));
+  if (!q) return res.status(404).json({ error: 'QR-код устарел. Обновите страницу входа и отсканируйте снова.' });
+  if (q.token) return res.status(409).json({ error: 'Этот код уже использован' });
+  q.username = acc.username;
+  q.token = createSession(acc.username, { ua: 'QR · ' + String(q.ua || ''), ip: q.ip });
+  res.json({ ok: true, user: publicAccount(acc, acc.username) });
+});
+
 app.get('/files/:id', (req, res) => {
   const id = String(req.params.id || '');
   if (!/^[a-z0-9._-]+$/i.test(id)) return res.status(400).end();
@@ -875,6 +1107,8 @@ io.on('connection', (socket) => {
       type: 'group',
       name,
       handle: h,
+      owner: username,
+      admins: [username],
       participants: Array.from(parts),
     });
     const sys = {
@@ -1124,6 +1358,9 @@ io.on('connection', (socket) => {
       emitToUser(p, 'receive_message', msg);
       emitToUser(p, 'conversation_upsert', convForClient(conv, p));
     }
+    if (conv.type === 'dm' && key(username) !== BOTFATHER && conv.participants.some((p) => key(p) === BOTFATHER)) {
+      try { botFatherHandle(username, conv, msg); } catch (e) { console.error('BotFather:', e); }
+    }
   });
 
   socket.on('star_message', (data) => {
@@ -1281,6 +1518,13 @@ io.on('connection', (socket) => {
     const before = conv.participants.length;
     conv.participants = conv.participants.filter((p) => key(p) !== key(username));
     if (conv.participants.length === before) return;
+    if (conv.owner || conv.admins) {
+      conv.admins = (conv.admins || []).filter((a) => key(a) !== key(username));
+      if (conv.owner && key(conv.owner) === key(username)) {
+        conv.owner = conv.admins.find((a) => conv.participants.some((p) => key(p) === key(a))) || conv.participants[0] || null;
+      }
+      if (conv.owner && !conv.admins.some((a) => key(a) === key(conv.owner))) conv.admins.unshift(conv.owner);
+    }
     const sys = {
       id: uid(),
       conversationId: conv.id,
@@ -1514,6 +1758,110 @@ io.on('connection', (socket) => {
     emitToUser(data.to, 'webrtc_signal', { from: username, signal: data.signal });
   });
 
+  /* ===== NMessenger additions: участники, права, ссылки ===== */
+  socket.on('add_members', (data) => {
+    const username = me(socket);
+    if (!username || !data) return;
+    const conv = convMap.get(data.conversationId);
+    if (!conv || (conv.type !== 'group' && conv.type !== 'channel')) return;
+    if (!conv.participants.some((p) => key(p) === key(username))) return;
+    if (conv.type === 'channel' && !isConvAdmin(conv, username)) { socket.emit('action_error', 'Добавлять подписчиков могут только админы'); return; }
+    const added = [];
+    for (const m of (Array.isArray(data.members) ? data.members : []).slice(0, 50)) {
+      const acc = accounts.get(key(m));
+      if (!acc || acc.isBot) continue;
+      if (conv.participants.some((p) => key(p) === key(acc.username))) continue;
+      if (isBlocked(username, acc.username)) continue;
+      conv.participants.push(acc.username);
+      added.push(acc.username);
+    }
+    if (!added.length) return;
+    sysMessage(conv, `${displayOf(username)} добавил(а) ${added.map(displayOf).join(', ')}`);
+    broadcastConv(conv);
+  });
+
+  socket.on('remove_member', (data) => {
+    const username = me(socket);
+    if (!username || !data) return;
+    const conv = convMap.get(data.conversationId);
+    if (!conv || (conv.type !== 'group' && conv.type !== 'channel')) return;
+    if (!isConvAdmin(conv, username)) { socket.emit('action_error', 'Недостаточно прав'); return; }
+    const target = conv.participants.find((p) => key(p) === key(data.user));
+    if (!target || key(target) === key(username)) return;
+    if (isConvOwner(conv, target)) { socket.emit('action_error', 'Владельца исключить нельзя'); return; }
+    if (isConvAdmin(conv, target) && !isConvOwner(conv, username)) { socket.emit('action_error', 'Исключить админа может только владелец'); return; }
+    conv.participants = conv.participants.filter((p) => key(p) !== key(target));
+    conv.admins = (conv.admins || []).filter((a) => key(a) !== key(target));
+    if (conv.unread) delete conv.unread[key(target)];
+    const tAcc = accounts.get(key(target));
+    sysMessage(conv, tAcc && tAcc.isBot ? `${displayOf(username)} удалил(а) бота ${displayOf(target)}` : `${displayOf(username)} исключил(а) ${displayOf(target)}`);
+    emitToUser(target, 'conversation_removed', conv.id);
+    broadcastConv(conv);
+  });
+
+  socket.on('set_admin', (data) => {
+    const username = me(socket);
+    if (!username || !data) return;
+    const conv = convMap.get(data.conversationId);
+    if (!conv || (conv.type !== 'group' && conv.type !== 'channel')) return;
+    if (!isConvOwner(conv, username)) { socket.emit('action_error', 'Назначать админов может только владелец'); return; }
+    const target = conv.participants.find((p) => key(p) === key(data.user));
+    if (!target || isConvOwner(conv, target)) return;
+    const owner = convOwner(conv);
+    conv.owner = owner;
+    conv.admins = (conv.admins || [owner]).filter((a) => key(a) !== key(target));
+    if (!conv.admins.some((a) => key(a) === key(owner))) conv.admins.unshift(owner);
+    if (data.admin) conv.admins.push(target);
+    sysMessage(conv, data.admin ? `${displayOf(target)} теперь администратор` : `${displayOf(target)} больше не администратор`);
+    broadcastConv(conv);
+  });
+
+  socket.on('update_conversation', (data) => {
+    const username = me(socket);
+    if (!username || !data) return;
+    const conv = convMap.get(data.conversationId);
+    if (!conv || (conv.type !== 'group' && conv.type !== 'channel')) return;
+    if (!isConvAdmin(conv, username)) { socket.emit('action_error', 'Недостаточно прав'); return; }
+    const n = norm(data.name);
+    if (!n || n.length > NAME_MAX) { socket.emit('action_error', `Название: 1–${NAME_MAX} символов`); return; }
+    if (n === conv.name) return;
+    conv.name = n;
+    sysMessage(conv, `${displayOf(username)} изменил(а) название на «${n}»`);
+    broadcastConv(conv);
+  });
+
+  socket.on('join_handle', (handle) => {
+    const username = me(socket);
+    if (!username) return;
+    const h = String(handle || '').replace(/^@/, '').trim();
+    const found = findByHandle(h);
+    if (!found) { socket.emit('action_error', 'Не найдено: @' + h); return; }
+    if (found.kind === 'user') {
+      const acc = found.acc;
+      if (key(acc.username) === key(username)) {
+        const fav = ensureFav(username);
+        socket.emit('conversation_upsert', convForClient(fav, username));
+        socket.emit('history', { conversationId: fav.id, messages: fav.messages.slice(-300) });
+        return;
+      }
+      socket.emit('open_dm_proxy');
+      if (isBlocked(username, acc.username)) { socket.emit('action_error', 'Пользователь заблокирован'); return; }
+      const conv = getOrCreateDM(username, acc.username);
+      socket.emit('conversation_upsert', convForClient(conv, username));
+      socket.emit('history', { conversationId: conv.id, messages: conv.messages.slice(-300) });
+      return;
+    }
+    const conv = found.conv;
+    if (!conv.participants.some((p) => key(p) === key(username))) {
+      conv.participants.push(username);
+      if (conv.type === 'group') sysMessage(conv, `${displayOf(username)} присоединился(ась) по ссылке`);
+      else persist();
+      broadcastConv(conv);
+    }
+    socket.emit('conversation_upsert', convForClient(conv, username));
+    socket.emit('history', { conversationId: conv.id, messages: conv.messages.slice(-300) });
+  });
+
   socket.on('disconnect', () => {
     const username = usersBySocket.get(socket.id);
     if (username) {
@@ -1529,6 +1877,8 @@ io.on('connection', (socket) => {
     console.log('❌ Отключился:', socket.id);
   });
 });
+
+ensureSystemBots();
 
 const PORT = process.env.PORT || 10000;
 server.listen(PORT, '0.0.0.0', () => {

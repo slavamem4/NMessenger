@@ -161,7 +161,7 @@ img{display:block}
 .chat-item.active .pin-ic{color:rgba(255,255,255,.75)}
 .chat-item .mute-ic{width:15px;height:15px;color:var(--text-3)}
 .list-empty{padding:40px 20px;text-align:center;color:var(--text-2);font-size:14px;line-height:1.5}
-.list-empty .ic{width:44px;height:44px;margin:0 auto 10px;color:var(--text-3)}
+.list-empty .ic{display:block;width:44px;height:44px;margin:0 auto 10px;color:var(--text-3)}
 .list-title{padding:14px 20px 6px;font-size:13px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.4px}
 .sr-msg .sub{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .sr-msg .sub mark,.b-text mark{background:rgba(245,166,35,.45);color:inherit;border-radius:3px}
@@ -289,7 +289,7 @@ img{display:block}
 .dropzone{position:absolute;inset:0;z-index:20;background:rgba(47,124,246,.15);border:3px dashed var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:var(--accent);pointer-events:none;backdrop-filter:blur(2px)}
 
 /* composer */
-.composer-wrap{max-width:792px;width:100%;margin:0 auto;padding:0 16px 12px;flex-shrink:0}
+.composer-wrap{max-width:792px;width:100%;margin:0 auto;padding:0 16px 12px;flex-shrink:0;position:relative}
 .composer-bar{display:flex;align-items:center;gap:10px;background:var(--bg-3);border-radius:16px 16px 0 0;padding:8px 12px;border:1px solid var(--border);border-bottom:0;margin-bottom:-1px}
 .composer-bar .ic{color:var(--accent);width:22px;height:22px}
 .composer-bar .cb-body{flex:1;min-width:0;border-left:2px solid var(--accent);padding-left:10px;font-size:13px;line-height:1.3}
@@ -297,7 +297,7 @@ img{display:block}
 .composer-bar .cb-text{color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .composer-bar img{width:36px;height:36px;border-radius:6px;object-fit:cover}
 .composer{display:flex;align-items:flex-end;gap:2px;background:var(--bg-3);border-radius:22px;padding:5px 6px 5px 6px;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,.12)}
-.composer-bar + .composer{border-top-left-radius:0;border-top-right-radius:0}
+.composer-bar:not(.hidden) + .composer{border-top-left-radius:0;border-top-right-radius:0}
 .composer textarea{flex:1;background:none;border:0;outline:0;resize:none;max-height:200px;padding:10px 6px;line-height:1.4;color:var(--text);min-width:0;font-size:15px}
 .composer textarea::placeholder{color:var(--text-3)}
 .composer .icon-btn{width:42px;height:42px}
@@ -418,7 +418,17 @@ img{display:block}
 .row-item .rs{font-size:12.5px;color:var(--text-2);margin-top:2px;line-height:1.4}
 .row-item select{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:7px 10px;outline:0;color:var(--text)}
 .row-item .avatar{width:44px;height:44px;font-size:16px}
-.row-item input[type=range]{width:140px;accent-color:var(--accent)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:160px;height:24px;background:transparent;cursor:pointer;outline:0;--pct:50%}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--accent) var(--pct),var(--border) var(--pct))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid var(--accent);margin-top:-7px;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .1s}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.15)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--border)}
+input[type=range]::-moz-range-progress{height:4px;border-radius:2px;background:var(--accent)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--accent)}
+select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b93a7' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 10px center;background-size:15px;padding-right:34px!important;color-scheme:dark;cursor:pointer}
+body[data-theme=light] select{color-scheme:light}
+select option{background:var(--surface);color:var(--text)}
+select:focus{border-color:var(--accent)!important}
 .theme-cards{display:flex;gap:10px;margin-top:6px}
 .theme-card{flex:1;border-radius:14px;border:2px solid var(--border);padding:8px;cursor:pointer;text-align:center;font-size:13px;font-weight:500;transition:border-color .15s}
 .theme-card.active{border-color:var(--accent)}
@@ -486,6 +496,39 @@ img{display:block}
 .call.lk .call-center{position:absolute;top:58px;left:0;right:0;bottom:auto;flex:none;padding:4px;opacity:1!important;pointer-events:none;gap:4px}
 .call.lk .call-avatar,.call.lk .call-name{display:none}
 .call.lk .call-grid{inset:96px 0 130px}
+.call.lk .call-controls{position:absolute;left:0;right:0;bottom:0}
+.call-settings{position:absolute;left:50%;bottom:140px;transform:translateX(-50%);width:min(400px,calc(100% - 24px));background:rgba(20,24,36,.97);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:12px 16px 16px;z-index:6;box-shadow:0 20px 60px rgba(0,0,0,.5);color:#fff;max-height:calc(100% - 200px);overflow:auto}
+.call-settings .cs-head{display:flex;align-items:center;justify-content:space-between;font-weight:600;margin-bottom:2px}
+.call-settings .icon-btn{color:#fff}
+.dev-form h5{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-2);margin:12px 0 6px;font-weight:600}
+.call-settings .dev-form h5{color:rgba(255,255,255,.55)}
+.dev-form select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 10px;color:var(--text);outline:0}
+.call-settings .dev-form select{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#fff}
+.dev-form .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dev-form .hint{display:block;font-size:12px;color:var(--text-3);margin-top:6px}
+.qr-box{display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px 0}
+.qr-box .qr{background:#fff;padding:12px;border-radius:16px;line-height:0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.qr-box .qr svg{width:210px;height:210px;display:block}
+.qr-box .qr .spinner{margin:95px}
+.qr-pane{padding:4px 0 6px}
+.scan-box{position:relative;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:1;max-height:340px;margin:0 auto}
+.scan-box video{width:100%;height:100%;object-fit:cover;display:block}
+.scan-box .frame{position:absolute;inset:14%;border:3px solid rgba(255,255,255,.85);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.cmd-pop{position:absolute;left:16px;right:16px;bottom:calc(100% - 6px);background:var(--bg-3);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);max-height:280px;overflow:auto;z-index:20;padding:4px 0}
+.cmd-item{display:flex;gap:12px;align-items:center;padding:9px 14px;cursor:pointer;font-size:14px}
+.cmd-item:hover{background:var(--surface-hover)}
+.cmd-item b{color:var(--accent);min-width:104px;font-weight:600}
+.cmd-item span{color:var(--text-2)}
+.b-text a.cmdlink{color:var(--accent);text-decoration:none;cursor:pointer;font-weight:500}
+.b-text a.cmdlink:hover{text-decoration:underline}
+.ip-title{display:flex;align-items:center;justify-content:space-between}
+.icon-btn.mini{width:30px;height:30px}
+.icon-btn.mini .ic{width:16px;height:16px}
+.ip-row .icon-btn.mini{margin-left:auto;flex-shrink:0;color:var(--text-3)}
+.ip-row .icon-btn.mini:hover{color:var(--text)}
+.bf-start{display:flex;flex-direction:column;align-items:center;gap:14px;margin:auto;text-align:center;color:var(--text-2);padding:20px}
+.bf-start .avatar{width:84px;height:84px;font-size:30px}
+.auth-alt{margin-top:14px;font-size:13px;color:var(--text-2)}
 .call.has-video .call-center{opacity:0;pointer-events:none}
 .call.has-video.show-ui .call-center{opacity:1}
 .call-top{position:relative;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;z-index:2}
@@ -664,17 +707,23 @@ img{display:block}
     <div class="tabs" id="authTabs">
       <button data-tab="login" class="active">Вход</button>
       <button data-tab="register">Регистрация</button>
+      <button data-tab="qr">QR-код</button>
+    </div>
+    <div id="qrPane" class="hidden qr-pane">
+      <div class="qr-box"><div class="qr" id="qrLoginCode"><span class="spinner"></span></div>
+      <p class="md-text" style="text-align:center;line-height:1.5">Откройте NMessenger на устройстве, где вы уже вошли:<br><b>Меню → Сканировать QR-код</b> — или просто наведите камеру телефона на код</p>
+      <div class="md-text" id="qrLoginStatus" style="font-size:12px"></div></div>
     </div>
     <form id="loginForm" autocomplete="on">
       <div class="field"><label>Логин</label><input name="username" placeholder="например, ivan" autocomplete="username" required maxlength="24"></div>
-      <div class="field"><label>Пароль</label><div class="pw-wrap"><input name="password" type="password" placeholder="••••••••" autocomplete="current-password" required><button type="button" class="icon-btn pw-toggle"><svg class="ic sm"><use href="#i-eye"/></svg></button></div></div>
+      <div class="field"><label>Пароль</label><div class="pw-wrap"><input name="password" type="password" placeholder="••••••••" autocomplete="current-password" required maxlength="72"><button type="button" class="icon-btn pw-toggle"><svg class="ic sm"><use href="#i-eye"/></svg></button></div></div>
       <div class="auth-error" id="authError"></div>
       <button class="btn block" type="submit" id="loginBtn">Войти</button>
     </form>
     <form id="registerForm" class="hidden" autocomplete="on">
       <div class="field"><label>Имя</label><input name="displayName" placeholder="Как вас называть" maxlength="32" autocomplete="name"></div>
       <div class="field"><label>Логин</label><input name="username" placeholder="латиница, цифры, . _ -" autocomplete="username" required maxlength="24"><span class="hint">2–24 символа. По нему вас найдут: @логин</span></div>
-      <div class="field"><label>Пароль</label><div class="pw-wrap"><input name="password" type="password" placeholder="минимум 6 символов" autocomplete="new-password" required minlength="6"><button type="button" class="icon-btn pw-toggle"><svg class="ic sm"><use href="#i-eye"/></svg></button></div></div>
+      <div class="field"><label>Пароль</label><div class="pw-wrap"><input name="password" type="password" placeholder="минимум 6 символов" autocomplete="new-password" required minlength="6" maxlength="72"><button type="button" class="icon-btn pw-toggle"><svg class="ic sm"><use href="#i-eye"/></svg></button></div></div>
       <div class="auth-error" id="regError"></div>
       <button class="btn block" type="submit" id="regBtn">Создать аккаунт</button>
     </form>
@@ -689,7 +738,7 @@ img{display:block}
       <button class="icon-btn" id="btnMenu" title="Меню"><svg class="ic"><use href="#i-menu"/></svg></button>
       <div class="search-box">
         <svg class="ic"><use href="#i-search"/></svg>
-        <input id="searchInput" placeholder="Поиск" autocomplete="off">
+        <input id="searchInput" placeholder="Поиск" autocomplete="off" maxlength="64">
         <button class="icon-btn hidden" id="searchClear"><svg class="ic sm"><use href="#i-x"/></svg></button>
       </div>
     </header>
@@ -725,7 +774,7 @@ img{display:block}
         </div>
       </header>
       <div class="chat-search hidden" id="chatSearch">
-        <input id="chatSearchInput" placeholder="Поиск по сообщениям" autocomplete="off">
+        <input id="chatSearchInput" placeholder="Поиск по сообщениям" autocomplete="off" maxlength="200">
         <span class="count" id="chatSearchCount"></span>
         <button class="icon-btn" id="csPrev"><svg class="ic sm"><use href="#i-chev-u"/></svg></button>
         <button class="icon-btn" id="csNext"><svg class="ic sm"><use href="#i-chev-d"/></svg></button>
@@ -746,10 +795,12 @@ img{display:block}
           <textarea id="input" rows="1" placeholder="Сообщение" maxlength="4000"></textarea>
           <div class="rec-bar hidden" id="recBar"><span class="rec-dot"></span><span class="rec-time" id="recTime">0:00</span><span class="rec-hint">Запись… нажмите ✕ для отмены</span><button class="icon-btn" id="recCancel"><svg class="ic"><use href="#i-trash"/></svg></button></div>
           <span class="char-count hidden" id="charCount"></span>
+          <button class="icon-btn hidden" id="btnCmds" title="Команды бота"><svg class="ic"><use href="#i-bot"/></svg></button>
           <button class="icon-btn" id="btnEmoji" title="Эмодзи"><svg class="ic"><use href="#i-smile"/></svg></button>
           <button class="send mic" id="btnSend" title="Отправить"><svg class="ic"><use href="#i-mic"/></svg></button>
         </div>
         <div class="composer-notice hidden" id="composerNotice"></div>
+        <div class="cmd-pop hidden" id="cmdPop"></div>
       </div>
     </div>
   </main>
@@ -803,8 +854,10 @@ img{display:block}
     <div class="cc"><button class="cc-btn" id="ccMic" title="Микрофон"><svg class="ic"><use href="#i-mic"/></svg></button><span class="cc-lbl">Микрофон</span></div>
     <div class="cc"><button class="cc-btn" id="ccCam" title="Камера"><svg class="ic"><use href="#i-video"/></svg></button><span class="cc-lbl">Камера</span></div>
     <div class="cc"><button class="cc-btn" id="ccScreen" title="Демонстрация экрана"><svg class="ic"><use href="#i-screen"/></svg></button><span class="cc-lbl">Экран</span></div>
+    <div class="cc"><button class="cc-btn" id="ccSettings" title="Устройства и качество"><svg class="ic"><use href="#i-settings"/></svg></button><span class="cc-lbl">Устройства</span></div>
     <div class="cc"><button class="cc-btn end" id="ccEnd" title="Завершить"><svg class="ic"><use href="#i-phone-off"/></svg></button><span class="cc-lbl">Завершить</span></div>
   </div>
+  <div class="call-settings hidden" id="callSettings"></div>
   <div id="lkAudio" class="hidden"></div>
 </div>
 <div class="incoming hidden" id="incoming">
@@ -824,6 +877,7 @@ img{display:block}
 <script src="/socket.io/socket.io.js"></script>
 <script>
 'use strict';
+var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],f={},c=function(t,r){o=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(i=4*e+17),l(0,0),l(i-7,0),l(0,i-7),s(),h(),d(t,r),e>=7&&v(t),null==a&&(a=p(e,n,u)),w(a,r)},l=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||i<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||i<=r+n||(o[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},h=function(){for(var t=8;t<i-8;t+=1)null==o[t][6]&&(o[t][6]=t%2==0);for(var r=8;r<i-8;r+=1)null==o[6][r]&&(o[6][r]=r%2==0)},s=function(){for(var t=B.getPatternPosition(e),r=0;r<t.length;r+=1)for(var n=0;n<t.length;n+=1){var i=t[r],a=t[n];if(null==o[i][a])for(var u=-2;u<=2;u+=1)for(var f=-2;f<=2;f+=1)o[i+u][a+f]=-2==u||2==u||-2==f||2==f||0==u&&0==f}},v=function(t){for(var r=B.getBCHTypeNumber(e),n=0;n<18;n+=1){var a=!t&&1==(r>>n&1);o[Math.floor(n/3)][n%3+i-8-3]=a}for(n=0;n<18;n+=1){a=!t&&1==(r>>n&1);o[n%3+i-8-3][Math.floor(n/3)]=a}},d=function(t,r){for(var e=n<<3|r,a=B.getBCHTypeInfo(e),u=0;u<15;u+=1){var f=!t&&1==(a>>u&1);u<6?o[u][8]=f:u<8?o[u+1][8]=f:o[i-15+u][8]=f}for(u=0;u<15;u+=1){f=!t&&1==(a>>u&1);u<8?o[8][i-u-1]=f:u<9?o[8][15-u-1+1]=f:o[8][15-u-1]=f}o[i-8][8]=!t},w=function(t,r){for(var e=-1,n=i-1,a=7,u=0,f=B.getMaskFunction(r),c=i-1;c>0;c-=2)for(6==c&&(c-=1);;){for(var g=0;g<2;g+=1)if(null==o[n][c-g]){var l=!1;u<t.length&&(l=1==(t[u]>>>a&1)),f(n,c-g)&&(l=!l),o[n][c-g]=l,-1==(a-=1)&&(u+=1,a=7)}if((n+=e)<0||i<=n){n-=e,e=-e;break}}},p=function(t,r,e){for(var n=A.getRSBlocks(t,r),o=b(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=k(i[u],l.getLength()-1).mod(l);for(a[u]=new Array(l.getLength()-1),g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=s>=0?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};f.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=M(t);break;case"Alphanumeric":e=x(t);break;case"Byte":e=m(t);break;case"Kanji":e=L(t);break;default:throw"mode:"+r}u.push(e),a=null},f.isDark=function(t,r){if(t<0||i<=t||r<0||i<=r)throw t+","+r;return o[t][r]},f.getModuleCount=function(){return i},f.make=function(){if(e<1){for(var t=1;t<40;t++){for(var r=A.getRSBlocks(t,n),o=b(),i=0;i<u.length;i++){var a=u[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var g=0;for(i=0;i<r.length;i++)g+=r[i].dataCount;if(o.getLengthInBits()<=8*g)break}e=t}c(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){c(!0,e);var n=B.getLostPoint(f);(0==e||t>n)&&(t=n,r=e)}return r}())},f.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<f.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<f.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=f.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>"},f.createSvgTag=function(t,r,e,n){var o={};"object"==typeof arguments[0]&&(t=(o=arguments[0]).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,c,g=f.getModuleCount()*t+2*r,l="";for(c="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",l+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',l+=o.scalable?"":' width="'+g+'px" height="'+g+'px"',l+=' viewBox="0 0 '+g+" "+g+'" ',l+=' preserveAspectRatio="xMinYMin meet"',l+=n.text||e.text?' role="img" aria-labelledby="'+y([n.id,e.id].join(" ").trim())+'"':"",l+=">",l+=n.text?'<title id="'+y(n.id)+'">'+y(n.text)+"</title>":"",l+=e.text?'<description id="'+y(e.id)+'">'+y(e.text)+"</description>":"",l+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',l+='<path d="',a=0;a<f.getModuleCount();a+=1)for(u=a*t+r,i=0;i<f.getModuleCount();i+=1)f.isDark(a,i)&&(l+="M"+(i*t+r)+","+u+c);return l+='" stroke="transparent" fill="black"/>',l+="</svg>"},f.createDataURL=function(t,r){t=t||2,r=void 0===r?4*t:r;var e=f.getModuleCount()*t+2*r,n=r,o=e-r;return I(e,e,function(r,e){if(n<=r&&r<o&&n<=e&&e<o){var i=Math.floor((r-n)/t),a=Math.floor((e-n)/t);return f.isDark(a,i)?0:1}return 1})},f.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=f.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=f.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=y(e),o+='"'),o+="/>"};var y=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return f.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*f.getModuleCount()+2*t,u=t,c=a-t,g={"██":"█","█ ":"▀"," █":"▄","  ":" "},l={"██":"▀","█ ":"▀"," █":" ","  ":" "},h="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<c&&u<=r&&r<c&&f.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<c&&u<=r+1&&r+1<c&&f.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",h+=t<1&&r+1>=c?l[i]:g[i];h+="\n"}return a%2&&t>0?h.substring(0,h.length-a-1)+Array(a+1).join("▀"):h.substring(0,h.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=f.getModuleCount()*t+2*r,u=r,c=a-r,g=Array(t+1).join("██"),l=Array(t+1).join("  "),h="",s="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),s="",n=0;n<a;n+=1)i=1,u<=n&&n<c&&u<=e&&e<c&&f.isDark(o,Math.floor((n-u)/t))&&(i=0),s+=i?g:l;for(o=0;o<t;o+=1)h+=s+"\n"}return h.substring(0,h.length-1)},f.renderTo2dContext=function(t,r){r=r||2;for(var e=f.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=f.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},f};t.stringToBytes=(t.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,t.createStringToBytes=function(t,r){var e=function(){for(var e=S(t),n=function(){var t=e.read();if(-1==t)throw"eof";return t},o=0,i={};;){var a=e.read();if(-1==a)break;var u=n(),f=n()<<8|n();i[String.fromCharCode(a<<8|u)]=f,o+=1}if(o!=r)throw o+" != "+r;return i}(),n="?".charCodeAt(0);return function(t){for(var r=[],o=0;o<t.length;o+=1){var i=t.charCodeAt(o);if(i<128)r.push(i);else{var a=e[t.charAt(o)];"number"==typeof a?(255&a)==a?r.push(a):(r.push(a>>>8),r.push(255&a)):r.push(n)}}return r}};var r,e,n,o,i,a=1,u=2,f=4,c=8,g={L:1,M:0,Q:3,H:2},l=0,h=1,s=2,v=3,d=4,w=5,p=6,y=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],e=1335,n=7973,i=function(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r},(o={}).getBCHTypeInfo=function(t){for(var r=t<<10;i(r)-i(e)>=0;)r^=e<<i(r)-i(e);return 21522^(t<<10|r)},o.getBCHTypeNumber=function(t){for(var r=t<<12;i(r)-i(n)>=0;)r^=n<<i(r)-i(n);return t<<12|r},o.getPatternPosition=function(t){return r[t-1]},o.getMaskFunction=function(t){switch(t){case l:return function(t,r){return(t+r)%2==0};case h:return function(t,r){return t%2==0};case s:return function(t,r){return r%3==0};case v:return function(t,r){return(t+r)%3==0};case d:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case w:return function(t,r){return t*r%2+t*r%3==0};case p:return function(t,r){return(t*r%2+t*r%3)%2==0};case y:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},o.getErrorCorrectPolynomial=function(t){for(var r=k([1],0),e=0;e<t;e+=1)r=r.multiply(k([1,C.gexp(e)],0));return r},o.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case f:case c:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case f:return 16;case c:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case f:return 16;case c:return 12;default:throw"mode:"+t}}},o.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);i>5&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},o),C=function(){for(var t=new Array(256),r=new Array(256),e=0;e<8;e+=1)t[e]=1<<e;for(e=8;e<256;e+=1)t[e]=t[e-4]^t[e-5]^t[e-6]^t[e-8];for(e=0;e<255;e+=1)r[t[e]]=e;var n={glog:function(t){if(t<1)throw"glog("+t+")";return r[t]},gexp:function(r){for(;r<0;)r+=255;for(;r>=256;)r-=255;return t[r]}};return n}();function k(t,r){if(void 0===t.length)throw t.length+"/"+r;var e=function(){for(var e=0;e<t.length&&0==t[e];)e+=1;for(var n=new Array(t.length-e+r),o=0;o<t.length-e;o+=1)n[o]=t[o+e];return n}(),n={getAt:function(t){return e[t]},getLength:function(){return e.length},multiply:function(t){for(var r=new Array(n.getLength()+t.getLength()-1),e=0;e<n.getLength();e+=1)for(var o=0;o<t.getLength();o+=1)r[e+o]^=C.gexp(C.glog(n.getAt(e))+C.glog(t.getAt(o)));return k(r,0)},mod:function(t){if(n.getLength()-t.getLength()<0)return n;for(var r=C.glog(n.getAt(0))-C.glog(t.getAt(0)),e=new Array(n.getLength()),o=0;o<n.getLength();o+=1)e[o]=n.getAt(o);for(o=0;o<t.getLength();o+=1)e[o]^=C.gexp(C.glog(t.getAt(o))+r);return k(e,0).mod(t)}};return n}var A=function(){var t=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],r=function(t,r){var e={};return e.totalCount=t,e.dataCount=r,e},e={};return e.getRSBlocks=function(e,n){var o=function(r,e){switch(e){case g.L:return t[4*(r-1)+0];case g.M:return t[4*(r-1)+1];case g.Q:return t[4*(r-1)+2];case g.H:return t[4*(r-1)+3];default:return}}(e,n);if(void 0===o)throw"bad rs block @ typeNumber:"+e+"/errorCorrectionLevel:"+n;for(var i=o.length/3,a=[],u=0;u<i;u+=1)for(var f=o[3*u+0],c=o[3*u+1],l=o[3*u+2],h=0;h<f;h+=1)a.push(r(c,l));return a},e}(),b=function(){var t=[],r=0,e={getBuffer:function(){return t},getAt:function(r){var e=Math.floor(r/8);return 1==(t[e]>>>7-r%8&1)},put:function(t,r){for(var n=0;n<r;n+=1)e.putBit(1==(t>>>r-n-1&1))},getLengthInBits:function(){return r},putBit:function(e){var n=Math.floor(r/8);t.length<=n&&t.push(0),e&&(t[n]|=128>>>r%8),r+=1}};return e},M=function(t){var r=a,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+2<r.length;)t.put(o(r.substring(n,n+3)),10),n+=3;n<r.length&&(r.length-n==1?t.put(o(r.substring(n,n+1)),4):r.length-n==2&&t.put(o(r.substring(n,n+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return n},x=function(t){var r=u,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+1<r.length;)t.put(45*o(r.charAt(n))+o(r.charAt(n+1)),11),n+=2;n<r.length&&t.put(o(r.charAt(n)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return n},m=function(r){var e=f,n=t.stringToBytes(r),o={getMode:function(){return e},getLength:function(t){return n.length},write:function(t){for(var r=0;r<n.length;r+=1)t.put(n[r],8)}};return o},L=function(r){var e=c,n=t.stringToBytesFuncs.SJIS;if(!n)throw"sjis not supported.";!function(){var t=n("友");if(2!=t.length||38726!=(t[0]<<8|t[1]))throw"sjis not supported."}();var o=n(r),i={getMode:function(){return e},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return i},D=function(){var t=[],r={writeByte:function(r){t.push(255&r)},writeShort:function(t){r.writeByte(t),r.writeByte(t>>>8)},writeBytes:function(t,e,n){e=e||0,n=n||t.length;for(var o=0;o<n;o+=1)r.writeByte(t[o+e])},writeString:function(t){for(var e=0;e<t.length;e+=1)r.writeByte(t.charCodeAt(e))},toByteArray:function(){return t},toString:function(){var r="";r+="[";for(var e=0;e<t.length;e+=1)e>0&&(r+=","),r+=t[e];return r+="]"}};return r},S=function(t){var r=t,e=0,n=0,o=0,i={read:function(){for(;o<8;){if(e>=r.length){if(0==o)return-1;throw"unexpected end of file./"+o}var t=r.charAt(e);if(e+=1,"="==t)return o=0,-1;t.match(/^\s$/)||(n=n<<6|a(t.charCodeAt(0)),o+=6)}var i=n>>>o-8&255;return o-=8,i}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return i},I=function(t,r,e){for(var n=function(t,r){var e=t,n=r,o=new Array(t*r),i={setPixel:function(t,r,n){o[r*e+t]=n},write:function(t){t.writeString("GIF87a"),t.writeShort(e),t.writeShort(n),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(e),t.writeShort(n),t.writeByte(0);var r=a(2);t.writeByte(2);for(var o=0;r.length-o>255;)t.writeByte(255),t.writeBytes(r,o,255),o+=255;t.writeByte(r.length-o),t.writeBytes(r,o,r.length-o),t.writeByte(0),t.writeString(";")}},a=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,i=u(),a=0;a<r;a+=1)i.add(String.fromCharCode(a));i.add(String.fromCharCode(r)),i.add(String.fromCharCode(e));var f,c,g,l=D(),h=(f=l,c=0,g=0,{write:function(t,r){if(t>>>r!=0)throw"length over";for(;c+r>=8;)f.writeByte(255&(t<<c|g)),r-=8-c,t>>>=8-c,g=0,c=0;g|=t<<c,c+=r},flush:function(){c>0&&f.writeByte(g)}});h.write(r,n);var s=0,v=String.fromCharCode(o[s]);for(s+=1;s<o.length;){var d=String.fromCharCode(o[s]);s+=1,i.contains(v+d)?v+=d:(h.write(i.indexOf(v),n),i.size()<4095&&(i.size()==1<<n&&(n+=1),i.add(v+d)),v=d)}return h.write(i.indexOf(v),n),h.write(e,n),h.flush(),l.toByteArray()},u=function(){var t={},r=0,e={add:function(n){if(e.contains(n))throw"dup key:"+n;t[n]=r,r+=1},size:function(){return r},indexOf:function(r){return t[r]},contains:function(r){return void 0!==t[r]}};return e};return i}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=D();n.write(a);for(var u=function(){var t=0,r=0,e=0,n="",o={},i=function(t){n+=String.fromCharCode(a(63&t))},a=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return o.writeByte=function(n){for(t=t<<8|255&n,r+=8,e+=1;r>=6;)i(t>>>r-6),r-=6},o.flush=function(){if(r>0&&(i(t<<6-r),t=0,r=0),e%3!=0)for(var o=3-e%3,a=0;a<o;a+=1)n+="="},o.toString=function(){return n},o}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return t}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||n>=57344?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}(function(){return qrcode});
 /* =====================================================================
    NMessenger — клиент. Один файл, без сборки.
    ===================================================================== */
@@ -948,7 +1002,7 @@ const S = {
   livekit: false, textMax: 4000, drafts: {}, search: '', chatSearch: null,
   connected: false, newBelow: 0, lastTypingSent: 0, focused: document.hasFocus(),
   e2e: { priv: null, pub: null, shared: new Map() }, ready: false,
-  useLK: localStorage.getItem('nm_uselk') === '1',
+  useLK: localStorage.getItem('nm_uselk') !== '0',
 };
 try { S.drafts = JSON.parse(localStorage.getItem('nm_drafts') || '{}') || {}; } catch { S.drafts = {}; }
 let socket = null;
@@ -1078,6 +1132,7 @@ const E2E = {
   },
 };
 async function prepareMsg(m) {
+  if (m.from && key(m.from) === 'botfather' && typeof m.text === 'string' && m.text.includes('{ORIGIN}')) m.text = m.text.split('{ORIGIN}').join(location.origin);
   if (m.type === 'secret' && !m.deleted && m.ciphertext) {
     const c = S.convs.get(m.conversationId);
     const peer = c ? peerOf(c) : null;
@@ -1098,6 +1153,8 @@ $('#authTabs').addEventListener('click', (e) => {
   $$('#authTabs button').forEach((x) => x.classList.toggle('active', x === b));
   $('#loginForm').classList.toggle('hidden', b.dataset.tab !== 'login');
   $('#registerForm').classList.toggle('hidden', b.dataset.tab !== 'register');
+  $('#qrPane').classList.toggle('hidden', b.dataset.tab !== 'qr');
+  if (b.dataset.tab === 'qr') QRLogin.start(); else QRLogin.stop();
   $('#authError').textContent = ''; $('#regError').textContent = '';
 });
 $$('.pw-toggle').forEach((b) => b.addEventListener('click', () => { const i = b.parentElement.querySelector('input'); i.type = i.type === 'password' ? 'text' : 'password'; b.innerHTML = icon(i.type === 'password' ? 'eye' : 'eye-off', 'sm'); }));
@@ -1111,7 +1168,7 @@ $('#registerForm').addEventListener('submit', async (e) => {
   try { const j = await api('/api/register', { username: f.username.value.trim(), password: f.password.value, displayName: f.displayName.value.trim() }); onLoggedIn(j); }
   catch (err) { $('#regError').textContent = err.message; } finally { btn.disabled = false; }
 });
-function onLoggedIn(j) { S.token = j.token; localStorage.setItem('nm_token', j.token); $('#auth').classList.add('hidden'); startApp(); }
+function onLoggedIn(j) { QRLogin.stop(); S.token = j.token; localStorage.setItem('nm_token', j.token); $('#auth').classList.add('hidden'); startApp(); }
 function startApp() {
   $('#app').classList.remove('hidden');
   $('#chatList').innerHTML = '<div class="list-empty"><span class="spinner"></span></div>';
@@ -1164,7 +1221,9 @@ async function onAuthOk(d) {
   await E2E.init().catch((e) => console.warn('E2E init', e));
   if (S.current) { if (S.convs.has(S.current)) { socket.emit('get_history', S.current); renderHeader(); renderComposerState(); } else closeChat(); }
   const p = new URLSearchParams(location.search); const start = p.get('start');
-  if (start && !wasReady) { history.replaceState({}, '', location.pathname); openHandle(start); }
+  const qrl = p.get('qrlogin');
+  if (start && !wasReady) { history.replaceState({}, '', location.pathname); joinHandle(start); }
+  if (qrl && !wasReady) { history.replaceState({}, '', location.pathname); approveQrLogin(qrl); }
   if (!wasReady && 'Notification' in window && Notification.permission === 'default') {
     const ask = () => { Notification.requestPermission().catch(() => { }); window.removeEventListener('click', ask); };
     window.addEventListener('click', ask);
@@ -1173,6 +1232,7 @@ async function onAuthOk(d) {
 async function onHistory({ conversationId, messages }) {
   await Promise.all(messages.map(prepareMsg));
   S.msgs.set(conversationId, messages);
+  if (S.bfPendingCmd && S.pendingOpen) { const cmd = S.bfPendingCmd; S.bfPendingCmd = null; setTimeout(() => { if (isBotFatherChat()) { input.value = cmd; sendText(); } }, 300); }
   if (S.pendingOpen) { if (takePending()) { selectConv(conversationId, { skipFetch: true }); return; } }
   if (S.current === conversationId) { renderMessages(); markReadSoon(); }
 }
@@ -1368,6 +1428,7 @@ function openDM(username) {
 function openSecret(username) { const id = secretIdOf(S.me.username, username); if (S.convs.has(id)) { selectConv(id); return; } setPending(); socket.emit('open_secret', username); }
 function openFav() { const id = favIdOf(); if (S.convs.has(id)) { selectConv(id); return; } setPending(); socket.emit('open_fav'); }
 function openHandle(h) { h = String(h || '').replace(/^@/, '').trim(); if (!h) return; setPending(); socket.emit('open_handle', h); }
+function joinHandle(h) { h = String(h || '').replace(/^@/, '').trim(); if (!h) return; setPending(); socket.emit('join_handle', h); }
 function selectConv(id, opts = {}) {
   const c = S.convs.get(id); if (!c) return;
   if (S.current && S.current !== id) saveDraft();
@@ -1475,7 +1536,7 @@ function msgHTML(m, first, last) {
     } else if (m.type === 'secret') {
       const pt = m._plain;
       body += typeof pt === 'string' ? `<div class="b-text ${isEmojiOnly(pt) ? 'big' : ''}">${renderText(pt, q)}${meta}</div>` : `<div class="b-text dim">${icon('lock', 'sm')} ${pt === false ? 'Не удалось расшифровать (ключ другого устройства)' : 'Расшифровка…'}${meta}</div>`;
-    } else body += `<div class="b-text ${isEmojiOnly(m.text) ? 'big' : ''}">${renderText(m.text, q)}${meta}</div>`;
+    } else body += `<div class="b-text ${isEmojiOnly(m.text) ? 'big' : ''}">${userOf(m.from)?.isBot ? linkCmds(renderText(m.text, q)) : renderText(m.text, q)}${meta}</div>`;
   }
   if (imgOnly) body += `<span class="b-meta over" title="${fmtFull(m.ts)}">${metaInner}</span>`;
   const showName = isGroup && !out && first && m.type !== 'call';
@@ -1486,6 +1547,7 @@ function msgHTML(m, first, last) {
 function renderMessages() {
   const c = cur(); if (!c) return;
   const arr = S.msgs.get(c.id) || [];
+  if (!arr.length && isBotFatherChat()) { msgsEl.innerHTML = `<div class="bf-start">${avatarHTML({ username: 'BotFather', name: 'BotFather', isBot: true }, 84)}<div><div style="font-size:18px;font-weight:600;color:var(--text)">BotFather</div><div style="margin-top:6px;line-height:1.5">Создаёт ботов и выдаёт им API-ключи.<br>Нажмите «Начать», чтобы увидеть команды.</div></div><button class="btn" id="bfStart">Начать</button></div>`; return; }
   if (!arr.length) { msgsEl.innerHTML = `<div class="list-empty" style="margin:auto">${c.type === 'secret' ? icon('lock') : icon('chat')}${c.type === 'secret' ? 'Секретный чат. Сообщения шифруются на устройстве<br>и не читаются сервером.' : c.type === 'fav' ? 'Здесь можно хранить заметки, ссылки и файлы' : 'Нет сообщений. Напишите первым!'}</div>`; return; }
   let h = '', prevTs = 0;
   arr.forEach((m, i) => { if (!sameDay(m.ts, prevTs)) h += `<div class="date-sep" data-ts="${m.ts}">${fmtDateSep(m.ts)}</div>`; prevTs = m.ts; const { first, last } = groupFlags(arr, i); h += msgHTML(m, first, last); });
@@ -1574,7 +1636,7 @@ function csShow() { const cs = S.chatSearch; $$('.msg.hl', msgsEl).forEach((n) =
 const input = $('#input');
 function autoResize() { input.style.height = 'auto'; input.style.height = Math.min(200, input.scrollHeight) + 'px'; }
 function updateSendBtn() { const has = input.value.trim().length > 0 || !!S.editing; const b = $('#btnSend'); if (Rec.active) return; b.classList.toggle('mic', !has); b.innerHTML = icon(has ? 'send' : 'mic'); b.title = has ? 'Отправить' : 'Голосовое сообщение'; const cc = $('#charCount'); const n = input.value.length; cc.classList.toggle('hidden', n < S.textMax - 300); cc.classList.toggle('over', n > S.textMax); cc.textContent = `${n}/${S.textMax}`; }
-input.addEventListener('input', () => { autoResize(); updateSendBtn(); const now = Date.now(); if (now - S.lastTypingSent > 2000 && input.value && S.current) { S.lastTypingSent = now; socket.emit('typing', S.current); } });
+input.addEventListener('input', () => { autoResize(); updateSendBtn(); if (isBotFatherChat() && input.value.startsWith('/') && !/\s/.test(input.value)) renderCmdPop(input.value); else $('#cmdPop').classList.add('hidden'); const now = Date.now(); if (now - S.lastTypingSent > 2000 && input.value && S.current) { S.lastTypingSent = now; socket.emit('typing', S.current); } });
 input.addEventListener('keydown', (e) => {
   const enterToSend = S.settings.enterToSend !== false;
   if (e.key === 'Enter' && !e.isComposing) {
@@ -1615,8 +1677,27 @@ function renderComposerState() {
   else if (c.type === 'secret' && !S.pubKeys[key(peerOf(c))]) msg = `${icon('lock', 'sm')} Собеседник ещё не заходил в NMessenger — ключ шифрования появится после его входа`;
   notice.innerHTML = msg; notice.classList.toggle('hidden', !msg); comp.classList.toggle('hidden', !!msg);
   $('#btnAttach').classList.toggle('hidden', c.type === 'secret');
-  input.placeholder = c.type === 'channel' ? 'Опубликовать' : c.type === 'secret' ? 'Секретное сообщение' : 'Сообщение';
+  $('#btnCmds').classList.toggle('hidden', !isBotFatherChat());
+  if (!isBotFatherChat()) $('#cmdPop').classList.add('hidden');
+  input.placeholder = c.type === 'channel' ? 'Опубликовать' : c.type === 'secret' ? 'Секретное сообщение' : isBotFatherChat() ? 'Команда, например /newbot' : 'Сообщение';
 }
+/* ---- BotFather: команды ---- */
+const BF_CMDS = [['/newbot', 'создать нового бота'], ['/mybots', 'мои боты'], ['/token', 'показать API-ключ'], ['/revoke', 'выпустить новый ключ'], ['/setname', 'изменить имя бота'], ['/setabout', 'изменить описание'], ['/setuserpic', 'сменить аватар'], ['/deletebot', 'удалить бота'], ['/help', 'справка'], ['/cancel', 'отменить действие']];
+function linkCmds(html) { return html.replace(/(^|\s)(\/[a-z][a-z0-9_]{1,31})(?=$|[\s.,;:!?)]|<)/g, '$1<a class="cmdlink" data-cmd="$2">$2</a>'); }
+function isBotFatherChat() { const c = cur(); return !!c && c.type === 'dm' && key(peerOf(c) || '') === 'botfather'; }
+function renderCmdPop(filter = '') {
+  const pop = $('#cmdPop'); if (!isBotFatherChat()) { pop.classList.add('hidden'); return; }
+  const list = BF_CMDS.filter(([c]) => c.startsWith(filter.toLowerCase()));
+  if (!list.length) { pop.classList.add('hidden'); return; }
+  pop.innerHTML = list.map(([c, d]) => `<div class="cmd-item" data-cmd="${c}"><b>${c}</b><span>${d}</span></div>`).join(''); pop.classList.remove('hidden');
+}
+$('#cmdPop').addEventListener('click', (e) => {
+  const it = e.target.closest('[data-cmd]'); if (!it) return; const cmd = it.dataset.cmd; $('#cmdPop').classList.add('hidden');
+  if (['/newbot', '/mybots', '/help', '/cancel'].includes(cmd)) { input.value = cmd; sendText(); }
+  else { input.value = cmd + ' '; input.focus(); autoResize(); updateSendBtn(); }
+});
+$('#btnCmds').addEventListener('click', () => { const pop = $('#cmdPop'); if (pop.classList.contains('hidden')) renderCmdPop(''); else pop.classList.add('hidden'); });
+msgsEl.addEventListener('click', (e) => { if (e.target.closest('#bfStart')) { input.value = '/start'; sendText(); return; } const cl = e.target.closest('a.cmdlink'); if (cl) { e.preventDefault(); const cmd = cl.dataset.cmd; if (['/newbot', '/mybots', '/help', '/cancel', '/start'].includes(cmd)) { input.value = cmd; sendText(); } else { input.value = cmd + ' '; input.focus(); autoResize(); updateSendBtn(); } } });
 $('#composerNotice').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; const c = cur(); if (b.dataset.n === 'mute') socket.emit('set_conv_flag', { id: c.id, mute: !c.muted }); if (b.dataset.n === 'unblock') socket.emit('unblock_user', peerOf(c)); });
 
 /* attachments */
@@ -1641,7 +1722,7 @@ async function sendFileMsg(file, type, caption) {
   const c = cur(); if (!c) return;
   try {
     if (type === 'image') file = await compressImage(file);
-    if (file.size > 10 * 1024 * 1024) { toast(`«${file.name}» больше 10 МБ`, 'err'); return; }
+    if (file.size > 10 * 1024 * 1024) { toast(`«${file.name}» — ${fmtSize(file.size)}. Максимальный размер файла — 10 МБ`, 'err', { ms: 5000 }); return; }
     const bar = $('#uploadBar'); bar.classList.remove('hidden'); $('#uploadName').textContent = file.name; $('#uploadProg').style.width = '0%'; $('#uploadPct').textContent = '0%';
     const j = await upload(file, file.name, (p) => { $('#uploadProg').style.width = Math.round(p * 100) + '%'; $('#uploadPct').textContent = Math.round(p * 100) + '%'; });
     bar.classList.add('hidden');
@@ -1687,11 +1768,13 @@ function showCtx(html, x, y) {
   ctxEl.style.left = clamp(x, 8, window.innerWidth - w - 8) + 'px'; ctxEl.style.top = clamp(y, 8, window.innerHeight - h - 8) + 'px';
 }
 function hideCtx() { ctxEl.classList.add('hidden'); ctxEl.innerHTML = ''; ctxEl.onclick = null; }
-function closeAllPopups() { hideCtx(); $('#emojiPicker').classList.add('hidden'); $('#newMenu').classList.add('hidden'); }
+function closeAllPopups() { hideCtx(); $('#emojiPicker').classList.add('hidden'); $('#newMenu').classList.add('hidden'); $('#cmdPop').classList.add('hidden'); $('#callSettings').classList.add('hidden'); }
 document.addEventListener('pointerdown', (e) => {
   if (!ctxEl.contains(e.target)) hideCtx();
   if (!$('#emojiPicker').contains(e.target) && !e.target.closest('#btnEmoji')) $('#emojiPicker').classList.add('hidden');
   if (!$('#newMenu').contains(e.target) && !e.target.closest('#btnNew')) $('#newMenu').classList.add('hidden');
+  if (!$('#cmdPop').contains(e.target) && !e.target.closest('#btnCmds') && e.target !== input) $('#cmdPop').classList.add('hidden');
+  if (!$('#callSettings').contains(e.target) && !e.target.closest('#ccSettings')) $('#callSettings').classList.add('hidden');
 });
 window.addEventListener('resize', closeAllPopups);
 const QUICK = ['👍', '❤️', '🔥', '😂', '😮', '😢', '🙏', '👎'];
@@ -1735,6 +1818,7 @@ function chatContextMenu(id, x, y, fromHeader = false) {
   if (c.type !== 'fav') { items.push(['pin', 'pin', c.pinned ? 'Открепить' : 'Закрепить']); items.push(['mute', c.muted ? 'bell' : 'bell-off', c.muted ? 'Включить уведомления' : 'Без звука']); }
   if (c.unread) items.push(['read', 'check2', 'Отметить прочитанным']);
   if (S.folders.length) items.push(['folder', 'folder', 'Добавить в папку…']);
+  if (c.type === 'dm' || ((c.type === 'group' || c.type === 'channel') && c.handle)) items.push(['qr', 'grid', 'Ссылка и QR-код']);
   items.push(['copyid', 'hash', 'Скопировать ID чата']);
   if ((c.type === 'dm') && !userOf(peerOf(c))?.isBot) items.push(['secret', 'lock', 'Секретный чат']);
   if (c.type === 'dm' || c.type === 'secret') items.push([S.blocked.has(key(peerOf(c))) ? 'unblock' : 'block', 'block', S.blocked.has(key(peerOf(c))) ? 'Разблокировать' : 'Заблокировать', 'danger']);
@@ -1751,6 +1835,7 @@ function chatContextMenu(id, x, y, fromHeader = false) {
       case 'read': socket.emit('mark_read', id); break;
       case 'folder': openFolderPick(id); break;
       case 'copyid': copyText(id); break;
+      case 'qr': openInviteModal(c); break;
       case 'secret': openSecret(peerOf(c)); break;
       case 'block': confirmModal('Заблокировать пользователя?', 'Он не сможет писать и звонить вам.', 'Заблокировать').then((ok) => ok && socket.emit('block_user', peerOf(c))); break;
       case 'unblock': socket.emit('unblock_user', peerOf(c)); break;
@@ -1840,7 +1925,7 @@ function userPickItem(u, checked = null) { return `<div class="pick-item" data-u
 function usersSorted(filter = () => true) { return [...S.users.values()].filter((u) => !isMe(u.username) && filter(u)).sort((a, b) => (b.online - a.online) || a.displayName.localeCompare(b.displayName, 'ru')); }
 function openNewChat() {
   const render = (q = '') => usersSorted((u) => !q || key(u.username).includes(q) || key(u.displayName).includes(q)).map((u) => userPickItem(u)).join('') || `<div class="list-empty">Никого не найдено</div>`;
-  Modal.open(`${mdHead('Новое сообщение')}<div class="md-body"><div class="field"><input id="ncQ" placeholder="Поиск по имени или @логину"></div><div class="pick-list" id="ncList">${render()}</div></div>`);
+  Modal.open(`${mdHead('Новое сообщение')}<div class="md-body"><div class="field"><input id="ncQ" maxlength="64" placeholder="Поиск по имени или @логину"></div><div class="pick-list" id="ncList">${render()}</div></div>`);
   $('#ncQ').oninput = (e) => { $('#ncList').innerHTML = render(key(e.target.value).replace(/^@/, '')); };
   $('#ncList').onclick = (e) => { const it = e.target.closest('[data-u]'); if (it) { Modal.close(); openDM(it.dataset.u); } };
 }
@@ -1860,18 +1945,18 @@ function openNewGroup() {
   $('#ngQ').oninput = upd;
   $('#ngList').onclick = (e) => { const it = e.target.closest('[data-u]'); if (!it) return; const u = it.dataset.u; if (sel.has(u)) sel.delete(u); else sel.add(u); upd(); };
   $('#ngChips').onclick = (e) => { const b = e.target.closest('[data-rm]'); if (b) { sel.delete(b.dataset.rm); upd(); } };
-  $('#ngCreate').onclick = () => { S.pendingOpen = true; socket.emit('create_group', { name: $('#ngName').value.trim(), handle: $('#ngHandle').value.trim() || $('#ngHandle').placeholder, members: [...sel] }); Modal.close(); };
+  $('#ngCreate').onclick = () => { setPending(); socket.emit('create_group', { name: $('#ngName').value.trim(), handle: $('#ngHandle').value.trim() || $('#ngHandle').placeholder, members: [...sel] }); Modal.close(); };
 }
 function openNewChannel() {
   Modal.open(`${mdHead('Новый канал')}<div class="md-body"><p class="md-text" style="margin-bottom:12px">Канал — публичная лента. Писать могут только администраторы, подписаться может любой по ссылке @имя.</p><div class="field"><label>Название</label><input id="nchName" placeholder="Мой канал" maxlength="48"></div><div class="field"><label>Публичная ссылка @</label><input id="nchHandle" placeholder="mychannel" maxlength="24"></div></div><div class="md-foot"><button class="btn ghost" data-close>Отмена</button><button class="btn" id="nchCreate" disabled>Создать</button></div>`);
   $('#nchName').oninput = () => { $('#nchHandle').placeholder = $('#nchName').value.toLowerCase().replace(/\s+/g, '_').replace(/[^\p{L}\p{N}._-]/gu, '').slice(0, 24) || 'mychannel'; $('#nchCreate').disabled = !$('#nchName').value.trim(); };
-  $('#nchCreate').onclick = () => { S.pendingOpen = true; socket.emit('create_channel', { name: $('#nchName').value.trim(), handle: $('#nchHandle').value.trim() || $('#nchHandle').placeholder }); Modal.close(); };
+  $('#nchCreate').onclick = () => { setPending(); socket.emit('create_channel', { name: $('#nchName').value.trim(), handle: $('#nchHandle').value.trim() || $('#nchHandle').placeholder }); Modal.close(); };
 }
 function openForward(m) {
   const text = msgText(m);
   const convs = sortedConvs(true).filter((c) => c.type !== 'channel' || c.canPost).filter((c) => !(c.type === 'secret' && m.type !== 'text' && m.type !== 'secret'));
   const render = (q = '') => convs.filter((c) => !q || key(convTitle(c)).includes(q)).map((c) => `<div class="pick-item" data-c="${esc(c.id)}">${avatarHTML(convAvatarObj(c), 42)}<div class="pb"><div class="pn">${c.type === 'secret' ? icon('lock', 'sm') : ''}${esc(convTitle(c))}</div><div class="ps">${c.type === 'dm' ? '@' + esc(peerOf(c)) : c.type === 'group' ? 'группа' : c.type === 'channel' ? 'канал' : c.type === 'secret' ? 'секретный чат' : 'заметки'}</div></div></div>`).join('') || '<div class="list-empty">Нет чатов</div>';
-  Modal.open(`${mdHead('Переслать')}<div class="md-body"><div class="field"><input id="fwQ" placeholder="Поиск чата"></div><div class="pick-list" id="fwList">${render()}</div></div>`);
+  Modal.open(`${mdHead('Переслать')}<div class="md-body"><div class="field"><input id="fwQ" placeholder="Поиск чата" maxlength="64"></div><div class="pick-list" id="fwList">${render()}</div></div>`);
   $('#fwQ').oninput = (e) => { $('#fwList').innerHTML = render(key(e.target.value)); };
   $('#fwList').onclick = async (e) => {
     const it = e.target.closest('[data-c]'); if (!it) return; const c = S.convs.get(it.dataset.c); Modal.close();
@@ -1921,7 +2006,7 @@ function openFolderPick(convId) {
 }
 function openAddBot(convId) {
   const bots = [...S.users.values()].filter((u) => u.isBot); const c = S.convs.get(convId);
-  Modal.open(`${mdHead('Добавить бота')}<div class="md-body">${bots.length ? bots.map((b) => userPickItem(b, c.participants.some((p) => key(p) === key(b.username)))).join('') : `<div class="list-empty">Ботов пока нет.<br>Создайте своего в Настройки → Боты.</div>`}</div>`, { sm: true });
+  Modal.open(`${mdHead('Добавить бота')}<div class="md-body">${bots.length ? bots.map((b) => userPickItem(b, c.participants.some((p) => key(p) === key(b.username)))).join('') : `<div class="list-empty">Ботов пока нет.<br>Создайте своего через @BotFather (Меню → Боты).</div>`}</div>`, { sm: true });
   $('#modal').onclick = (e) => { const it = e.target.closest('[data-u]'); if (!it) return; socket.emit('add_bot', { conversationId: convId, bot: it.dataset.u }); toast('Бот добавлен', 'ok'); Modal.close(); };
 }
 
@@ -1938,31 +2023,110 @@ function renderInfo() {
   if (c.type === 'dm' || c.type === 'secret') {
     const u = userOf(peerOf(c)) || { username: peerOf(c), displayName: peerOf(c) }; const blocked = S.blocked.has(key(u.username));
     h += `<div class="ip-hero">${avatarHTML({ ...u, name: u.displayName, online: u.online && !u.isBot }, 110)}<h3>${esc(u.displayName)}${u.isBot ? icon('bot', 'sm') : ''}${c.type === 'secret' ? icon('lock', 'sm') : ''}</h3><div class="st ${u.online && !u.isBot ? 'online' : ''}">${fmtLastSeen(u)}</div></div>`;
-    h += `<div class="ip-actions">${u.isBot ? '' : `<button class="ip-act" data-a="call">${icon('phone')}Звонок</button><button class="ip-act" data-a="video">${icon('video')}Видео</button>`}${c.type === 'dm' && !u.isBot ? `<button class="ip-act" data-a="secret">${icon('lock')}Секретный</button>` : ''}${c.type === 'secret' ? `<button class="ip-act" data-a="dm">${icon('chat')}Обычный</button>` : ''}<button class="ip-act" data-a="search">${icon('search')}Поиск</button></div>`;
+    h += `<div class="ip-actions">${u.isBot ? '' : `<button class="ip-act" data-a="call">${icon('phone')}Звонок</button><button class="ip-act" data-a="video">${icon('video')}Видео</button>`}${c.type === 'dm' && !u.isBot ? `<button class="ip-act" data-a="secret">${icon('lock')}Секретный</button>` : ''}${c.type === 'secret' ? `<button class="ip-act" data-a="dm">${icon('chat')}Обычный</button>` : ''}<button class="ip-act" data-a="search">${icon('search')}Поиск</button><button class="ip-act" data-a="qr">${icon('grid')}QR-код</button></div>`;
     h += `<div class="ip-sec"><div class="ip-row" data-copy="@${esc(u.username)}">${icon('at')}<div class="rb"><div class="rt">@${esc(u.username)}</div><div class="rs">Имя пользователя</div></div></div>${u.about ? `<div class="ip-row">${icon('info')}<div class="rb"><div class="rt" style="white-space:pre-wrap">${esc(u.about)}</div><div class="rs">О себе</div></div></div>` : ''}${notif}${c.type === 'secret' ? `<div class="ip-row">${icon('shield')}<div class="rb"><div class="rt">Сквозное шифрование</div><div class="rs">ECDH P-256 + AES-256-GCM. Ключи хранятся только на устройствах.</div></div></div>` : ''}${u.isBot ? idRow : ''}</div>`;
     h += mediaSec;
     h += `<div class="ip-sec"><div class="ip-row danger" data-a="${blocked ? 'unblock' : 'block'}">${icon('block')}<div class="rb"><div class="rt">${blocked ? 'Разблокировать' : 'Заблокировать'}</div></div></div><div class="ip-row danger" data-a="report">${icon('flag')}<div class="rb"><div class="rt">Пожаловаться</div></div></div><div class="ip-row danger" data-a="clear">${icon('broom')}<div class="rb"><div class="rt">Очистить историю</div></div></div><div class="ip-row danger" data-a="hide">${icon('trash')}<div class="rb"><div class="rt">Удалить чат</div></div></div></div>`;
   } else if (c.type === 'fav') {
     h += `<div class="ip-hero">${avatarHTML({ type: 'fav', name: 'Избранное' }, 110)}<h3>Избранное</h3><div class="st">Личное хранилище заметок и файлов</div></div>${mediaSec}<div class="ip-sec"><div class="ip-row danger" data-a="clear">${icon('broom')}<div class="rb"><div class="rt">Очистить</div></div></div></div>`;
   } else {
-    const n = c.participants.length; const admin = isAdmin(c);
-    h += `<div class="ip-hero">${avatarHTML(convAvatarObj(c), 110)}<h3>${esc(c.name)}</h3><div class="st">${n} ${plural(n, c.type === 'group' ? ['участник', 'участника', 'участников'] : ['подписчик', 'подписчика', 'подписчиков'])}</div></div>`;
-    h += `<div class="ip-actions">${c.type === 'group' ? `<button class="ip-act" data-a="call">${icon('phone')}Звонок</button><button class="ip-act" data-a="video">${icon('video')}Видео</button>` : ''}<button class="ip-act" data-a="search">${icon('search')}Поиск</button>${c.handle ? `<button class="ip-act" data-a="link">${icon('link')}Ссылка</button>` : ''}</div>`;
-    h += `<div class="ip-sec">${c.handle ? `<div class="ip-row" data-copy="@${esc(c.handle)}">${icon('at')}<div class="rb"><div class="rt">@${esc(c.handle)}</div><div class="rs">${c.type === 'channel' ? 'Публичная ссылка — поделитесь, чтобы на канал подписались' : 'Адрес группы'}</div></div></div>` : ''}${notif}${idRow}${admin ? `<div class="ip-row" data-a="addbot">${icon('bot')}<div class="rb"><div class="rt">Добавить бота</div><div class="rs">Боты смогут писать в этот чат через API</div></div></div>` : ''}</div>`;
-    h += `<div class="ip-sec"><div class="ip-title">${c.type === 'group' ? 'Участники' : 'Подписчики'}</div>${c.participants.slice(0, 100).map((pp) => { const u = userOf(pp) || { username: pp, displayName: pp }; const own = key(pp) === key(c.owner); const adm = (c.admins || []).some((a) => key(a) === key(pp)); return `<div class="ip-row" data-user="${esc(pp)}">${avatarHTML({ ...u, name: u.displayName, online: u.online && !u.isBot }, 40)}<div class="rb"><div class="rt">${esc(u.displayName)}${isMe(pp) ? ' (вы)' : ''}</div><div class="rs">${fmtLastSeen(u)}</div></div>${own ? '<span class="tag">владелец</span>' : adm ? '<span class="tag">админ</span>' : ''}</div>`; }).join('')}</div>`;
+    const n = c.participants.length; const admin = isAdmin(c); const owner = isOwner(c); const canAdd = c.type === 'group' || admin;
+    h += `<div class="ip-hero">${avatarHTML(convAvatarObj(c), 110)}<h3>${esc(c.name)}${admin ? `<button class="icon-btn mini" data-a="rename" title="Переименовать">${icon('edit', 'sm')}</button>` : ''}</h3><div class="st">${n} ${plural(n, c.type === 'group' ? ['участник', 'участника', 'участников'] : ['подписчик', 'подписчика', 'подписчиков'])}${owner ? ' · вы владелец' : admin ? ' · вы админ' : ''}</div></div>`;
+    h += `<div class="ip-actions">${c.type === 'group' ? `<button class="ip-act" data-a="call">${icon('phone')}Звонок</button><button class="ip-act" data-a="video">${icon('video')}Видео</button>` : ''}<button class="ip-act" data-a="search">${icon('search')}Поиск</button>${c.handle ? `<button class="ip-act" data-a="qr">${icon('grid')}QR / ссылка</button>` : ''}</div>`;
+    h += `<div class="ip-sec">${c.handle ? `<div class="ip-row" data-copy="@${esc(c.handle)}">${icon('at')}<div class="rb"><div class="rt">@${esc(c.handle)}</div><div class="rs">${c.type === 'channel' ? 'Публичная ссылка — по ней подписываются на канал' : 'Адрес группы — по ссылке или QR-коду в неё вступают'}</div></div></div>` : ''}${notif}${idRow}${admin ? `<div class="ip-row" data-a="addbot">${icon('bot')}<div class="rb"><div class="rt">Добавить бота</div><div class="rs">Боты смогут писать в этот чат через API</div></div></div>` : ''}</div>`;
+    h += `<div class="ip-sec"><div class="ip-title"><span>${c.type === 'group' ? 'Участники' : 'Подписчики'}</span>${canAdd ? `<button class="icon-btn mini" data-a="addmembers" title="Добавить">${icon('user-plus')}</button>` : ''}</div>${c.participants.slice(0, 200).map((pp) => { const u = userOf(pp) || { username: pp, displayName: pp }; const own = key(pp) === key(c.owner); const adm = (c.admins || []).some((a) => key(a) === key(pp)); const canManage = admin && !isMe(pp) && !own && (owner || !adm); return `<div class="ip-row" data-user="${esc(pp)}">${avatarHTML({ ...u, name: u.displayName, online: u.online && !u.isBot }, 40)}<div class="rb"><div class="rt">${esc(u.displayName)}${isMe(pp) ? ' (вы)' : ''}${u.isBot ? icon('bot', 'sm') : ''}</div><div class="rs">${u.isBot ? 'бот' : fmtLastSeen(u)}</div></div>${own ? '<span class="tag">владелец</span>' : adm ? '<span class="tag">админ</span>' : ''}${canManage ? `<button class="icon-btn mini" data-mact="${esc(pp)}" title="Управление">${icon('more-v')}</button>` : ''}</div>`; }).join('')}</div>`;
     h += mediaSec;
     h += `<div class="ip-sec">${admin || c.type === 'group' ? `<div class="ip-row danger" data-a="clear">${icon('broom')}<div class="rb"><div class="rt">Очистить историю</div></div></div>` : ''}<div class="ip-row danger" data-a="leave">${icon('logout')}<div class="rb"><div class="rt">${c.type === 'group' ? 'Выйти из группы' : 'Отписаться'}</div></div></div></div>`;
   }
   p.innerHTML = h;
 }
+function memberMenu(c, user, x, y) {
+  const owner = isOwner(c); const adm = (c.admins || []).some((a) => key(a) === key(user)); const u = userOf(user);
+  const items = [['profile', 'user', 'Профиль']];
+  if (owner && !u?.isBot) items.push(['admin', 'shield', adm ? 'Снять с администраторов' : 'Назначить администратором']);
+  if (owner || !adm) items.push(['kick', 'block', u?.isBot ? 'Удалить бота' : (c.type === 'group' ? 'Исключить из группы' : 'Удалить из канала'), 'danger']);
+  showCtx(items.map(([a, i, l, cls]) => `<div class="ctx-item ${cls || ''}" data-a="${a}">${icon(i)}${l}</div>`).join(''), x, y);
+  ctxEl.onclick = (e) => {
+    const it = e.target.closest('[data-a]'); if (!it) return; hideCtx();
+    switch (it.dataset.a) {
+      case 'profile': openProfile(user); break;
+      case 'admin': socket.emit('set_admin', { conversationId: c.id, user, admin: !adm }); break;
+      case 'kick': confirmModal(u?.isBot ? 'Удалить бота из чата?' : `Исключить ${displayOf(user)}?`, u?.isBot ? '' : 'Участник потеряет доступ к чату, но сможет вернуться по ссылке.', u?.isBot ? 'Удалить' : 'Исключить').then((ok) => ok && socket.emit('remove_member', { conversationId: c.id, user })); break;
+    }
+  };
+}
+function openAddMembers(convId) {
+  const c = S.convs.get(convId); if (!c) return; const sel = new Set();
+  const inConv = (u) => c.participants.some((p) => key(p) === key(u));
+  const list = (q = '') => { const arr = usersSorted((u) => !u.isBot && !inConv(u.username) && (!q || key(u.username).includes(q) || key(u.displayName).includes(q))); return arr.length ? arr.map((u) => userPickItem(u, sel.has(u.username))).join('') : '<div class="list-empty">Никого не найдено</div>'; };
+  Modal.open(`${mdHead(c.type === 'group' ? 'Добавить участников' : 'Добавить подписчиков')}<div class="md-body"><div class="field"><input id="amQ" placeholder="Поиск по имени или @логину" maxlength="64"></div><div class="pick-list" id="amList">${list()}</div></div><div class="md-foot"><button class="btn ghost" data-close>Отмена</button><button class="btn" id="amOk" disabled>Добавить</button></div>`);
+  $('#amQ').oninput = () => { $('#amList').innerHTML = list(key($('#amQ').value)); };
+  $('#modal').onclick = (e) => { const it = e.target.closest('[data-u]'); if (!it) return; const u = it.dataset.u; if (sel.has(u)) sel.delete(u); else sel.add(u); it.querySelector('.check')?.classList.toggle('on', sel.has(u)); $('#amOk').disabled = !sel.size; $('#amOk').textContent = sel.size ? `Добавить (${sel.size})` : 'Добавить'; };
+  $('#amOk').onclick = () => { socket.emit('add_members', { conversationId: convId, members: [...sel] }); Modal.close(); };
+}
+function inviteURL(c) { if (!c) return location.origin; if (c.type === 'dm' || c.type === 'secret') return `${location.origin}/?start=${encodeURIComponent(peerOf(c))}`; return `${location.origin}/?start=${encodeURIComponent(c.handle || '')}`; }
+function qrSVG(text) { try { qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8']; const q = qrcode(0, 'M'); q.addData(text, 'Byte'); q.make(); return q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); } catch (e) { return `<div class="md-text" style="padding:20px;color:#000">${esc(text)}</div>`; } }
+function openQRModal({ title, url, name, hint }) {
+  Modal.push(`${mdHead(title)}<div class="md-body qr-box"><div class="qr">${qrSVG(url)}</div><div style="font-weight:600;font-size:16px">${esc(name)}</div><div class="token-box" style="width:100%"><span class="grow" style="font-size:13px;word-break:break-all">${esc(url)}</span><button class="icon-btn" data-copy="${esc(url)}" title="Скопировать">${icon('copy', 'sm')}</button></div>${hint ? `<p class="md-text" style="text-align:center;line-height:1.5">${esc(hint)}</p>` : ''}</div><div class="md-foot">${navigator.share ? `<button class="btn ghost" id="qrShare">Поделиться</button>` : ''}<button class="btn" data-close>Готово</button></div>`, { sm: true });
+  $('#modal').onclick = (e) => { const cp = e.target.closest('[data-copy]'); if (cp) copyText(cp.dataset.copy); if (e.target.closest('#qrShare')) navigator.share({ title: name, url }).catch(() => { }); };
+}
+function openInviteModal(c) {
+  const url = inviteURL(c);
+  openQRModal({ title: c.type === 'channel' ? 'Ссылка на канал' : c.type === 'group' ? 'Ссылка на группу' : 'Ссылка на чат', url, name: convTitle(c), hint: c.type === 'group' ? 'Кто перейдёт по ссылке или отсканирует код — сразу вступит в группу' : c.type === 'channel' ? 'По ссылке или коду — сразу подписка на канал' : 'Открывает чат с пользователем' });
+}
+/* ---- QR-вход: подтверждение с авторизованного устройства и сканер ---- */
+async function approveQrLogin(id) {
+  const ok = await confirmModal('Войти на другом устройстве?', 'Устройство, показавшее QR-код, получит полный доступ к вашему аккаунту. Подтверждайте, только если код сканировали вы.', 'Да, войти');
+  if (!ok) return;
+  try { await api('/api/qr/approve', { id }); toast('Вход подтверждён — устройство авторизовано', 'ok'); } catch (e) { toast(e.message, 'err'); }
+}
+function handleScannedText(text) {
+  let u = null; try { u = new URL(text); } catch { }
+  if (u && u.searchParams.get('qrlogin')) { approveQrLogin(u.searchParams.get('qrlogin')); return true; }
+  if (u && u.searchParams.get('start')) { joinHandle(u.searchParams.get('start')); return true; }
+  if (/^@?[\p{L}\p{N}._-]{2,24}$/u.test(text.trim())) { joinHandle(text.trim()); return true; }
+  if (u) { window.open(u.href, '_blank', 'noopener'); return true; }
+  return false;
+}
+async function openScanner() {
+  const supported = 'BarcodeDetector' in window && navigator.mediaDevices?.getUserMedia;
+  Modal.open(`${mdHead('Сканировать QR-код')}<div class="md-body">${supported ? `<div class="scan-box"><video id="scanVideo" autoplay playsinline muted></video><div class="frame"></div></div><p class="md-text" style="text-align:center;margin-top:12px">Наведите камеру на QR-код входа или QR-код чата</p>` : `<p class="md-text" style="line-height:1.5">Этот браузер не умеет распознавать QR-коды с камеры. Наведите на код обычную камеру телефона — ссылка откроется в NMessenger автоматически. Или вставьте ссылку/код вручную:</p>`}<div class="field" style="margin-top:12px"><input id="scanManual" placeholder="Вставьте ссылку или @имя" maxlength="300"></div></div><div class="md-foot"><button class="btn ghost" data-close>Закрыть</button><button class="btn" id="scanGo">Открыть</button></div>`, { sm: true, onClose: () => { stream?.getTracks().forEach((t) => t.stop()); clearInterval(timer); } });
+  let stream = null, timer = null;
+  $('#scanGo').onclick = () => { const v = $('#scanManual').value.trim(); if (!v) return; Modal.close(); if (!handleScannedText(v)) toast('Не похоже на ссылку NMessenger', 'err'); };
+  if (!supported) return;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+    const v = $('#scanVideo'); if (!v) { stream.getTracks().forEach((t) => t.stop()); return; } v.srcObject = stream;
+    const det = new BarcodeDetector({ formats: ['qr_code'] }); let busy = false;
+    timer = setInterval(async () => { if (busy || !v.videoWidth) return; busy = true; try { const codes = await det.detect(v); const raw = codes[0]?.rawValue; if (raw) { clearInterval(timer); Modal.close(); if (!handleScannedText(raw)) toast('QR-код не от NMessenger', 'err'); } } catch { } busy = false; }, 350);
+  } catch { toast('Нет доступа к камере', 'err'); }
+}
+const QRLogin = {
+  timer: null, req: null,
+  async start() {
+    this.stop(); const box = $('#qrLoginCode'); box.innerHTML = '<span class="spinner"></span>'; $('#qrLoginStatus').textContent = '';
+    try { this.req = await api('/api/qr/new', {}); } catch (e) { box.innerHTML = `<div class="md-text" style="padding:20px;color:#000">${esc(e.message)}</div>`; return; }
+    box.innerHTML = qrSVG(`${location.origin}/?qrlogin=${this.req.id}`); $('#qrLoginStatus').textContent = 'Код действует 3 минуты и обновляется автоматически';
+    const req = this.req;
+    this.timer = setInterval(async () => {
+      if (this.req !== req) return;
+      try { const r = await fetch(`/api/qr/status/${req.id}?secret=${req.secret}`); if (r.status === 404) { this.start(); return; } const j = await r.json(); if (j.status === 'approved') { this.stop(); onLoggedIn({ token: j.token, user: j.user }); } } catch { }
+    }, 2000);
+  },
+  stop() { clearInterval(this.timer); this.timer = null; this.req = null; },
+};
 $('#infoPanel').addEventListener('click', (e) => {
   const c = cur(); if (!c) return;
   const img = e.target.closest('img[data-view]'); if (img) { openLightbox(img.dataset.view, img.dataset.name); return; }
   const cp = e.target.closest('[data-copy]'); if (cp) { copyText(cp.dataset.copy); return; }
+  const ma = e.target.closest('[data-mact]'); if (ma) { const r = ma.getBoundingClientRect(); memberMenu(c, ma.dataset.mact, r.left - 200, r.bottom + 4); return; }
   const us = e.target.closest('[data-user]'); if (us) { if (!isMe(us.dataset.user)) openProfile(us.dataset.user); return; }
   const a = e.target.closest('[data-a]'); if (!a) return;
   switch (a.dataset.a) {
     case 'close': toggleInfo(false); break;
+    case 'qr': openInviteModal(c); break;
+    case 'rename': promptModal(c.type === 'group' ? 'Название группы' : 'Название канала', { label: 'Название', value: c.name, maxlength: 48, okLabel: 'Сохранить' }).then((v) => { if (v && v.trim() && v.trim() !== c.name) socket.emit('update_conversation', { conversationId: c.id, name: v.trim() }); }); break;
+    case 'addmembers': openAddMembers(c.id); break;
     case 'menu': { const r = a.getBoundingClientRect(); chatContextMenu(c.id, r.right, r.bottom + 4); break; }
     case 'mute': socket.emit('set_conv_flag', { id: c.id, mute: !c.muted }); break;
     case 'call': Call.fromChat(false); break;
@@ -1970,7 +2134,7 @@ $('#infoPanel').addEventListener('click', (e) => {
     case 'secret': openSecret(peerOf(c)); break;
     case 'dm': openDM(peerOf(c)); break;
     case 'search': $('#btnSearchChat').click(); if (isMobile()) toggleInfo(false); break;
-    case 'link': copyText(`${location.origin}/?start=${c.handle}`); break;
+    case 'link': openInviteModal(c); break;
     case 'addbot': openAddBot(c.id); break;
     case 'block': confirmModal('Заблокировать пользователя?', 'Он не сможет писать и звонить вам.', 'Заблокировать').then((ok) => ok && socket.emit('block_user', peerOf(c))); break;
     case 'unblock': socket.emit('unblock_user', peerOf(c)); break;
@@ -1993,7 +2157,9 @@ function renderDrawer() {
     <div class="dr-item" data-a="channel">${icon('megaphone')}Новый канал</div>
     <div class="dr-sep"></div>
     <div class="dr-item" data-a="folders">${icon('folder')}Папки</div>
-    <div class="dr-item" data-a="bots">${icon('bot')}Боты</div>
+    <div class="dr-item" data-a="bots">${icon('bot')}Боты · BotFather</div>
+    <div class="dr-item" data-a="scan">${icon('grid')}Сканировать QR-код</div>
+    <div class="dr-item" data-a="myqr">${icon('at')}Мой QR-код</div>
     <div class="dr-item" data-a="settings">${icon('settings')}Настройки</div>
     <div class="dr-item" data-a="theme">${icon(dark ? 'moon' : 'sun')}Ночной режим<span class="switch ${dark ? 'on' : ''}"></span></div>
     <div class="dr-sep"></div>
@@ -2012,7 +2178,9 @@ $('#drawerPanel').addEventListener('click', (e) => {
     case 'group': openNewGroup(); break;
     case 'channel': openNewChannel(); break;
     case 'folders': Settings.open('folders'); break;
-    case 'bots': Settings.open('bots'); break;
+    case 'bots': openHandle('BotFather'); break;
+    case 'scan': openScanner(); break;
+    case 'myqr': openQRModal({ title: 'Мой QR-код', url: `${location.origin}/?start=${encodeURIComponent(S.me.username)}`, name: S.me.displayName, hint: 'Отсканировав код, собеседник сразу откроет чат с вами' }); break;
     case 'settings': Settings.open('profile'); break;
     case 'theme': { const t = S.settings.theme === 'light' ? 'dark' : 'light'; S.settings.theme = t; applySettings(); socket.emit('update_settings', { theme: t }); renderDrawer(); break; }
     case 'logout': confirmModal('Выйти из аккаунта?', 'Секретные чаты на этом устройстве останутся доступны при повторном входе.', 'Выйти').then(async (ok) => { if (!ok) return; try { await api('/api/logout', {}); } catch { } if (Call.st) Call.hangup(); logoutLocal(); S.current = null; S.convs.clear(); S.msgs.clear(); document.body.classList.remove('chat-open'); $('#chatInner').classList.add('hidden'); $('#chatEmpty').classList.remove('hidden'); $('#infoPanel').classList.add('hidden'); showAuth(); }); break;
@@ -2022,7 +2190,7 @@ $('#drawerPanel').addEventListener('click', (e) => {
 /* ====================== SETTINGS ====================== */
 const Settings = {
   tab: null,
-  tabs: [['profile', 'user', 'Профиль'], ['notif', 'bell', 'Уведомления'], ['privacy', 'shield', 'Приватность'], ['look', 'palette', 'Оформление'], ['folders', 'folder', 'Папки'], ['bots', 'bot', 'Боты'], ['security', 'key', 'Безопасность'], ['about', 'info', 'О приложении']],
+  tabs: [['profile', 'user', 'Профиль'], ['notif', 'bell', 'Уведомления'], ['privacy', 'shield', 'Приватность'], ['look', 'palette', 'Оформление'], ['calls', 'phone', 'Звонки'], ['folders', 'folder', 'Папки'], ['bots', 'bot', 'Боты'], ['security', 'key', 'Безопасность'], ['about', 'info', 'О приложении']],
   open(tab = 'profile') {
     this.tab = tab;
     Modal.open(`<div class="md-head"><span>Настройки</span><span class="grow"></span><button class="icon-btn" data-close>${icon('x')}</button></div><div class="st"><nav class="st-nav" id="stNav"></nav><div class="st-body" id="stBody"></div></div>`, { wide: true });
@@ -2042,7 +2210,7 @@ const Settings = {
         <div class="field"><label>Имя</label><input id="pfName" value="${esc(S.me.displayName)}" maxlength="32"></div>
         <div class="field"><label>О себе</label><textarea id="pfAbout" maxlength="140" placeholder="Пара слов о себе">${esc(S.me.about || '')}</textarea><span class="hint" id="pfAboutCnt">${(S.me.about || '').length}/140</span></div>
         <div class="field"><label>Имя пользователя</label><div class="token-box"><span class="grow">@${esc(S.me.username)}</span><button class="icon-btn" data-copy="@${esc(S.me.username)}">${icon('copy', 'sm')}</button></div><span class="hint">Ссылка на вас: ${esc(location.origin)}/?start=${esc(S.me.username)}</span></div>
-        <div style="display:flex;gap:8px;justify-content:flex-end">${S.me.avatar ? `<button class="btn ghost" id="pfAvDel">Удалить фото</button>` : ''}<button class="btn" id="pfSave">Сохранить</button></div>`;
+        <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn soft" id="pfQR">${icon('grid', 'sm')}Мой QR-код</button><span class="grow"></span>${S.me.avatar ? `<button class="btn ghost" id="pfAvDel">Удалить фото</button>` : ''}<button class="btn" id="pfSave">Сохранить</button></div>`;
         break;
       case 'notif':
         h = `<h4>Звук</h4>
@@ -2076,14 +2244,20 @@ const Settings = {
         <div style="margin-top:14px"><button class="btn soft" id="fAdd">${icon('plus', 'sm')}Создать папку</button></div>`;
         break;
       case 'bots':
-        h = `<h4>Мои боты</h4><p class="md-text" style="margin-bottom:8px">Бот — аккаунт с API-ключом. Через HTTP-запрос бот может писать в личные чаты, группы и каналы.</p>
-        ${S.bots.map((b) => `<div class="row-item">${avatarHTML({ username: b.username, name: b.displayName, isBot: true }, 44)}<div class="rb"><div class="rt">${esc(b.displayName)}</div><div class="rs">@${esc(b.username)}</div></div><button class="btn sm ghost" data-btoken="${esc(b.username)}">Ключ</button><button class="icon-btn" data-bregen="${esc(b.username)}" title="Новый ключ">${icon('refresh', 'sm')}</button><button class="icon-btn" data-bdel="${esc(b.username)}" title="Удалить">${icon('trash', 'sm')}</button></div>`).join('') || '<p class="md-text">Ботов пока нет</p>'}
-        <h4>Создать бота</h4><div class="field"><label>Имя</label><input id="bName" placeholder="Напоминалка" maxlength="32"></div><div class="field"><label>Логин (оканчивается на bot)</label><input id="bUser" placeholder="reminder_bot" maxlength="24"></div><button class="btn" id="bCreate">Создать</button>`;
+        h = `<div class="row-item" style="border:0;padding:0 0 12px">${avatarHTML({ username: 'BotFather', name: 'BotFather', isBot: true }, 56)}<div class="rb"><div class="rt">BotFather</div><div class="rs">Как в Telegram: боты создаются и настраиваются в чате с @BotFather — команды /newbot, /mybots, /token, /revoke, /setname, /setuserpic, /deletebot</div></div><button class="btn sm" id="bfOpen">Открыть</button></div>
+        <h4>Мои боты</h4>
+        ${S.bots.length ? S.bots.map((b) => `<div class="row-item">${avatarHTML({ ...(userOf(b.username) || {}), username: b.username, name: b.displayName, isBot: true }, 44)}<div class="rb"><div class="rt">${esc(b.displayName)}</div><div class="rs">@${esc(b.username)}</div></div><button class="btn sm ghost" data-bfcmd="/token @${esc(b.username)}">Ключ</button><button class="btn sm soft" data-openbot="${esc(b.username)}">Чат</button></div>`).join('') : '<p class="md-text">Ботов пока нет — отправьте /newbot в чат с BotFather.</p>'}
+        <h4>Как это работает</h4><p class="md-text" style="line-height:1.5">Бот — аккаунт с API-ключом. Добавьте его в группу или канал (информация о чате → «Добавить бота») и отправляйте сообщения HTTP-запросом:<br><code>POST ${esc(location.origin)}/api/bot/&lt;ключ&gt;/sendMessage</code> с телом <code>{"chat_id":"…","text":"…"}</code>. ID чата — в информации о чате.</p>`;
+        break;
+      case 'calls':
+        h = `<h4>Устройства</h4><div class="dev-form" id="devForm"><span class="spinner"></span></div>
+        <h4>Соединение</h4>
+        ${S.livekit ? `<div class="row-item"><div class="rb"><div class="rt">Звонки через LiveKit</div><div class="rs">Включено по умолчанию: стабильнее за NAT и позволяет групповые звонки. Выключите, чтобы звонить напрямую (P2P)</div></div>${sw('useLK', S.useLK)}</div>` : `<p class="md-text">LiveKit не настроен на сервере — личные звонки идут напрямую (P2P), групповые недоступны. Добавьте LIVEKIT_URL, LIVEKIT_API_KEY и LIVEKIT_API_SECRET в .env.</p>`}`;
         break;
       case 'security':
         h = `<h4>Смена пароля</h4><div class="field"><label>Текущий пароль</label><input type="password" id="pwOld" autocomplete="current-password"></div><div class="field"><label>Новый пароль</label><input type="password" id="pwNew" autocomplete="new-password" minlength="6"></div><div class="field"><label>Повторите новый пароль</label><input type="password" id="pwNew2" autocomplete="new-password"></div><button class="btn" id="pwSave">Изменить пароль</button>
         <h4>Шифрование</h4><p class="md-text">Ключ секретных чатов создан на этом устройстве и хранится в браузере. При входе с другого устройства создаётся новый ключ — старые секретные сообщения там не расшифруются.</p>
-        ${S.livekit ? `<h4>Звонки</h4><div class="row-item"><div class="rb"><div class="rt">Личные звонки через LiveKit</div><div class="rs">Вместо прямого P2P-соединения. Помогает, если звонки не соединяются через NAT</div></div>${sw('useLK', S.useLK)}</div>` : ''}`;
+        <h4>Вход по QR-коду</h4><p class="md-text" style="line-height:1.5">На новом устройстве откройте вкладку «QR-код» на экране входа, а здесь — Меню → «Сканировать QR-код». Активные сессии можно завершить во вкладке «Приватность».</p>`;
         break;
       case 'about':
         h = `<div style="text-align:center;padding:10px 0 16px"><div class="logo" style="width:72px;height:72px"><svg><use href="#i-logo"/></svg></div><h3 style="margin-top:10px">NMessenger</h3><p class="md-text">Версия 1.0</p></div>
@@ -2105,9 +2279,14 @@ const Settings = {
       const sw = t.closest('[data-sw]'); if (sw) { const k = sw.dataset.sw; const on = !sw.classList.contains('on'); sw.classList.toggle('on', on); if (k === 'useLK') { S.useLK = on; localStorage.setItem('nm_uselk', on ? '1' : '0'); } else emit({ [k]: on }); return; }
       const tp = t.closest('[data-theme-pick]'); if (tp) { emit({ theme: tp.dataset.themePick }); return; }
       if (t.closest('#avEdit')) { $('#avatarInput').click(); return; }
+      if (t.closest('#pfQR')) { openQRModal({ title: 'Мой QR-код', url: `${location.origin}/?start=${encodeURIComponent(S.me.username)}`, name: S.me.displayName, hint: 'Отсканировав код, собеседник сразу откроет чат с вами' }); return; }
       if (t.closest('#pfSave')) { socket.emit('update_profile', { displayName: $('#pfName').value.trim(), about: $('#pfAbout').value.trim() }); return; }
       if (t.closest('#pfAvDel')) { socket.emit('update_profile', { avatar: '' }); S.me.avatar = ''; setTimeout(() => this.render(), 300); return; }
       if (t.closest('#ntTest')) { Snd.message(); return; }
+      if (t.closest('#bfOpen')) { Modal.close(); openHandle('BotFather'); return; }
+      const ob = t.closest('[data-openbot]'); if (ob) { Modal.close(); openDM(ob.dataset.openbot); return; }
+      const bc = t.closest('[data-bfcmd]'); if (bc) { const cmd = bc.dataset.bfcmd; Modal.close(); S.bfPendingCmd = cmd; openHandle('BotFather'); return; }
+      if (t.closest('#devPerm')) { try { const st = await navigator.mediaDevices.getUserMedia({ audio: true, video: true }); st.getTracks().forEach((x) => x.stop()); } catch { } this.render(); return; }
       if (t.closest('#ntAsk')) { Notification.requestPermission().then(() => this.render()); return; }
       const ub = t.closest('[data-unblock]'); if (ub) { socket.emit('unblock_user', ub.dataset.unblock); return; }
       const sd = t.closest('[data-sdel]'); if (sd) { try { await api('/api/sessions/' + sd.dataset.sdel, null, 'DELETE'); toast('Сессия завершена', 'ok'); this.loadSessions(); } catch (err) { toast(err.message, 'err'); } return; }
@@ -2122,10 +2301,12 @@ const Settings = {
     };
     body.onchange = (e) => { const s = e.target.closest('[data-sel]'); if (s) emit({ [s.dataset.sel]: s.value }); };
     body.oninput = (e) => {
-      const r = e.target.closest('[data-range]'); if (r) { const k = r.dataset.range; const v = Number(r.value); if (k === 'fontSize') { $('#fsVal').textContent = v; S.settings.fontSize = v; document.documentElement.style.setProperty('--fs', v + 'px'); } else S.settings[k] = v; clearTimeout(this._rt); this._rt = setTimeout(() => socket.emit('update_settings', { [k]: v }), 400); }
+      const r = e.target.closest('[data-range]'); if (r) { syncRange(r); const k = r.dataset.range; const v = Number(r.value); if (k === 'fontSize') { $('#fsVal').textContent = v; S.settings.fontSize = v; document.documentElement.style.setProperty('--fs', v + 'px'); } else S.settings[k] = v; clearTimeout(this._rt); this._rt = setTimeout(() => socket.emit('update_settings', { [k]: v }), 400); }
       if (e.target.id === 'pfAbout') $('#pfAboutCnt').textContent = e.target.value.length + '/140';
     };
     if (this.tab === 'privacy') this.loadSessions();
+    if (this.tab === 'calls') devicePrefsHTML().then((html) => { const f = $('#devForm'); if (f) f.innerHTML = html; });
+    $$('input[type=range]', body).forEach(syncRange);
   },
   async loadSessions() {
     const el = $('#sessList'); if (!el) return;
@@ -2148,6 +2329,31 @@ function openFolderEditor(id) {
 }
 
 /* ====================== CALLS ====================== */
+function syncRange(el) { const min = Number(el.min || 0), max = Number(el.max || 100), v = Number(el.value); el.style.setProperty('--pct', Math.round(((v - min) / (max - min || 1)) * 100) + '%'); }
+document.addEventListener('input', (e) => { if (e.target.matches?.('input[type=range]')) syncRange(e.target); });
+const CallPrefs = {
+  get() { try { return JSON.parse(localStorage.getItem('nm_call_prefs') || '{}'); } catch { return {}; } },
+  set(patch) { const p = { ...this.get(), ...patch }; localStorage.setItem('nm_call_prefs', JSON.stringify(p)); return p; },
+  res() { const p = this.get(); return { 720: [1280, 720], 1080: [1920, 1080], 1440: [2560, 1440], 2160: [3840, 2160] }[p.screenRes || '1080']; },
+  fps() { return Number(this.get().screenFps || 30); },
+  bitrate() { return { 720: 1.5e6, 1080: 3e6, 1440: 5e6, 2160: 8e6 }[this.get().screenRes || '1080'] * (this.fps() >= 60 ? 1.5 : 1); },
+  screenConstraints() { const [w, h] = this.res(); const f = this.fps(); return { width: { ideal: w }, height: { ideal: h }, frameRate: { ideal: f, max: f } }; },
+  audioConstraints() { const p = this.get(); const a = { echoCancellation: true, noiseSuppression: true, autoGainControl: true }; if (p.mic) a.deviceId = { ideal: p.mic }; return a; },
+  videoConstraints() { const p = this.get(); const v = { width: { ideal: 1280 }, height: { ideal: 720 } }; if (p.cam) v.deviceId = { ideal: p.cam }; else v.facingMode = 'user'; return v; },
+  async devices() { try { const list = await navigator.mediaDevices.enumerateDevices(); return { mics: list.filter((d) => d.kind === 'audioinput'), cams: list.filter((d) => d.kind === 'videoinput'), spks: list.filter((d) => d.kind === 'audiooutput') }; } catch { return { mics: [], cams: [], spks: [] }; } },
+};
+async function devicePrefsHTML() {
+  const p = CallPrefs.get(); const d = await CallPrefs.devices(); const canSink = 'setSinkId' in HTMLMediaElement.prototype;
+  const noLabels = [...d.mics, ...d.cams].length > 0 && [...d.mics, ...d.cams].every((x) => !x.label);
+  const opt = (list, curId, name) => list.length ? list.map((x, i) => `<option value="${esc(x.deviceId)}" ${x.deviceId === curId ? 'selected' : ''}>${esc(x.label || `${name} ${i + 1}`)}</option>`).join('') : `<option value="">${name} не найден</option>`;
+  const sel = (arr, curV) => arr.map(([v, l]) => `<option value="${v}" ${curV === v ? 'selected' : ''}>${l}</option>`).join('');
+  return `${noLabels ? `<p class="md-text" style="margin-bottom:4px">Названия устройств появятся после разрешения доступа. <button class="btn sm soft" id="devPerm">Разрешить</button></p>` : ''}
+  <h5>Микрофон</h5><select data-dev="mic">${opt(d.mics, p.mic, 'Микрофон')}</select>
+  <h5>Камера</h5><select data-dev="cam">${opt(d.cams, p.cam, 'Камера')}</select>
+  ${canSink ? `<h5>Динамики</h5><select data-dev="spk">${opt(d.spks, p.spk, 'Динамики')}</select>` : ''}
+  <h5>Демонстрация экрана</h5><div class="two"><select data-dev="screenRes">${sel([['720', '720p'], ['1080', '1080p · Full HD'], ['1440', '1440p · 2K'], ['2160', '2160p · 4K']], p.screenRes || '1080')}</select><select data-dev="screenFps">${sel([['15', '15 fps'], ['30', '30 fps'], ['60', '60 fps']], p.screenFps || '30')}</select></div><span class="hint">Разрешение и частота применяются при следующем запуске показа экрана. Итоговое качество зависит от канала связи.</span>`;
+}
+document.addEventListener('change', (e) => { const el = e.target.closest?.('[data-dev]'); if (!el) return; CallPrefs.set({ [el.dataset.dev]: el.value }); if (Call.st) Call.applyPref(el.dataset.dev, el.value); });
 const ICE = { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] }] };
 const Call = {
   st: null, pending: null, pendingTimer: null,
@@ -2155,8 +2361,8 @@ const Call = {
   fromChat(video) { const c = cur(); if (!c) return; if (c.type === 'dm') this.start(peerOf(c), video); else if (c.type === 'group') this.startGroup(c, video); },
   mediaOk() { if (!navigator.mediaDevices?.getUserMedia || !window.RTCPeerConnection) { toast('Звонки требуют HTTPS (или localhost) и современный браузер', 'err'); return false; } return true; },
   async getMedia(video) {
-    const audio = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
-    try { return await navigator.mediaDevices.getUserMedia({ audio, video: video ? { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' } : false }); }
+    const audio = CallPrefs.audioConstraints();
+    try { return await navigator.mediaDevices.getUserMedia({ audio, video: video ? CallPrefs.videoConstraints() : false }); }
     catch (e) { if (video) { try { const s = await navigator.mediaDevices.getUserMedia({ audio }); toast('Камера недоступна — звонок без видео'); return s; } catch { } } throw e; }
   },
   async start(peer, video) {
@@ -2167,7 +2373,7 @@ const Call = {
     const st = this.st = { peer, convId: dmIdOf(S.me.username, peer), room: 'call_' + uid(), video, mode: 'webrtc', dir: 'out', phase: 'ringing', polite: false, remote: new MediaStream(), cands: [], holdNeg: false, muted: false, camOff: !video, sharing: false, minimized: false };
     try { st.local = await this.getMedia(video); } catch { this.st = null; toast('Нет доступа к микрофону', 'err'); return; }
     st.camTrack = st.local.getVideoTracks()[0] || null; st.camOff = !st.camTrack;
-    this.showScreen(u.displayName, u, 'Вызов…'); this.attachLocal();
+    this.showScreen(u.displayName, u, 'Вызов…'); this.attachLocal(); this.applySpeaker();
     Snd.startRing('out');
     socket.emit('call_invite', { to: peer, room: st.room, video, conversationId: st.convId, mode: 'webrtc' });
     st.ringTimer = setTimeout(() => { if (this.st === st && st.phase === 'ringing') { this.setStatus('Не отвечает'); this.log('missed'); socket.emit('call_end', { to: peer }); setTimeout(() => this.cleanup(), 1200); } }, 45000);
@@ -2198,7 +2404,7 @@ const Call = {
     const st = this.st = { peer: d.from, convId: d.conversationId, room: d.room, video: d.video, mode: 'webrtc', dir: 'in', phase: 'connecting', polite: true, remote: new MediaStream(), cands: [], holdNeg: true, muted: false, camOff: !d.video, sharing: false, minimized: false };
     try { st.local = await this.getMedia(d.video); } catch { this.st = null; toast('Нет доступа к микрофону', 'err'); socket.emit('call_reject', { to: d.from }); return; }
     st.camTrack = st.local.getVideoTracks()[0] || null; st.camOff = !st.camTrack;
-    this.showScreen(u.displayName, u, 'Соединение…'); this.attachLocal();
+    this.showScreen(u.displayName, u, 'Соединение…'); this.attachLocal(); this.applySpeaker();
     this.createPeer();
     socket.emit('call_accept', { to: d.from, room: d.room });
   },
@@ -2267,6 +2473,7 @@ const Call = {
     $('#ccScreen').parentElement.classList.toggle('hidden', !navigator.mediaDevices?.getDisplayMedia);
   },
   setStatus(t) { this.el.status.innerHTML = t; },
+  applySpeaker() { const id = CallPrefs.get().spk; if (id && this.el.remote.setSinkId) this.el.remote.setSinkId(id).catch(() => { }); },
   startTimer() { const st = this.st; clearInterval(st.timer); st.timer = setInterval(() => { if (!this.st) return; const t = fmtDur((Date.now() - st.startedAt) / 1000); this.setStatus(t); $('#miniTime').textContent = t; }, 1000); },
   attachLocal() {
     const st = this.st; const box = this.el.localBox;
@@ -2290,26 +2497,58 @@ const Call = {
     if (st.mode === 'livekit') { st.camOff = !st.camOff; try { await st.lk.localParticipant.setCameraEnabled(!st.camOff); } catch { st.camOff = true; toast('Камера недоступна', 'err'); } this.updateControls(); this.lkRefresh(); return; }
     if (!st.camOff) { st.camOff = true; st.camTrack?.stop(); st.camTrack = null; if (!st.sharing) await this.videoSender()?.replaceTrack(null); }
     else {
-      try { const s = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' } }); st.camTrack = s.getVideoTracks()[0]; st.camOff = false; st.video = true; if (!st.sharing) { const snd = this.videoSender(); if (snd) await snd.replaceTrack(st.camTrack); else st.pc.addTrack(st.camTrack, st.local); } }
+      try { const s = await navigator.mediaDevices.getUserMedia({ video: CallPrefs.videoConstraints() }); st.camTrack = s.getVideoTracks()[0]; st.camOff = false; st.video = true; if (!st.sharing) { const snd = this.videoSender(); if (snd) await snd.replaceTrack(st.camTrack); else st.pc.addTrack(st.camTrack, st.local); } }
       catch { toast('Камера недоступна', 'err'); }
     }
     this.attachLocal(); this.updateControls(); this.sendMeta();
   },
   async toggleScreen() {
     const st = this.st; if (!st) return;
-    if (st.mode === 'livekit') { try { st.sharing = !st.sharing; await st.lk.localParticipant.setScreenShareEnabled(st.sharing); } catch { st.sharing = false; } this.updateControls(); this.lkRefresh(); return; }
+    if (st.mode === 'livekit') { try { st.sharing = !st.sharing; const [w, h] = CallPrefs.res(); const f = CallPrefs.fps(); await st.lk.localParticipant.setScreenShareEnabled(st.sharing, { resolution: { width: w, height: h, frameRate: f }, contentHint: f >= 60 ? 'motion' : 'detail', audio: false }, { screenShareEncoding: { maxBitrate: CallPrefs.bitrate(), maxFramerate: f }, simulcast: false }); } catch (e) { st.sharing = false; if (e?.name !== 'NotAllowedError') toast('Не удалось начать показ экрана', 'err'); } this.updateControls(); this.lkRefresh(); return; }
     if (st.sharing) { this.stopScreen(); return; }
-    let ds; try { ds = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: { ideal: 15 } }, audio: false }); } catch { return; }
-    const track = ds.getVideoTracks()[0]; track.onended = () => this.stopScreen();
+    let ds; try { ds = await navigator.mediaDevices.getDisplayMedia({ video: CallPrefs.screenConstraints(), audio: false }); } catch { return; }
+    const track = ds.getVideoTracks()[0]; track.onended = () => this.stopScreen(); try { track.contentHint = CallPrefs.fps() >= 60 ? 'motion' : 'detail'; } catch { }
     st.screen = ds; st.sharing = true;
     const snd = this.videoSender(); if (snd) await snd.replaceTrack(track); else st.pc.addTrack(track, st.local);
-    this.attachLocal(); this.updateControls(); this.sendMeta(); toast('Вы показываете экран');
+    this.setVideoBitrate(CallPrefs.bitrate(), CallPrefs.fps());
+    this.attachLocal(); this.updateControls(); this.sendMeta(); toast(`Вы показываете экран · ${CallPrefs.res()[1]}p ${CallPrefs.fps()} fps`);
   },
   async stopScreen() {
     const st = this.st; if (!st || !st.sharing) return;
     st.screen?.getTracks().forEach((t) => t.stop()); st.screen = null; st.sharing = false;
     await this.videoSender()?.replaceTrack(st.camOff ? null : st.camTrack || null);
+    this.setVideoBitrate(null, null);
     this.attachLocal(); this.updateControls(); this.sendMeta();
+  },
+  async setVideoBitrate(bps, fps) {
+    const snd = this.videoSender(); if (!snd) return;
+    try { const prm = snd.getParameters(); if (!prm.encodings || !prm.encodings.length) prm.encodings = [{}]; if (bps) { prm.encodings[0].maxBitrate = bps; prm.encodings[0].maxFramerate = fps; } else { delete prm.encodings[0].maxBitrate; delete prm.encodings[0].maxFramerate; } await snd.setParameters(prm); } catch { }
+  },
+  async applyPref(k, id) {
+    const st = this.st; if (!st) return;
+    try {
+      if (st.mode === 'livekit') { const map = { mic: 'audioinput', cam: 'videoinput', spk: 'audiooutput' }; if (map[k] && st.lk) await st.lk.switchActiveDevice(map[k], id); if (map[k]) toast('Устройство переключено', 'ok'); return; }
+      if (k === 'spk') { if (this.el.remote.setSinkId) await this.el.remote.setSinkId(id); toast('Динамики переключены', 'ok'); return; }
+      if (k === 'mic') {
+        const s = await navigator.mediaDevices.getUserMedia({ audio: { ...CallPrefs.audioConstraints(), deviceId: { exact: id } } });
+        const track = s.getAudioTracks()[0]; track.enabled = !st.muted;
+        const sender = st.pc?.getSenders().find((x) => x.track && x.track.kind === 'audio'); if (sender) await sender.replaceTrack(track);
+        st.local.getAudioTracks().forEach((t) => { t.stop(); st.local.removeTrack(t); }); st.local.addTrack(track); toast('Микрофон переключён', 'ok');
+      }
+      if (k === 'cam' && !st.camOff) {
+        const s = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 }, deviceId: { exact: id } } });
+        const track = s.getVideoTracks()[0]; st.camTrack?.stop(); st.camTrack = track;
+        if (!st.sharing) await this.videoSender()?.replaceTrack(track);
+        this.attachLocal(); toast('Камера переключена', 'ok');
+      }
+    } catch (e) { toast('Не удалось переключить устройство', 'err'); }
+  },
+  async toggleSettings() {
+    const box = $('#callSettings'); if (!box.classList.contains('hidden')) { box.classList.add('hidden'); return; }
+    box.innerHTML = `<div class="cs-head"><span>Устройства и качество</span><button class="icon-btn" id="csClose">${icon('x')}</button></div><div class="dev-form"><span class="spinner"></span></div>`; box.classList.remove('hidden');
+    const html = await devicePrefsHTML(); const f = box.querySelector('.dev-form'); if (f) f.innerHTML = html;
+    box.querySelector('#csClose').onclick = () => box.classList.add('hidden');
+    const perm = box.querySelector('#devPerm'); if (perm) perm.onclick = async () => { try { const st = await navigator.mediaDevices.getUserMedia({ audio: true, video: true }); st.getTracks().forEach((x) => x.stop()); } catch { } box.classList.add('hidden'); this.toggleSettings(); };
   },
   async pollStats() {
     const st = this.st; if (!st?.pc) return;
@@ -2322,7 +2561,7 @@ const Call = {
     try { st.pc?.close(); } catch { }
     try { st.lk?.disconnect(); } catch { }
     st.local?.getTracks().forEach((t) => t.stop()); st.camTrack?.stop(); st.screen?.getTracks().forEach((t) => t.stop());
-    this.el.remote.srcObject = null; this.el.local.srcObject = null; this.el.screen.classList.add('hidden'); this.el.mini.classList.add('hidden'); $('#callQuality').classList.add('hidden'); $('#lkAudio').innerHTML = ''; this.el.grid.innerHTML = '';
+    this.el.remote.srcObject = null; this.el.local.srcObject = null; this.el.screen.classList.add('hidden'); this.el.mini.classList.add('hidden'); $('#callSettings').classList.add('hidden'); $('#callQuality').classList.add('hidden'); $('#lkAudio').innerHTML = ''; this.el.grid.innerHTML = '';
     if (document.fullscreenElement) document.exitFullscreen?.().catch(() => { });
   },
   /* ---- LiveKit ---- */
@@ -2343,7 +2582,8 @@ const Call = {
     const LK = window.LivekitClient;
     try {
       const { token, url } = await api('/get-livekit-token', { roomName: room, participantName: S.me.username });
-      const r = st.lk = new LK.Room({ adaptiveStream: true, dynacast: true });
+      const pr = CallPrefs.get();
+      const r = st.lk = new LK.Room({ adaptiveStream: true, dynacast: true, audioCaptureDefaults: { deviceId: pr.mic || undefined, echoCancellation: true, noiseSuppression: true, autoGainControl: true }, videoCaptureDefaults: { deviceId: pr.cam || undefined, resolution: LK.VideoPresets.h720.resolution }, audioOutput: pr.spk ? { deviceId: pr.spk } : undefined });
       const refresh = () => this.lkRefresh();
       r.on(LK.RoomEvent.TrackSubscribed, (track) => { if (track.kind === 'audio') { const el = track.attach(); $('#lkAudio').appendChild(el); } refresh(); });
       r.on(LK.RoomEvent.TrackUnsubscribed, (track) => { track.detach().forEach((el) => el.remove()); refresh(); });
@@ -2387,6 +2627,7 @@ $('#miniEnd').addEventListener('click', () => Call.hangup());
 $('#ccMic').addEventListener('click', () => Call.toggleMic());
 $('#ccCam').addEventListener('click', () => Call.toggleCam());
 $('#ccScreen').addEventListener('click', () => Call.toggleScreen());
+$('#ccSettings').addEventListener('click', () => Call.toggleSettings());
 $('#callMinimize').addEventListener('click', () => Call.minimize(true));
 $('#miniExpand').addEventListener('click', () => Call.minimize(false));
 $('#callMini').addEventListener('click', (e) => { if (!e.target.closest('button')) Call.minimize(false); });
@@ -2399,7 +2640,7 @@ window.addEventListener('beforeunload', () => { if (Call.st) Call.hangup(); save
 /* ====================== KEYBOARD / INIT ====================== */
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    if (!ctxEl.classList.contains('hidden') || !$('#emojiPicker').classList.contains('hidden') || !$('#newMenu').classList.contains('hidden')) { closeAllPopups(); return; }
+    if (!ctxEl.classList.contains('hidden') || !$('#emojiPicker').classList.contains('hidden') || !$('#newMenu').classList.contains('hidden') || !$('#cmdPop').classList.contains('hidden') || !$('#callSettings').classList.contains('hidden')) { closeAllPopups(); return; }
     if (!$('#lightbox').classList.contains('hidden')) { $('#lightbox').classList.add('hidden'); return; }
     if (Modal.isOpen()) { Modal.close(); return; }
     if (!$('#drawer').classList.contains('hidden')) { $('#drawer').classList.add('hidden'); return; }
