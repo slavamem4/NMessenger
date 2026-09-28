@@ -26,6 +26,80 @@ const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'store.json');
 const FILES_DIR = path.join(DATA_DIR, 'files');
 
+/* ===================== Владельцы и верификация ===================== */
+// Аккаунты из OWNER_USERNAMES всегда верифицированы (синяя галочка), могут выдавать галочку другим и модерировать.
+const OWNERS = new Set(String(process.env.OWNER_USERNAMES || process.env.OWNER_USERNAME || 'newrizer').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean));
+
+/* ===================== Защита экземпляра (активация владельцем) ===================== */
+// tools/build.js подставляет сюда хеш ключа владельца; в режиме разработки берётся OWNER_KEY_HASH из .env.
+const BAKED_OWNER_KEY_HASH = '__NM_OWNER_KEY_HASH__';
+const OWNER_KEY_HASH = (BAKED_OWNER_KEY_HASH.startsWith('__') ? String(process.env.OWNER_KEY_HASH || '') : BAKED_OWNER_KEY_HASH).trim();
+const LOCK_FILE = path.join(DATA_DIR, '.instance.lock');
+let instanceLocked = false;
+function machineFingerprint() {
+  const os = require('os');
+  let user = '';
+  try { user = os.userInfo().username; } catch { }
+  const cpu = ((os.cpus() || [])[0] || {}).model || '';
+  return crypto.createHash('sha256').update([os.hostname(), os.platform(), os.arch(), user, cpu].join('|')).digest('hex');
+}
+function lockValue() { return crypto.createHmac('sha256', OWNER_KEY_HASH).update(machineFingerprint()).digest('hex'); }
+function verifyOwnerKey(k) {
+  const [algo, salt, hash] = OWNER_KEY_HASH.split('$');
+  if (algo !== 'scrypt' || !salt || !hash) return false;
+  try {
+    const check = crypto.scryptSync(String(k || ''), salt, 32);
+    const buf = Buffer.from(hash, 'hex');
+    return buf.length === check.length && crypto.timingSafeEqual(buf, check);
+  } catch { return false; }
+}
+function checkInstance() {
+  if (!OWNER_KEY_HASH) { console.warn('⚠️  Защита от копирования выключена: задайте OWNER_KEY_HASH в .env (команда: npm run owner-key)'); return; }
+  try { if (fs.readFileSync(LOCK_FILE, 'utf8').trim() === lockValue()) return; } catch { }
+  instanceLocked = true;
+  console.warn('🔒 Экземпляр не активирован на этом компьютере. Откройте сайт и введите ключ владельца.');
+}
+const ACTIVATE_PAGE = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NMessenger — активация</title>
+<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f1012;color:#e7e9ee;font:15px/1.4 -apple-system,Segoe UI,Roboto,sans-serif}
+.card{width:360px;max-width:92vw;background:#17181c;border:1px solid #2a2d34;border-radius:18px;padding:28px 26px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#2f7cf6,#7c5cff);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:26px;margin:0 auto 14px}
+h1{font-size:18px;margin:0 0 6px;text-align:center}p{color:#9aa0ad;font-size:13px;text-align:center;margin:0 0 18px}
+input{width:100%;box-sizing:border-box;background:#212328;border:1px solid #2f3340;color:#fff;border-radius:12px;padding:12px 14px;font-size:15px;outline:0}input:focus{border-color:#2f7cf6}
+button{width:100%;margin-top:12px;background:#2f7cf6;color:#fff;border:0;border-radius:12px;padding:12px;font-size:15px;font-weight:600;cursor:pointer}button:disabled{opacity:.6}
+.err{color:#ff6b6b;font-size:13px;min-height:18px;margin-top:10px;text-align:center}</style></head><body>
+<form class="card" id="f"><div class="logo">N</div><h1>Активация экземпляра</h1><p>Этот сервер NMessenger запущен на новом компьютере. Введите ключ владельца, чтобы продолжить.</p>
+<input type="password" id="k" placeholder="Ключ владельца" autofocus autocomplete="off" maxlength="200"><button id="b">Активировать</button><div class="err" id="e"></div></form>
+<script>document.getElementById('f').onsubmit=async function(ev){ev.preventDefault();var b=document.getElementById('b'),e=document.getElementById('e');b.disabled=true;e.textContent='';
+try{var r=await fetch('/api/activate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:document.getElementById('k').value})});var j=await r.json();if(r.ok&&j.ok){location.replace('/');return}e.textContent=j.error||'Ошибка'}catch(x){e.textContent='Нет связи с сервером'}b.disabled=false}</script></body></html>`;
+const activateTries = new Map();
+app.post('/api/activate', (req, res) => {
+  const ip = req.ip || '';
+  const t = activateTries.get(ip) || { n: 0, until: 0 };
+  if (t.until > Date.now()) return res.status(429).json({ error: 'Слишком много попыток. Подождите 15 минут.' });
+  if (!OWNER_KEY_HASH) return res.json({ ok: true });
+  if (!verifyOwnerKey(req.body?.key)) {
+    t.n += 1;
+    if (t.n >= 5) { t.n = 0; t.until = Date.now() + 15 * 60 * 1000; }
+    activateTries.set(ip, t);
+    return res.status(401).json({ error: 'Неверный ключ владельца' });
+  }
+  activateTries.delete(ip);
+  try {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(LOCK_FILE, lockValue());
+  } catch (e) { return res.status(500).json({ error: 'Не удалось записать файл активации: ' + e.message }); }
+  instanceLocked = false;
+  console.log('✅ Экземпляр активирован владельцем');
+  res.json({ ok: true });
+});
+app.use((req, res, next) => {
+  if (!instanceLocked) return next();
+  if (req.path === '/ping' || req.path === '/api/activate') return next();
+  if (req.path.startsWith('/api/') || req.path.startsWith('/files/')) return res.status(423).json({ error: 'Экземпляр не активирован' });
+  res.status(423).type('html').send(ACTIVATE_PAGE);
+});
+io.use((socket, next) => (instanceLocked ? next(new Error('locked')) : next()));
+
 function loadStore() {
   try {
     const parsed = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
@@ -193,7 +267,9 @@ function sessionUser(token) {
     if (s) sessions.delete(token);
     return null;
   }
-  return accounts.get(key(s.username)) || null;
+  const acc = accounts.get(key(s.username)) || null;
+  if (acc && acc.banned) { sessions.delete(token); return null; }
+  return acc;
 }
 function bearerAcc(req) {
   const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
@@ -224,6 +300,10 @@ function publicAccount(acc, viewer) {
     avatar: acc.avatar || '',
     pubKey: acc.pubKey || null,
     isBot: !!acc.isBot,
+    verified: isVerified(acc.username),
+    owner: isOwnerUser(acc.username),
+    banned: !!acc.banned,
+    commands: acc.isBot ? acc.botCommands || [] : undefined,
     online: acc.isBot ? true : isOnline(acc.username),
     lastSeen: hideSeen ? null : acc.lastSeen || null,
     lastSeenHidden: hideSeen,
@@ -482,6 +562,194 @@ function isConvAdmin(conv, user) {
 function broadcastConv(conv) {
   for (const p of conv.participants) emitToUser(p, 'conversation_upsert', convForClient(conv, p));
 }
+function isOwnerUser(u) { return OWNERS.has(key(u)); }
+function isVerified(u) { if (isOwnerUser(u)) return true; const a = accounts.get(key(u)); return !!(a && a.verified); }
+function isMod(u) { const a = accounts.get(key(u)); return !!a && !a.isBot && !a.banned && isVerified(u); }
+function kickUser(username, reason) {
+  for (const [t, sx] of sessions) if (key(sx.username) === key(username)) sessions.delete(t);
+  const set = socketsByName.get(key(username));
+  if (set) for (const sk of Array.from(set)) { try { sk.emit('auth_error', reason); sk.disconnect(true); } catch { } }
+}
+function deleteMsg(conv, msg) {
+  msg.deleted = true; msg.text = ''; msg.file = null; msg.ciphertext = null; msg.replyTo = null;
+  if (conv.lastMessage && conv.messages[conv.messages.length - 1] && conv.messages[conv.messages.length - 1].id === msg.id) conv.lastMessage.text = 'Сообщение удалено';
+  persist();
+  emitToConv(conv, 'message_updated', msg);
+  for (const p of conv.participants) emitToUser(p, 'conversation_upsert', convForClient(conv, p));
+}
+function removeConversationForAll(conv, reason) {
+  for (const p of conv.participants) emitToUser(p, 'conversation_removed', { id: conv.id, reason });
+  convMap.delete(conv.id);
+  persist();
+}
+function modSnapshot() {
+  const users = Array.from(accounts.values()).filter((a) => !a.system).map((a) => ({ ...publicAccount(a, null), createdAt: a.createdAt || 0, banReason: a.banReason || '', botOwner: a.botOwner || null }));
+  const convs = Array.from(convMap.values()).filter((c) => c.type === 'group' || c.type === 'channel').map((c) => ({ id: c.id, type: c.type, name: c.name, handle: c.handle || '', owner: convOwner(c), members: c.participants.length, messages: (c.messages || []).length, createdAt: c.createdAt || 0 }));
+  const reps = reports.slice(-100).reverse().map((r) => ({ ...r, fromName: displayOf(r.from), targetName: r.target ? displayOf(r.target) : '' }));
+  return { users, convs, reports: reps };
+}
+
+/* ===================== Bot API: очередь обновлений для внешних ботов (Python SDK) ===================== */
+const botUpdates = new Map();
+function botQueue(b) {
+  const k = key(b);
+  let q = botUpdates.get(k);
+  if (!q) { q = { seq: 0, items: [], waiters: [] }; botUpdates.set(k, q); }
+  return q;
+}
+function tgMessage(conv, msg) {
+  const fromAcc = accounts.get(key(msg.from));
+  const out = {
+    message_id: msg.id,
+    date: Math.floor((msg.ts || Date.now()) / 1000),
+    chat: { id: conv.id, type: conv.type === 'dm' ? 'private' : conv.type, title: conv.name || null, handle: conv.handle || null },
+    from: { username: msg.from, first_name: fromAcc ? fromAcc.displayName || fromAcc.username : msg.from, is_bot: !!(fromAcc && fromAcc.isBot) },
+    type: msg.type,
+    text: msg.text || '',
+  };
+  if (msg.file) out.file = { id: msg.file.id, name: msg.file.name, size: msg.file.size, mime: msg.file.mime, url: msg.file.url };
+  if (msg.replyTo) out.reply_to_message = { message_id: msg.replyTo.id, text: msg.replyTo.text || '', from: msg.replyTo.from || null };
+  return out;
+}
+function dispatchToBots(conv, msg) {
+  if (!msg || msg.type === 'system' || msg.type === 'secret' || msg.type === 'call') return;
+  const fromAcc = accounts.get(key(msg.from));
+  if (fromAcc && fromAcc.isBot) return;
+  for (const p of conv.participants) {
+    const a = accounts.get(key(p));
+    if (!a || !a.isBot || a.system) continue;
+    const q = botQueue(p);
+    q.seq += 1;
+    q.items.push({ update_id: q.seq, message: tgMessage(conv, msg) });
+    if (q.items.length > 1000) q.items.splice(0, q.items.length - 1000);
+    for (const w of q.waiters.splice(0)) { try { w(); } catch { } }
+  }
+}
+function botChat(bot, chatId) {
+  let conv = convMap.get(String(chatId || '').trim());
+  if (!conv) {
+    const user = accounts.get(key(String(chatId || '')));
+    if (user && !user.isBot) conv = getOrCreateDM(bot.username, user.username);
+  }
+  if (!conv) return { error: 'Чат не найден', code: 404 };
+  if (!conv.participants.some((p) => key(p) === key(bot.username))) return { error: 'Бот не добавлен в этот чат', code: 403 };
+  if (conv.type === 'channel' && !isConvAdmin(conv, bot.username)) return { error: 'Бот не админ канала', code: 403 };
+  return { conv };
+}
+function storeFile(buf, name, mime, owner) {
+  let orig = String(name || 'file');
+  try { orig = decodeURIComponent(orig); } catch { }
+  orig = path.basename(orig).replace(/[^\w.\p{L}\p{N} ()_-]+/gu, '_').slice(0, 120) || 'file';
+  mime = String(mime || 'application/octet-stream').slice(0, 80);
+  const id = uid() + path.extname(orig).slice(0, 10);
+  if (!fs.existsSync(FILES_DIR)) fs.mkdirSync(FILES_DIR, { recursive: true });
+  fs.writeFileSync(path.join(FILES_DIR, id), buf);
+  const rec = { id, name: orig, size: buf.length, mime, owner, ts: Date.now() };
+  filesMeta.set(id, rec);
+  persist();
+  return rec;
+}
+
+/* ===================== AI-помощник: внешний LLM (OpenAI-совместимый) или встроенный корректор ===================== */
+const AI = { url: String(process.env.AI_API_URL || 'https://api.openai.com/v1').replace(/\/+$/, ''), key: String(process.env.AI_API_KEY || ''), model: String(process.env.AI_MODEL || 'gpt-4o-mini') };
+function aiInfo() { return { llm: !!AI.key, model: AI.key ? AI.model : null, actions: AI.key ? ['fix', 'shorter', 'polite', 'formal', 'translate', 'emoji'] : ['fix'] }; }
+const AI_PROMPTS = {
+  fix: 'Ты корректор. Исправь орфографические, пунктуационные и грамматические ошибки в тексте пользователя. Сохрани смысл, стиль, язык, переносы строк, эмодзи, ссылки, @упоминания и форматирование. Верни только исправленный текст без пояснений и кавычек.',
+  shorter: 'Сократи текст пользователя примерно вдвое, сохранив смысл, язык и тон. Верни только результат.',
+  polite: 'Перепиши текст пользователя вежливо и дружелюбно, сохранив смысл и язык. Верни только результат.',
+  formal: 'Перепиши текст пользователя в деловом стиле, сохранив смысл и язык. Верни только результат.',
+  translate: 'Переведи текст пользователя: если он на русском — на английский, иначе — на русский. Верни только перевод.',
+  emoji: 'Добавь в текст пользователя несколько уместных эмодзи, не меняя слов. Верни только результат.',
+};
+async function askLLM(system, user) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 30000);
+  try {
+    const r = await fetch(AI.url + '/chat/completions', {
+      method: 'POST', signal: ctrl.signal,
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + AI.key },
+      body: JSON.stringify({ model: AI.model, temperature: 0.2, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error((j.error && j.error.message) || 'HTTP ' + r.status);
+    const out = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+    if (typeof out !== 'string' || !out.trim()) throw new Error('пустой ответ модели');
+    return out.trim();
+  } finally { clearTimeout(t); }
+}
+const TYPOS = {
+  // русские опечатки и просторечия
+  'щас': 'сейчас', 'ща': 'сейчас', 'счас': 'сейчас', 'ваще': 'вообще', 'вобще': 'вообще', 'вопще': 'вообще', 'кароче': 'короче', 'седня': 'сегодня', 'сёдня': 'сегодня', 'ниче': 'ничего', 'ничё': 'ничего', 'ничо': 'ничего', 'тока': 'только', 'токо': 'только', 'када': 'когда', 'тада': 'тогда', 'чё': 'что', 'че': 'что', 'чо': 'что', 'шо': 'что', 'ево': 'его', 'сево': 'сего', 'тя': 'тебя', 'тебе': 'тебе',
+  'пожалуста': 'пожалуйста', 'пожалуйсто': 'пожалуйста', 'пожалуйста': 'пожалуйста', 'пожалста': 'пожалуйста', 'пж': 'пожалуйста', 'пжл': 'пожалуйста', 'пжлст': 'пожалуйста', 'плз': 'пожалуйста', 'спс': 'спасибо', 'спосибо': 'спасибо', 'спасиба': 'спасибо', 'спасибки': 'спасибо', 'здраствуйте': 'здравствуйте', 'здравствуйте': 'здравствуйте', 'здрасте': 'здравствуйте', 'здрасьте': 'здравствуйте', 'здраствуй': 'здравствуй', 'прив': 'привет', 'превет': 'привет', 'привет': 'привет', 'здарова': 'здорово', 'дарова': 'здорово', 'досвидания': 'до свидания', 'досвидание': 'до свидания', 'извени': 'извини', 'извените': 'извините', 'извиняюсь': 'извините',
+  'незнаю': 'не знаю', 'немогу': 'не могу', 'нехочу': 'не хочу', 'небуду': 'не буду', 'непомню': 'не помню', 'непонял': 'не понял', 'непоняла': 'не поняла', 'неполучается': 'не получается', 'неполучилось': 'не получилось', 'нету': 'нет', 'неа': 'нет', 'ага': 'да',
+  'чтото': 'что-то', 'ктото': 'кто-то', 'гдето': 'где-то', 'какойто': 'какой-то', 'какаято': 'какая-то', 'какието': 'какие-то', 'когдато': 'когда-то', 'кудато': 'куда-то', 'почемуто': 'почему-то', 'изза': 'из-за', 'изпод': 'из-под', 'потомучто': 'потому что', 'потомушто': 'потому что', 'всётаки': 'всё-таки', 'всетаки': 'всё-таки', 'вобщем': 'в общем', 'вообщем': 'в общем', 'вкраце': 'вкратце', 'вобщемто': 'в общем-то', 'ксожалению': 'к сожалению', 'наверно': 'наверное', 'наврятли': 'навряд ли', 'врятли': 'вряд ли', 'врядли': 'вряд ли', 'нискем': 'ни с кем', 'ниочем': 'ни о чём', 'ниочём': 'ни о чём',
+  'зделать': 'сделать', 'зделал': 'сделал', 'зделала': 'сделала', 'зделаю': 'сделаю', 'зделай': 'сделай', 'сдесь': 'здесь', 'здать': 'сдать', 'расказать': 'рассказать', 'расказ': 'рассказ', 'расказал': 'рассказал', 'росказ': 'рассказ', 'програма': 'программа', 'програмы': 'программы', 'програму': 'программу', 'програмист': 'программист', 'колличество': 'количество', 'коллекция': 'коллекция', 'агенство': 'агентство', 'будующий': 'будущий', 'будующего': 'будущего', 'следущий': 'следующий', 'следущего': 'следующего', 'ихний': 'их', 'ихние': 'их', 'ихняя': 'их', 'евоный': 'его', 'ейный': 'её', 'ложить': 'класть', 'ложи': 'клади', 'координально': 'кардинально', 'прецендент': 'прецедент', 'инциндент': 'инцидент', 'черезчур': 'чересчур', 'симпотичный': 'симпатичный', 'симпотичная': 'симпатичная', 'щитать': 'считать', 'щитаю': 'считаю', 'щитаешь': 'считаешь', 'сматреть': 'смотреть', 'сматри': 'смотри', 'придти': 'прийти', 'прийдти': 'прийти', 'прийду': 'приду', 'прийдёт': 'придёт', 'прийдет': 'придёт', 'ездиет': 'ездит', 'едит': 'едет', 'хотит': 'хочет', 'хочут': 'хотят', 'ложится': 'ложится', 'экспрессо': 'эспрессо', 'ньюанс': 'нюанс', 'девченка': 'девчонка', 'девчёнка': 'девчонка', 'мущина': 'мужчина', 'мущины': 'мужчины', 'вкустно': 'вкусно', 'сдесь': 'здесь', 'зделка': 'сделка', 'бесплатно': 'бесплатно', 'безплатно': 'бесплатно', 'безполезно': 'бесполезно', 'расчитать': 'рассчитать', 'расчитывать': 'рассчитывать', 'росписаться': 'расписаться', 'росписание': 'расписание', 'зарание': 'заранее', 'зараннее': 'заранее', 'исскуство': 'искусство', 'искуство': 'искусство', 'военый': 'военный', 'обажаю': 'обожаю', 'обещяю': 'обещаю', 'обещяние': 'обещание', 'вообщето': 'вообще-то', 'сдесь': 'здесь', 'офицально': 'официально', 'офицальный': 'официальный', 'аккаунт': 'аккаунт', 'акаунт': 'аккаунт', 'акаунта': 'аккаунта', 'месенджер': 'мессенджер', 'мессенжер': 'мессенджер', 'месседж': 'сообщение', 'сылка': 'ссылка', 'сылку': 'ссылку', 'сылки': 'ссылки', 'скинь': 'скинь', 'зарегестрироваться': 'зарегистрироваться', 'зарегестрировался': 'зарегистрировался', 'регестрация': 'регистрация', 'пороль': 'пароль', 'пороля': 'пароля', 'учавствовать': 'участвовать', 'учавствую': 'участвую', 'чуствовать': 'чувствовать', 'чуствую': 'чувствую', 'растояние': 'расстояние', 'скачять': 'скачать', 'устонавливать': 'устанавливать', 'устоновить': 'установить', 'скрин': 'скрин', 'сфоткай': 'сфотографируй',
+  'хочеш': 'хочешь', 'можеш': 'можешь', 'делаеш': 'делаешь', 'знаеш': 'знаешь', 'будеш': 'будешь', 'идеш': 'идёшь', 'идёш': 'идёшь', 'пишеш': 'пишешь', 'скажеш': 'скажешь', 'сможеш': 'сможешь', 'придеш': 'придёшь', 'придёш': 'придёшь', 'видиш': 'видишь', 'говориш': 'говоришь', 'смотриш': 'смотришь', 'сидиш': 'сидишь', 'спиш': 'спишь',
+  'ться': 'ться', 'тся': 'тся',
+  // английские
+  'teh': 'the', 'recieve': 'receive', 'recieved': 'received', 'seperate': 'separate', 'definately': 'definitely', 'definetly': 'definitely', 'occured': 'occurred', 'untill': 'until', 'wich': 'which', 'becuase': 'because', 'becasue': 'because', 'becouse': 'because', 'alot': 'a lot', 'dont': "don't", 'cant': "can't", 'wont': "won't", 'im': "I'm", 'ive': "I've", 'thier': 'their', 'freind': 'friend', 'tommorow': 'tomorrow', 'tomorow': 'tomorrow', 'adress': 'address', 'begining': 'beginning', 'beleive': 'believe', 'calender': 'calendar', 'collegue': 'colleague', 'enviroment': 'environment', 'goverment': 'government', 'grammer': 'grammar', 'happend': 'happened', 'immediatly': 'immediately', 'independant': 'independent', 'neccessary': 'necessary', 'necesary': 'necessary', 'occassion': 'occasion', 'peice': 'piece', 'realy': 'really', 'recomend': 'recommend', 'succesful': 'successful', 'suprise': 'surprise', 'truely': 'truly', 'wierd': 'weird', 'writting': 'writing', 'youre': "you're", 'theyre': "they're", 'doesnt': "doesn't", 'didnt': "didn't", 'isnt': "isn't", 'wasnt': "wasn't", 'thats': "that's", 'whats': "what's", 'pls': 'please', 'plz': 'please', 'thx': 'thanks', 'u': 'you', 'ur': 'your', 'b4': 'before', 'tonite': 'tonight', 'accomodate': 'accommodate', 'acheive': 'achieve', 'arguement': 'argument', 'basicly': 'basically', 'buisness': 'business', 'comming': 'coming', 'excelent': 'excellent', 'existance': 'existence', 'familar': 'familiar', 'finaly': 'finally', 'foriegn': 'foreign', 'gaurd': 'guard', 'knowlege': 'knowledge', 'liason': 'liaison', 'lisence': 'license', 'mispell': 'misspell', 'noticable': 'noticeable', 'ocassion': 'occasion', 'persue': 'pursue', 'posession': 'possession', 'prefered': 'preferred', 'privelege': 'privilege', 'publically': 'publicly', 'reccomend': 'recommend', 'refered': 'referred', 'relevent': 'relevant', 'religous': 'religious', 'rythm': 'rhythm', 'sieze': 'seize', 'similiar': 'similar', 'sincerly': 'sincerely', 'speach': 'speech', 'sucess': 'success', 'tendancy': 'tendency', 'therefor': 'therefore', 'tounge': 'tongue', 'unfortunatly': 'unfortunately', 'usefull': 'useful', 'vaccuum': 'vacuum', 'vegtable': 'vegetable', 'wether': 'whether', 'wuz': 'was', 'gud': 'good', 'nite': 'night',
+};
+for (const k of Object.keys(TYPOS)) if (TYPOS[k] === k) delete TYPOS[k];
+const REPEAT_OK = new Set(['очень', 'давно', 'быстро', 'тихо', 'далеко', 'чуть', 'еле', 'вот', 'ну', 'да', 'нет', 'так', 'много', 'мало', 'только', 'уже', 'ещё', 'еще', 'сильно', 'долго', 'вряд', 'едва', 'ха', 'хах', 'бла', 'тук', 'кап', 'ой', 'ай', 'no', 'very', 'so', 'really', 'bye', 'ha', 'la']);
+const SOFT_EXC = new Set(['клавиш', 'афиш', 'ниш', 'депеш', 'финиш', 'фетиш', 'гашиш', 'кишмиш', 'дервиш', 'мякиш', 'шиш', 'кеш', 'флеш', 'меш', 'фарш', 'марш', 'гуляш', 'шалаш', 'ералаш', 'багаж', 'тираж', 'малыш', 'камыш', 'ландыш', 'латыш', 'крепыш', 'голыш', 'барыш', 'детёныш', 'детеныш', 'мышь', 'плешь']);
+const ABBR = /(?:^|[\s(])(?:т|е|д|п|г|гг|ул|пр|просп|пер|д|кв|см|стр|рис|тел|им|др|проч|напр|руб|коп|тыс|млн|млрд|обл|р|с|ст|ч|мин|сек|сут|шт|экз|доп|букв|англ|рус|лат|т\.е|т\.д|т\.п|т\.к|т\.н|и\.т\.д|и\.т\.п|и\.о|Mr|Mrs|Ms|Dr|St|vs|etc|e\.g|i\.e|no|No|approx)\.$/i;
+function matchCase(w, rep) {
+  if (w.length > 1 && w === w.toUpperCase() && /\p{L}/u.test(w)) return rep.toUpperCase();
+  if (w[0] === w[0].toUpperCase() && w[0] !== w[0].toLowerCase()) return rep[0].toUpperCase() + rep.slice(1);
+  return rep;
+}
+function basicFix(input) {
+  const prot = [];
+  let text = String(input).replace(/```[\s\S]*?```|`[^`\n]*`|https?:\/\/\S+|www\.\S+|[\w.+-]+@[\w-]+\.[\w.-]+|@[\w.]+|#[\p{L}\p{N}_]+|\|\|[\s\S]*?\|\||\b\d+[.,:]\d+\b/gu, (m) => { prot.push(m); return '\u0001' + (prot.length - 1) + '\u0002'; });
+  const isLatinText = (text.match(/\b[a-zA-Z]{2,}\b/g) || []).length >= 3;
+  // 1. пробелы
+  text = text.replace(/[ \t]+$/gm, '').replace(/[ \t]{2,}/g, ' ').replace(/\n{3,}/g, '\n\n');
+  // 2. пунктуация: нет пробела перед , . ! ? ; : — есть пробел после
+  text = text.replace(/ +([,.!?;:…])/g, '$1');
+  text = text.replace(/([,;:])(?=[^\s\d\n\u0001,;:.!?)"»\]])/g, '$1 ');
+  text = text.replace(/([.!?…]+)(?=[\p{L}])/gu, (m, p, off, str) => {
+    const before = str.slice(Math.max(0, off - 12), off);
+    if (ABBR.test(before + p)) return m;
+    if (/\d$/.test(before)) return m;
+    return m + ' ';
+  });
+  text = text.replace(/,{2,}/g, ',').replace(/(?<![.!?])\.{2}(?!\.)/g, '.').replace(/\?{3,}/g, '??').replace(/!{4,}/g, '!!!');
+  // 3. повторы слов
+  text = text.replace(/(?<![\p{L}\p{N}-])(\p{L}{2,})(?:[ \t]+\1(?![\p{L}\p{N}-]))+/giu, (m, w) => (REPEAT_OK.has(w.toLowerCase()) ? m : w));
+  // 4. словарь опечаток + мягкий знак в глаголах 2-го лица
+  text = text.replace(/\p{L}[\p{L}'’-]*/gu, (w) => {
+    const lw = w.toLowerCase();
+    if (lw === 'i' && isLatinText) return 'I';
+    if (TYPOS[lw]) return matchCase(w, TYPOS[lw]);
+    if (w.length >= 5 && /[еёи]ш$/u.test(lw) && /^[а-яё-]+$/i.test(lw) && !SOFT_EXC.has(lw) && /[аеёиоуыэюя][^аеёиоуыэюя]*[еёи]ш$/u.test(lw)) return w + 'ь';
+    return w;
+  });
+  // 5. частицы через дефис
+  text = text.replace(/(?<![\p{L}\p{N}-])(кто|что|какой|какая|какое|какие|какого|какому|каким|где|куда|откуда|когда|почему|зачем|как|чей|чья|чьё|чьи|сколько|кем|чем|кого|чего|кому|чему|каком|отчего)[ ]+(то|либо|нибудь)(?![\p{L}\p{N}-])/giu, '$1-$2');
+  text = text.replace(/(?<![\p{L}\p{N}-])кое[ ]+(кто|что|как|где|куда|какой|какие|когда|чего|кому)(?![\p{L}\p{N}-])/giu, 'кое-$1');
+  // 6. заглавные буквы в начале текста, строки и предложения
+  text = text.replace(/(^|\n[ \t]*|[.!?…]+[ \t]+)(\p{Ll})/gmu, (m, a, b, off, str) => {
+    if (/[.!?…]/.test(a)) { const before = str.slice(Math.max(0, off - 12), off + a.trimEnd().length); if (ABBR.test(before)) return m; }
+    return a + b.toUpperCase();
+  });
+  // 7. точка в конце длинного сообщения, если предложения уже есть
+  if (text.length >= 60 && /[.!?]/.test(text) && /[\p{L}\p{N}]$/u.test(text.trimEnd())) text = text.trimEnd() + '.';
+  text = text.replace(/\u0001(\d+)\u0002/g, (m, i) => prot[+i]);
+  const a = String(input).split(/\s+/), b = text.split(/\s+/);
+  let changes = Math.abs(a.length - b.length);
+  for (let i = 0; i < Math.min(a.length, b.length); i++) if (a[i] !== b[i]) changes++;
+  return { text, changes };
+}
+const aiRate = new Map();
+function aiAllowed(user) {
+  const now = Date.now();
+  const r = aiRate.get(key(user)) || { n: 0, t: now };
+  if (now - r.t > 60000) { r.n = 0; r.t = now; }
+  r.n += 1;
+  aiRate.set(key(user), r);
+  return r.n <= 30;
+}
+
 function displayOf(username) {
   const a = accounts.get(key(username));
   return a ? a.displayName || a.username : String(username);
@@ -539,6 +807,7 @@ const BF_HELP = `Я BotFather — создаю ботов для NMessenger и �
 
 **Команды:**
 /newbot — создать нового бота
+/setcommands — список команд бота (подсказки при вводе «/»)
 /mybots — мои боты
 /token — показать API-ключ
 /revoke — выпустить новый ключ (старый перестанет работать)
@@ -550,6 +819,27 @@ const BF_HELP = `Я BotFather — создаю ботов для NMessenger и �
 function bfApiHelp(acc) {
   return `**API-ключ** @${acc.username} — никому не показывайте:
 \`${acc.botToken}\`
+
+**Бот на Python за минуту** (сторонние библиотеки не нужны):
+1. Скачайте {ORIGIN}/sdk/nmessenger_bot.py в папку с ботом
+2. Создайте bot.py:
+\`\`\`
+from nmessenger_bot import Bot
+
+bot = Bot("${acc.botToken}", "{ORIGIN}")
+
+@bot.command("start")
+def start(m):
+    m.reply("Привет! Я работаю 🎉")
+
+@bot.message()
+def echo(m):
+    m.reply("Вы написали: " + m.text)
+
+bot.run()
+\`\`\`
+3. Запустите: \`python bot.py\` — и напишите боту @${acc.username}
+Полный пример с командами, файлами и кнопкой /help: {ORIGIN}/sdk/example_bot.py
 
 **Отправить сообщение:**
 \`\`\`
@@ -581,6 +871,10 @@ function botFatherHandle(username, conv, msg) {
       case '/setabout':
         if (tail) { if (tail.length > ABOUT_MAX) return reply(`Описание: до ${ABOUT_MAX} символов.`); b.about = tail; botsChanged(); return reply('Описание обновлено.'); }
         bfState.set(uk, { step: 'setabout_value', bot: b.username }); return reply(`Пришлите описание для @${b.username} (до ${ABOUT_MAX} символов).`);
+      case '/setcommands': {
+        if (tail) { const cmds = tail.split(/\n|;/).map((l) => l.match(/^\s*\/?([a-z0-9_]{1,32})\s*[-—:]\s*(.{1,80})$/i)).filter(Boolean).map((m) => ({ command: m[1].toLowerCase(), description: m[2].trim() })); if (cmds.length) { b.botCommands = cmds.slice(0, 50); botsChanged(); return reply(`Сохранено команд: ${cmds.length}.`); } }
+        bfState.set(uk, { step: 'setcommands_value', bot: b.username }); return reply(`Пришлите список команд для @${b.username}, каждая с новой строки в формате \`команда - описание\`:\n\`\`\`\nstart - Запустить бота\nhelp - Помощь\n\`\`\`\nЧтобы очистить — напишите «нет».`);
+      }
       case '/setuserpic': bfState.set(uk, { step: 'userpic', bot: b.username }); return reply(`Пришлите фото — оно станет аватаром @${b.username}.`);
       case '/deletebot': bfState.set(uk, { step: 'delete_confirm', bot: b.username }); return reply(`Удалить @${b.username}? Это необратимо: бот исчезнет из всех чатов, а ключ перестанет работать.\n\nДля подтверждения пришлите: **Да, удалить**`);
     }
@@ -614,6 +908,15 @@ function botFatherHandle(username, conv, msg) {
         if (!text || text.length > 32) return reply('Имя: 1–32 символа. Попробуйте /setname ещё раз.');
         b.displayName = text; botsChanged(); return reply(`Имя обновлено: **${text}**`);
       }
+      case 'setcommands_value': {
+        const b = findMine(st.bot); bfState.delete(uk);
+        if (!b) return reply('Бот не найден.');
+        if (lower === 'нет' || lower === 'очистить' || lower === 'clear') { b.botCommands = []; botsChanged(); return reply('Команды очищены.'); }
+        const cmds = text.split(/\n/).map((l) => l.match(/^\/?([a-z0-9_]{1,32})\s*[-—:]\s*(.{1,80})$/i)).filter(Boolean).map((m) => ({ command: m[1].toLowerCase(), description: m[2].trim() }));
+        if (!cmds.length) return reply('Не понял формат. Каждая строка: `команда - описание`, например:\n```\nstart - Запустить бота\nhelp - Помощь\n```');
+        b.botCommands = cmds.slice(0, 50); botsChanged();
+        return reply(`Сохранено команд: ${b.botCommands.length}. Теперь при вводе «/» в чате с @${b.username} появятся подсказки.`);
+      }
       case 'setabout_value': {
         const b = findMine(st.bot); bfState.delete(uk);
         if (!b) return reply('Бот не найден.');
@@ -645,9 +948,9 @@ function botFatherHandle(username, conv, msg) {
   if (c === '/mybots') {
     const bots = myBots();
     if (!bots.length) return reply('У вас пока нет ботов. Создайте первого: /newbot');
-    return reply('**Ваши боты:**\n' + bots.map((b) => `• ${b.displayName} — @${b.username}`).join('\n') + `\n\nУправление: /token, /revoke, /setname, /setabout, /setuserpic, /deletebot — можно сразу с @username, например \`/token @${bots[0].username}\``);
+    return reply('**Ваши боты:**\n' + bots.map((b) => `• ${b.displayName} — @${b.username}`).join('\n') + `\n\nУправление: /token, /revoke, /setname, /setabout, /setuserpic, /setcommands, /deletebot — можно сразу с @username, например \`/token @${bots[0].username}\``);
   }
-  if (['/token', '/revoke', '/setname', '/setabout', '/setuserpic', '/deletebot'].includes(c)) {
+  if (['/token', '/revoke', '/setname', '/setabout', '/setuserpic', '/deletebot', '/setcommands'].includes(c)) {
     const bots = myBots();
     if (!bots.length) return reply('У вас пока нет ботов. Создайте: /newbot');
     let b = null;
@@ -686,6 +989,9 @@ function attachUser(socket, acc) {
     textMax: TEXT_MAX,
     folders: acc.folders || [],
     bots: botsOf(username),
+    ai: aiInfo(),
+    isMod: isMod(username),
+    isOwner: isOwnerUser(username),
   });
   io.emit('users_update', listUsers());
 }
@@ -695,6 +1001,11 @@ app.get('/', (req, res) => {
 });
 app.get('/ping', (req, res) => res.send('Server is alive!'));
 app.get('/livekit-status', (req, res) => res.json({ enabled: livekitEnabled() }));
+// Клиентская библиотека LiveKit раздаётся локально (зафиксированная версия из package.json) — без зависимости от CDN
+app.get('/vendor/livekit-client.umd.js', (req, res) => {
+  try { res.set('Cache-Control', 'public, max-age=86400'); res.sendFile(require.resolve('livekit-client/dist/livekit-client.umd.js')); }
+  catch { res.status(404).end(); }
+});
 
 app.post('/get-livekit-token', async (req, res) => {
   try {
@@ -775,6 +1086,7 @@ app.post('/api/login', (req, res) => {
   if (!acc || acc.isBot || !verifyPassword(password, acc.passHash, acc.salt)) {
     return res.status(401).json({ error: 'Неверный логин или пароль' });
   }
+  if (acc.banned) return res.status(403).json({ error: 'Аккаунт заблокирован администрацией' + (acc.banReason ? ': ' + acc.banReason : '') });
   loginTries.delete(id);
   const token = createSession(username, {
     ua: req.headers['user-agent'],
@@ -847,21 +1159,9 @@ app.post('/api/bot/:token/sendMessage', (req, res) => {
   let text = String(req.body?.text || '').trim();
   if (!chatId || !text) return res.status(400).json({ error: 'Нужны chat_id и text' });
   if (text.length > TEXT_MAX) text = text.slice(0, TEXT_MAX);
-  let conv = convMap.get(chatId);
-  if (!conv) {
-    const user = accounts.get(key(chatId));
-    if (user && !user.isBot) conv = getOrCreateDM(bot.username, user.username);
-  }
-  if (!conv) return res.status(404).json({ error: 'Чат не найден' });
-  if (!conv.participants.some((p) => key(p) === key(bot.username))) {
-    return res.status(403).json({ error: 'Бот не добавлен в этот чат' });
-  }
-  if (conv.type === 'channel') {
-    const admins = conv.admins || [conv.owner];
-    if (!admins.some((a) => key(a) === key(bot.username))) {
-      return res.status(403).json({ error: 'Бот не админ канала' });
-    }
-  }
+  const bc = botChat(bot, chatId);
+  if (bc.error) return res.status(bc.code).json({ error: bc.error });
+  const conv = bc.conv;
   const ts = Date.now();
   const msg = {
     id: uid(),
@@ -871,13 +1171,143 @@ app.post('/api/bot/:token/sendMessage', (req, res) => {
     text,
     ts,
     time: timeLabel(ts),
+    replyTo: req.body?.reply_to_message_id ? sanitizeReply({ id: String(req.body.reply_to_message_id) }, conv) : null,
     reactions: {},
     edited: false,
     deleted: false,
   };
   conv.lastMessage = { text, ts, from: bot.username, time: msg.time };
   pushMessage(conv, msg);
-  res.json({ ok: true, message_id: msg.id, chat_id: conv.id });
+  res.json({ ok: true, result: tgMessage(conv, msg), message_id: msg.id, chat_id: conv.id });
+});
+
+/* ---- Bot API для внешних ботов (Python SDK: /sdk/nmessenger_bot.py) ---- */
+app.get('/api/bot/:token/getUpdates', async (req, res) => {
+  const bot = findBotByToken(req.params.token);
+  if (!bot) return res.status(401).json({ error: 'Неверный ключ' });
+  const offset = Math.max(0, parseInt(req.query.offset || '0', 10) || 0);
+  const timeout = Math.min(30, Math.max(0, parseInt(req.query.timeout || '0', 10) || 0));
+  const q = botQueue(bot.username);
+  q.items = q.items.filter((u) => u.update_id >= offset);
+  const pick = () => q.items.filter((u) => u.update_id >= offset).slice(0, 100);
+  let list = pick();
+  if (!list.length && timeout > 0) {
+    await new Promise((resolve) => {
+      let done = false;
+      const finish = () => { if (done) return; done = true; clearTimeout(t); const i = q.waiters.indexOf(finish); if (i >= 0) q.waiters.splice(i, 1); resolve(); };
+      const t = setTimeout(finish, timeout * 1000);
+      q.waiters.push(finish);
+      req.on('close', finish);
+    });
+    list = pick();
+  }
+  res.json({ ok: true, result: list });
+});
+app.post('/api/bot/:token/setMyCommands', (req, res) => {
+  const bot = findBotByToken(req.params.token);
+  if (!bot) return res.status(401).json({ error: 'Неверный ключ' });
+  const list = Array.isArray(req.body?.commands) ? req.body.commands : [];
+  bot.botCommands = list.slice(0, 50).map((c) => ({ command: String(c.command || '').replace(/^\//, '').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 32), description: String(c.description || '').slice(0, 80) })).filter((c) => c.command);
+  persist();
+  io.emit('users_update', listUsers());
+  res.json({ ok: true, result: bot.botCommands });
+});
+app.get('/api/bot/:token/getMyCommands', (req, res) => {
+  const bot = findBotByToken(req.params.token);
+  if (!bot) return res.status(401).json({ error: 'Неверный ключ' });
+  res.json({ ok: true, result: bot.botCommands || [] });
+});
+app.get('/api/bot/:token/getChat', (req, res) => {
+  const bot = findBotByToken(req.params.token);
+  if (!bot) return res.status(401).json({ error: 'Неверный ключ' });
+  const bc = botChat(bot, req.query.chat_id);
+  if (bc.error) return res.status(bc.code).json({ error: bc.error });
+  const c = bc.conv;
+  res.json({ ok: true, result: { id: c.id, type: c.type === 'dm' ? 'private' : c.type, title: c.name || null, handle: c.handle || null, members_count: c.participants.length, members: c.participants, owner: convOwner(c), admins: c.admins || [] } });
+});
+app.post('/api/bot/:token/sendChatAction', (req, res) => {
+  const bot = findBotByToken(req.params.token);
+  if (!bot) return res.status(401).json({ error: 'Неверный ключ' });
+  const bc = botChat(bot, req.body?.chat_id);
+  if (bc.error) return res.status(bc.code).json({ error: bc.error });
+  emitToConv(bc.conv, 'typing', { conversationId: bc.conv.id, user: bot.username }, bot.username);
+  res.json({ ok: true });
+});
+app.post('/api/bot/:token/deleteMessage', (req, res) => {
+  const bot = findBotByToken(req.params.token);
+  if (!bot) return res.status(401).json({ error: 'Неверный ключ' });
+  const bc = botChat(bot, req.body?.chat_id);
+  if (bc.error) return res.status(bc.code).json({ error: bc.error });
+  const msg = bc.conv.messages.find((m) => m.id === String(req.body?.message_id || ''));
+  if (!msg || msg.deleted) return res.status(404).json({ error: 'Сообщение не найдено' });
+  if (key(msg.from) !== key(bot.username)) return res.status(403).json({ error: 'Можно удалять только свои сообщения' });
+  deleteMsg(bc.conv, msg);
+  res.json({ ok: true });
+});
+app.post('/api/bot/:token/editMessageText', (req, res) => {
+  const bot = findBotByToken(req.params.token);
+  if (!bot) return res.status(401).json({ error: 'Неверный ключ' });
+  const bc = botChat(bot, req.body?.chat_id);
+  if (bc.error) return res.status(bc.code).json({ error: bc.error });
+  const msg = bc.conv.messages.find((m) => m.id === String(req.body?.message_id || ''));
+  const text = String(req.body?.text || '').trim().slice(0, TEXT_MAX);
+  if (!msg || msg.deleted || msg.type !== 'text') return res.status(404).json({ error: 'Сообщение не найдено' });
+  if (key(msg.from) !== key(bot.username)) return res.status(403).json({ error: 'Можно менять только свои сообщения' });
+  if (!text) return res.status(400).json({ error: 'Нужен text' });
+  msg.text = text; msg.edited = true;
+  if (bc.conv.messages[bc.conv.messages.length - 1].id === msg.id) bc.conv.lastMessage.text = text;
+  persist();
+  emitToConv(bc.conv, 'message_updated', msg);
+  res.json({ ok: true, result: tgMessage(bc.conv, msg) });
+});
+const sendBotFile = (kind) => [express.raw({ type: '*/*', limit: MAX_FILE + 2048 }), (req, res) => {
+  const bot = findBotByToken(req.params.token);
+  if (!bot) return res.status(401).json({ error: 'Неверный ключ' });
+  const bc = botChat(bot, req.query.chat_id || req.headers['x-chat-id']);
+  if (bc.error) return res.status(bc.code).json({ error: bc.error });
+  const buf = req.body;
+  if (!Buffer.isBuffer(buf) || !buf.length) return res.status(400).json({ error: 'Пустой файл: отправьте содержимое файла телом запроса' });
+  if (buf.length > MAX_FILE) return res.status(400).json({ error: 'Максимум 10 МБ' });
+  const rec = storeFile(buf, req.headers['x-filename'] || (kind === 'image' ? 'photo.jpg' : 'file'), req.headers['x-mime'] || (kind === 'image' ? 'image/jpeg' : 'application/octet-stream'), bot.username);
+  let caption = '';
+  try { caption = decodeURIComponent(String(req.headers['x-caption'] || req.query.caption || '')).slice(0, TEXT_MAX); } catch { }
+  const conv = bc.conv;
+  const ts = Date.now();
+  const file = fileRef(rec.id);
+  const msg = { id: uid(), conversationId: conv.id, from: bot.username, type: kind, text: caption || (kind === 'image' ? 'Изображение' : file.name), file, ts, time: timeLabel(ts), replyTo: null, reactions: {}, edited: false, deleted: false };
+  conv.lastMessage = { text: kind === 'image' ? '📷 Изображение' : '📎 ' + file.name, ts, from: bot.username, time: msg.time };
+  pushMessage(conv, msg);
+  res.json({ ok: true, result: tgMessage(conv, msg), message_id: msg.id, chat_id: conv.id });
+}];
+app.post('/api/bot/:token/sendDocument', ...sendBotFile('file'));
+app.post('/api/bot/:token/sendPhoto', ...sendBotFile('image'));
+app.get('/sdk/:name', (req, res) => {
+  const name = String(req.params.name || '');
+  if (!/^[\w.-]+\.py$/.test(name)) return res.status(404).end();
+  const f = path.join(__dirname, 'sdk', name);
+  if (!fs.existsSync(f)) return res.status(404).end();
+  res.type('text/x-python; charset=utf-8');
+  res.set('Content-Disposition', 'inline; filename="' + name + '"');
+  res.send(fs.readFileSync(f, 'utf8'));
+});
+
+/* ---- AI-помощник ---- */
+app.get('/api/ai/info', (req, res) => res.json(aiInfo()));
+app.post('/api/ai', async (req, res) => {
+  const acc = bearerAcc(req);
+  if (!acc) return res.status(401).json({ error: 'Нужна авторизация' });
+  if (!aiAllowed(acc.username)) return res.status(429).json({ error: 'Слишком часто. Подождите минуту.' });
+  const action = String(req.body?.action || 'fix');
+  let text = String(req.body?.text || '');
+  if (!text.trim()) return res.status(400).json({ error: 'Пустой текст' });
+  if (text.length > TEXT_MAX) text = text.slice(0, TEXT_MAX);
+  if (AI.key) {
+    try { return res.json({ ok: true, text: await askLLM(AI_PROMPTS[action] || AI_PROMPTS.fix, text), engine: 'llm' }); }
+    catch (e) { if (action !== 'fix') return res.status(502).json({ error: 'ИИ недоступен: ' + e.message }); console.warn('AI fallback:', e.message); }
+  }
+  if (action !== 'fix') return res.status(400).json({ error: 'Эта функция требует ключ нейросети (AI_API_KEY в .env). Без ключа доступно «Исправить ошибки».' });
+  const r = basicFix(text);
+  res.json({ ok: true, text: r.text, engine: 'basic', changes: r.changes });
 });
 
 app.post(
@@ -964,6 +1394,9 @@ io.on('connection', (socket) => {
   console.log('✅ Подключился:', socket.id);
 
   socket.on('auth', (token) => {
+    const sess = sessions.get(String(token || ''));
+    const bannedAcc = sess && accounts.get(key(sess.username));
+    if (bannedAcc && bannedAcc.banned) { socket.emit('auth_error', 'Аккаунт заблокирован администрацией' + (bannedAcc.banReason ? ': ' + bannedAcc.banReason : '')); return; }
     const acc = sessionUser(String(token || ''));
     if (!acc) {
       socket.emit('auth_error', 'Сессия истекла. Войдите снова.');
@@ -1361,6 +1794,7 @@ io.on('connection', (socket) => {
     if (conv.type === 'dm' && key(username) !== BOTFATHER && conv.participants.some((p) => key(p) === BOTFATHER)) {
       try { botFatherHandle(username, conv, msg); } catch (e) { console.error('BotFather:', e); }
     }
+    dispatchToBots(conv, msg);
   });
 
   socket.on('star_message', (data) => {
@@ -1426,20 +1860,61 @@ io.on('connection', (socket) => {
     const conv = convMap.get(data.conversationId);
     if (!conv) return;
     const msg = conv.messages.find((m) => m.id === data.id);
-    if (!msg || key(msg.from) !== key(username) || msg.deleted) return;
-    msg.deleted = true;
-    msg.text = '';
-    msg.file = null;
-    msg.ciphertext = null;
-    msg.replyTo = null;
-    if (conv.lastMessage && conv.messages[conv.messages.length - 1].id === msg.id) {
-      conv.lastMessage.text = 'Сообщение удалено';
-    }
+    if (!msg || msg.deleted) return;
+    const own = key(msg.from) === key(username);
+    const member = conv.participants.some((p) => key(p) === key(username));
+    // своё сообщение, админ группы/канала или модератор (верифицированный аккаунт)
+    if (!own && !(member && (conv.type === 'group' || conv.type === 'channel') && isConvAdmin(conv, username)) && !isMod(username)) return;
+    deleteMsg(conv, msg);
+  });
+
+  /* ---- Модерация (верифицированные аккаунты) ---- */
+  socket.on('mod_list', () => {
+    const username = me(socket);
+    if (!username || !isMod(username)) return;
+    socket.emit('mod_list_ok', modSnapshot());
+  });
+  socket.on('mod_ban_user', (data) => {
+    const username = me(socket);
+    if (!username || !isMod(username) || !data) return;
+    const target = accounts.get(key(String(data.user || '')));
+    if (!target || target.system) return socket.emit('action_error', 'Пользователь не найден');
+    if (isOwnerUser(target.username)) return socket.emit('action_error', 'Владельца нельзя заблокировать');
+    if (isVerified(target.username) && !isOwnerUser(username)) return socket.emit('action_error', 'Верифицированного пользователя может заблокировать только владелец');
+    target.banned = !!data.ban;
+    target.banReason = data.ban ? String(data.reason || '').slice(0, 120) : '';
+    if (target.banned) kickUser(target.username, 'Аккаунт заблокирован администрацией' + (target.banReason ? ': ' + target.banReason : ''));
     persist();
-    emitToConv(conv, 'message_updated', msg);
-    for (const p of conv.participants) {
-      emitToUser(p, 'conversation_upsert', convForClient(conv, p));
-    }
+    io.emit('users_update', listUsers());
+    socket.emit('mod_ok', { type: data.ban ? 'ban' : 'unban', user: target.username });
+  });
+  socket.on('mod_set_verified', (data) => {
+    const username = me(socket);
+    if (!username || !isOwnerUser(username) || !data) return;
+    const target = accounts.get(key(String(data.user || '')));
+    if (!target || target.system) return socket.emit('action_error', 'Пользователь не найден');
+    if (isOwnerUser(target.username)) return socket.emit('action_error', 'У владельца галочка всегда');
+    target.verified = !!data.verified;
+    persist();
+    io.emit('users_update', listUsers());
+    socket.emit('mod_ok', { type: data.verified ? 'verify' : 'unverify', user: target.username });
+  });
+  socket.on('mod_delete_conversation', (data) => {
+    const username = me(socket);
+    if (!username || !isMod(username) || !data) return;
+    const conv = convMap.get(String(data.conversationId || ''));
+    if (!conv || (conv.type !== 'group' && conv.type !== 'channel')) return socket.emit('action_error', 'Можно удалять только группы и каналы');
+    const o = convOwner(conv);
+    if (o && isOwnerUser(o) && !isOwnerUser(username)) return socket.emit('action_error', 'Чат владельца может удалить только владелец');
+    removeConversationForAll(conv, 'moderation');
+    socket.emit('mod_ok', { type: 'delete_conversation', conversationId: conv.id, name: conv.name });
+  });
+  socket.on('mod_dismiss_report', (data) => {
+    const username = me(socket);
+    if (!username || !isMod(username) || !data) return;
+    const i = reports.findIndex((r) => r.id === data.id);
+    if (i >= 0) { reports.splice(i, 1); persist(); }
+    socket.emit('mod_list_ok', modSnapshot());
   });
 
   socket.on('react', (data) => {
@@ -1879,8 +2354,10 @@ io.on('connection', (socket) => {
 });
 
 ensureSystemBots();
+checkInstance();
 
 const PORT = process.env.PORT || 10000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server started on port ${PORT}`);
+  console.log(`   NMessenger © ${Array.from(OWNERS).join(', ')} — владельцы/модераторы: ${Array.from(OWNERS).map((o) => '@' + o).join(', ')}${AI.key ? ' · AI: ' + AI.model : ' · AI: встроенный корректор (AI_API_KEY не задан)'}`);
 });

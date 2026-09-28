@@ -1,15 +1,23 @@
 {
   "name": "nmessenger",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "owner-key": "node tools/owner-key.js",
+    "build": "node tools/build.js",
+    "bot:example": "python3 sdk/example_bot.py"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "livekit-client": "2.15.16",
     "livekit-server-sdk": "^2.6.1",
     "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "javascript-obfuscator": "^5.8.0",
+    "terser": "^5.51.2"
   }
 }
