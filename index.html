@@ -213,6 +213,23 @@ img{display:block}
 .b-name{font-weight:600;font-size:13px;color:var(--accent);margin-bottom:2px;cursor:pointer}
 .b-text{white-space:pre-wrap}
 .b-text.big{font-size:44px;line-height:1.2;padding:4px 0}
+/* анимированные эмодзи (Noto Animated Emoji) */
+.aemoji{display:inline-block;position:relative;vertical-align:middle;margin:0 1px;line-height:1;flex:none}
+.aemoji .aemoji-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.aemoji.on .aemoji-txt{visibility:hidden}
+.aemoji-cv{position:absolute;inset:0;display:block}
+.aemoji-cv svg{display:block;width:100%!important;height:100%!important}
+.aemoji-st{vertical-align:middle;line-height:1}
+.b-text.big.anim{display:flex;align-items:flex-end;flex-wrap:wrap;gap:2px;padding:2px 0}
+.b-text.big.anim .b-meta{float:none;margin:0 0 6px 8px;top:0}
+.msg.emo .bubble{background:transparent;box-shadow:none;padding:0 2px;min-width:0}
+.msg.emo .b-meta{background:rgba(0,0,0,.42);color:#fff;padding:3px 7px;border-radius:10px;backdrop-filter:blur(6px);margin:0 0 8px 6px}
+.msg.emo .b-meta .read{color:#9fdcff}
+.msg.emo .reactions{margin-left:6px}
+.ctx-reacts button .aemoji{margin:0}
+.aemoji-burst{position:fixed;z-index:80;pointer-events:none;animation:aeBurst 2.2s ease-out forwards}
+.aemoji-burst svg{display:block;width:100%!important;height:100%!important}
+@keyframes aeBurst{0%{transform:scale(.3);opacity:0}15%{transform:scale(1.15);opacity:1}30%{transform:scale(1)}75%{opacity:1;transform:scale(1) translateY(-8px)}100%{opacity:0;transform:scale(1.25) translateY(-34px)}}
 .b-text.deleted{color:var(--text-2);font-style:italic;display:flex;align-items:center;gap:6px}
 .out .b-text.deleted{color:rgba(255,255,255,.8)}
 .b-text pre.code{background:rgba(0,0,0,.25);padding:8px 10px;border-radius:8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;overflow-x:auto;margin:4px 0;white-space:pre-wrap}
@@ -375,7 +392,7 @@ img{display:block}
 .ctx-item .ic{width:20px;height:20px;color:var(--text-2)}
 .ctx-item.danger .ic{color:var(--danger)}
 .ctx-reacts{display:flex;gap:2px;padding:4px 4px 8px;justify-content:space-between}
-.ctx-reacts button{font-size:22px;width:38px;height:38px;border-radius:50%;transition:transform .1s,background .1s;display:flex;align-items:center;justify-content:center}
+.ctx-reacts button{font-size:22px;width:38px;height:38px;flex:none;border-radius:50%;transition:transform .1s,background .1s;display:flex;align-items:center;justify-content:center}
 .ctx-reacts button:hover{background:var(--surface-hover);transform:scale(1.2)}
 .ctx-sep{height:1px;background:var(--border);margin:4px 8px}
 .ctx-title{padding:6px 12px 8px;font-size:12px;color:var(--text-2);font-weight:600}
@@ -1082,12 +1099,101 @@ function renderText(raw, q) {
   if (q) { const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?![^<]*>)', 'gi'); t = t.replace(re, '<mark>$1</mark>'); }
   return t;
 }
+// одна «эмодзи-последовательность»: пиктограмма с тоном кожи/VS16 и ZWJ-цепочками, флаг (пара региональных индикаторов) или keycap
+const EMOJI_SEQ = '\\p{Extended_Pictographic}(?:\\uFE0F|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:\\uFE0F|\\p{Emoji_Modifier})?)*|\\p{Regional_Indicator}{2}|[#*0-9]\\uFE0F?\\u20E3';
+const EMOJI_SEQ_RE = new RegExp(EMOJI_SEQ, 'gu');
 function isEmojiOnly(s) {
-  const t = String(s || '').trim(); if (!t || t.length > 20) return false;
-  const stripped = t.replace(/\p{Extended_Pictographic}|\p{Emoji_Modifier}|\uFE0F|\u200D|\u20E3/gu, '');
-  if (stripped.trim()) return false;
-  const n = (t.match(/\p{Extended_Pictographic}/gu) || []).length;
+  const t = String(s || '').trim(); if (!t || t.length > 24) return false;
+  if (t.replace(EMOJI_SEQ_RE, '').replace(/[\s\uFE0F]/gu, '')) return false;
+  const n = (t.match(EMOJI_SEQ_RE) || []).length;
   return n > 0 && n <= 3;
+}
+/* ---------- анимированные эмодзи (Google Noto Animated Emoji, CC BY 4.0) ---------- */
+const ANIM_EMOJI_IDS = '1f600 1f603 1f604 1f601 1f606 1f605 1f602 1f923 1f62d 1f609 1f617 1f619 1f61a 1f618 1f970 1f60d 1f929 1f973 1fae0 1f643 1f642 1f972 1f979 1f60a 263a_fe0f 1f60c 1f642_200d_2195_fe0f 1f642_200d_2194_fe0f 1f60f 1f924 1f60b 1f61b 1f61d 1f61c 1f92a 1faea 1f614 1f97a 1f62c 1f611 1f610 1f636 1f636_200d_1f32b_fe0f 1fae5 1f910 1fae1 1f914 1f92b 1fae2 1f92d 1f971 1f917 1fae3 1f631 1f928 1f9d0 1f612 1f644 1f62e_200d_1f4a8 1f624 1f620 1f621 1f92c 1f61e 1f613 1f61f 1f625 1f622 2639_fe0f 1f641 1fae4 1f615 1f630 1f628 1f627 1f626 1f62e 1f62f 1f632 1f633 1f92f 1f616 1f623 1f629 1f62b 1f635 1f635_200d_1f4ab 1fae8 1f974 1f975 1f976 1f922 1f92e 1fae9 1f634 1f62a 1f927 1f912 1f915 1f637 1f925 1f607 1f920 1f911 1f913 1f60e 1f978 1f921 1f4a9 1f608 1f47f 1f47b 1f480 1f916 1f479 2603_fe0f 26c4 1f47d 1f47e 1f31a 1f31d 1f31e 1f31b 1f31c 1f63a 1f638 1f639 1f63b 1f63c 1f63d 1f640 1f63f 1f63e 1f648 1f649 1f64a 2b50 1f31f 2728 26a1 1f4a5 1faef 1f573_fe0f 1f525 1f4af 1f389 1f38a 2764_fe0f 1f9e1 1f49b 1f49a 1fa75 1f499 1f49c 1f90e 1f5a4 1fa76 1f90d 1fa77 1f498 1f49d 1f496 1f497 1f493 1f49e 1f495 1f48c 1f49f 2665_fe0f 2763_fe0f 2764_fe0f_200d_1fa79 1f494 2764_fe0f_200d_1f525 1f48b 1fac2 1f5e3_fe0f 1f463 1fac6 1f9e0 1fac0 1fa78 1f9a0 1f9b4 1f440 1f441_fe0f 1fae6 1f443 1f443_1f3fb 1f443_1f3fc 1f443_1f3fd 1f443_1f3fe 1f443_1f3ff 1f442 1f442_1f3fb 1f442_1f3fc 1f442_1f3fd 1f442_1f3fe 1f442_1f3ff 1f9bb 1f9bb_1f3fb 1f9bb_1f3fc 1f9bb_1f3fd 1f9bb_1f3fe 1f9bb_1f3ff 1f9b6 1f9b6_1f3fb 1f9b6_1f3fc 1f9b6_1f3fd 1f9b6_1f3fe 1f9b6_1f3ff 1f9b5 1f9b5_1f3fb 1f9b5_1f3fc 1f9b5_1f3fd 1f9b5_1f3fe 1f9b5_1f3ff 1f9bf 1f9be 1f4aa 1f4aa_1f3fb 1f4aa_1f3fc 1f4aa_1f3fd 1f4aa_1f3fe 1f4aa_1f3ff 1f44f 1f44f_1f3fb 1f44f_1f3fc 1f44f_1f3fd 1f44f_1f3fe 1f44f_1f3ff 1f44d 1f44d_1f3fb 1f44d_1f3fc 1f44d_1f3fd 1f44d_1f3fe 1f44d_1f3ff 1f44e 1f44e_1f3fb 1f44e_1f3fc 1f44e_1f3fd 1f44e_1f3fe 1f44e_1f3ff 1faf6 1faf6_1f3fb 1faf6_1f3fc 1faf6_1f3fd 1faf6_1f3fe 1faf6_1f3ff 1f64c 1f64c_1f3fb 1f64c_1f3fc 1f64c_1f3fd 1f64c_1f3fe 1f64c_1f3ff 1f450 1f450_1f3fb 1f450_1f3fc 1f450_1f3fd 1f450_1f3fe 1f450_1f3ff 1f932 1f932_1f3fb 1f932_1f3fc 1f932_1f3fd 1f932_1f3fe 1f932_1f3ff 1f91c 1f91c_1f3fb 1f91c_1f3fc 1f91c_1f3fd 1f91c_1f3fe 1f91c_1f3ff 1f91b 1f91b_1f3fb 1f91b_1f3fc 1f91b_1f3fd 1f91b_1f3fe 1f91b_1f3ff 270a 270a_1f3fb 270a_1f3fc 270a_1f3fd 270a_1f3fe 270a_1f3ff 1f44a 1f44a_1f3fb 1f44a_1f3fc 1f44a_1f3fd 1f44a_1f3fe 1f44a_1f3ff 1faf3 1faf3_1f3fb 1faf3_1f3fc 1faf3_1f3fd 1faf3_1f3fe 1faf3_1f3ff 1faf4 1faf4_1f3fb 1faf4_1f3fc 1faf4_1f3fd 1faf4_1f3fe 1faf4_1f3ff 1faf1 1faf1_1f3fb 1faf1_1f3fc 1faf1_1f3fd 1faf1_1f3fe 1faf1_1f3ff 1faf2 1faf2_1f3fb 1faf2_1f3fc 1faf2_1f3fd 1faf2_1f3fe 1faf2_1f3ff 1faf8 1faf8_1f3fb 1faf8_1f3fc 1faf8_1f3fd 1faf8_1f3fe 1faf8_1f3ff 1faf7 1faf7_1f3fb 1faf7_1f3fc 1faf7_1f3fd 1faf7_1f3fe 1faf7_1f3ff 1f44b 1f44b_1f3fb 1f44b_1f3fc 1f44b_1f3fd 1f44b_1f3fe 1f44b_1f3ff 1f91a 1f91a_1f3fb 1f91a_1f3fc 1f91a_1f3fd 1f91a_1f3fe 1f91a_1f3ff 1f590_fe0f 1f590_1f3fb 1f590_1f3fc 1f590_1f3fd 1f590_1f3fe 1f590_1f3ff 270b 270b_1f3fb 270b_1f3fc 270b_1f3fd 270b_1f3fe 270b_1f3ff 1f596 1f596_1f3fb 1f596_1f3fc 1f596_1f3fd 1f596_1f3fe 1f596_1f3ff 1f91f 1f91f_1f3fb 1f91f_1f3fc 1f91f_1f3fd 1f91f_1f3fe 1f91f_1f3ff 1f918 1f918_1f3fb 1f918_1f3fc 1f918_1f3fd 1f918_1f3fe 1f918_1f3ff 270c_fe0f 270c_1f3fb 270c_1f3fc 270c_1f3fd 270c_1f3fe 270c_1f3ff 1f91e 1f91e_1f3fb 1f91e_1f3fc 1f91e_1f3fd 1f91e_1f3fe 1f91e_1f3ff 1faf0 1faf0_1f3fb 1faf0_1f3fc 1faf0_1f3fd 1faf0_1f3fe 1faf0_1f3ff 1f919 1f919_1f3fb 1f919_1f3fc 1f919_1f3fd 1f919_1f3fe 1f919_1f3ff 1f90c 1f90c_1f3fb 1f90c_1f3fc 1f90c_1f3fd 1f90c_1f3fe 1f90c_1f3ff 1f90f 1f90f_1f3fb 1f90f_1f3fc 1f90f_1f3fd 1f90f_1f3fe 1f90f_1f3ff 1f44c 1f44c_1f3fb 1f44c_1f3fc 1f44c_1f3fd 1f44c_1f3fe 1f44c_1f3ff 1faf5 1faf5_1f3fb 1faf5_1f3fc 1faf5_1f3fd 1faf5_1f3fe 1faf5_1f3ff 1f449 1f449_1f3fb 1f449_1f3fc 1f449_1f3fd 1f449_1f3fe 1f449_1f3ff 1f448 1f448_1f3fb 1f448_1f3fc 1f448_1f3fd 1f448_1f3fe 1f448_1f3ff 261d_fe0f 261d_1f3fb 261d_1f3fc 261d_1f3fd 261d_1f3fe 261d_1f3ff 1f446 1f446_1f3fb 1f446_1f3fc 1f446_1f3fd 1f446_1f3fe 1f446_1f3ff 1f447 1f447_1f3fb 1f447_1f3fc 1f447_1f3fd 1f447_1f3fe 1f447_1f3ff 1f595 1f595_1f3fb 1f595_1f3fc 1f595_1f3fd 1f595_1f3fe 1f595_1f3ff 270d_fe0f 270d_1f3fb 270d_1f3fc 270d_1f3fd 270d_1f3fe 270d_1f3ff 1f933 1f933_1f3fb 1f933_1f3fc 1f933_1f3fd 1f933_1f3fe 1f933_1f3ff 1f64f 1f64f_1f3fb 1f64f_1f3fc 1f64f_1f3fd 1f64f_1f3fe 1f64f_1f3ff 1f485 1f485_1f3fb 1f485_1f3fc 1f485_1f3fd 1f485_1f3fe 1f485_1f3ff 1f91d 1f91d_1f3fb 1faf1_1f3fb_200d_1faf2_1f3fc 1faf1_1f3fb_200d_1faf2_1f3fd 1faf1_1f3fb_200d_1faf2_1f3fe 1faf1_1f3fb_200d_1faf2_1f3ff 1faf1_1f3fc_200d_1faf2_1f3fb 1f91d_1f3fc 1faf1_1f3fc_200d_1faf2_1f3fd 1faf1_1f3fc_200d_1faf2_1f3fe 1faf1_1f3fc_200d_1faf2_1f3ff 1faf1_1f3fd_200d_1faf2_1f3fb 1faf1_1f3fd_200d_1faf2_1f3fc 1f91d_1f3fd 1faf1_1f3fd_200d_1faf2_1f3fe 1faf1_1f3fd_200d_1faf2_1f3ff 1faf1_1f3fe_200d_1faf2_1f3fb 1faf1_1f3fe_200d_1faf2_1f3fc 1faf1_1f3fe_200d_1faf2_1f3fd 1f91d_1f3fe 1faf1_1f3fe_200d_1faf2_1f3ff 1faf1_1f3ff_200d_1faf2_1f3fb 1faf1_1f3ff_200d_1faf2_1f3fc 1faf1_1f3ff_200d_1faf2_1f3fd 1faf1_1f3ff_200d_1faf2_1f3fe 1f91d_1f3ff 1fa82 1fac8 1f483 1f483_1f3fb 1f483_1f3fc 1f483_1f3fd 1f483_1f3fe 1f483_1f3ff 1f490 1f339 1f940 1f337 1fab7 1f338 1fabb 1f33c 1f342 1f341 1f344 1f33f 1f331 1f343 1f340 1f335 1fabe 1f332 1faa8 1f6d8 1f30b 1f3de_fe0f 1f305 1f304 1f30a 1f32c_fe0f 2744_fe0f 1f300 1f32a_fe0f 1f308 1f4a7 2601_fe0f 1f327_fe0f 1f329_fe0f 26c5 1fa90 1f30d 1f30e 1f30f 1f30c 2604_fe0f 1f981 1f43a 1f43b 1f43c 1f98a 1f42e 1f984 1f98e 1f409 1f996 1f995 1f422 1f40a 1f40d 1f438 1f407 1f400 1f429 1f415 1f9ae 1f415_200d_1f9ba 1f416 1f40e 1facf 1f402 1f410 1f9a5 1f998 1f405 1f412 1f98d 1f9a7 1f43f_fe0f 1f99d 1f994 1f9a6 1f987 1f426 1f426_200d_2b1b 1f413 1f423 1f424 1f425 1f985 1f989 1f54a_fe0f 1fabf 1f9a9 1f99a 1f426_200d_1f525 1f427 1f9ad 1f988 1facd 1f42c 1f433 1f41f 1f421 1f99e 1f980 1f419 1fabc 1fae7 1f982 1f577_fe0f 1f40c 1f41c 1f997 1f99f 1fab3 1fab0 1f41d 1f41e 1f98b 1f41b 1fab1 1f43e 1f353 1f352 1f34e 1f345 1f349 1f34a 1f955 1f96d 1f34d 1f33d 1f34b 1f348 1f350 1fadb 1f96c 1fad1 1f95d 1f951 1f966 1f952 1fad0 1f347 1fadc 1f954 1f9c5 1fada 1f9c4 1fad8 1f35e 1f95e 1f373 1f9c0 1f953 1f357 1f354 1f32d 1f968 1f355 1f32e 1f32f 1f35d 1f957 1f35c 1f362 1f361 1f368 1f366 1f967 1f369 1f36a 1f9c2 1f37f 1f9cb 1f9c3 1f37c 1f375 2615 1fad6 1f9c9 1f37b 1f942 1f37e 1f377 1fad7 1f379 1f962 1f37d_fe0f 1f6d1 1f6a7 1f6a8 26fd 1f6df 2693 1f6a6 1f6b2 1f3cd_fe0f 1f697 1f69a 1f69c 1f3ce_fe0f 1f695 1f68c 1f682 26f5 1f6f6 1f6f8 1f680 2708_fe0f 1f6eb 1f6ec 1f3a2 1f3a1 1f3a0 1f5ff 1f3da_fe0f 1f3e0 1f3d5_fe0f 1f307 1f388 1f382 1f381 1f386 1fa94 1fa85 1faa9 1f947 1f948 1f949 1f3c6 26bd 26be 1f94e 1f3c0 1f3c9 1f3be 1f3f8 1f94d 1f3cf 1f3d1 1f3d2 1f3bf 26f8_fe0f 1f6fc 1fa70 1f6f9 26f3 1f3af 1f94f 1fa83 1fa81 1f3a3 1f94b 1f3b1 1f3d3 1f3b3 265f_fe0f 1f3b2 1f3b0 1fa84 1f4f7 1f4f8 1fadf 1f3b7 1f3ba 1fa8a 1f3b8 1fa95 1f3bb 1fa89 1f941 1fa87 1f4fa 1f39e_fe0f 1f3ac 1f3ad 1f39f_fe0f 1f4df 1f50c 1f50b 1faab 1f4bf 1f4bb 1f5a8_fe0f 1fa8e 1fa99 1f48e 1f4b8 2696_fe0f 1f6d2 1f4a1 1f9f9 1f9e6 1f393 1f451 1f48d 1faad 2602_fe0f 1f460 1f45f 1f321_fe0f 1fa7a 1f6e0_fe0f 1fa8f 2699_fe0f 26d3_fe0f_200d_1f4a5 26d3_fe0f 1f587_fe0f 2702_fe0f 270f_fe0f 1f4da 1f4ca 1f4c8 1f4c9 1f5d1_fe0f 1f4e6 1f5f3_fe0f 23f0 231b 23f3 1f6ce_fe0f 1f514 1f4e3 1f50e 1f52e 1f4a3 1faa4 1f512 2660_fe0f 2648 2649 264a 264b 264c 264d 264e 264f 2650 2651 2652 2653 26ce 1f5ef_fe0f 1f4ac 2757 2753 2049_fe0f 203c_fe0f 274c 1f198 2668_fe0f 1f4f4 2622_fe0f 2623_fe0f 26a0_fe0f 2705 1f195 1f193 1f199 1f197 1f192 1f6ae 262e_fe0f 262f_fe0f 267e_fe0f 1f3b6 2795 a9_fe0f ae_fe0f 2122_fe0f 1f3c1 1f6a9 1f3f4 1f3f3_fe0f';
+const AnimEmoji = (() => {
+  const IDS = new Set(ANIM_EMOJI_IDS.split(' '));
+  const GRAPHEME = new RegExp(EMOJI_SEQ + '|\\s+|.', 'gsu');
+  let on = localStorage.getItem('nm_anim_emoji') !== '0';
+  let lib = null, libP = null, broken = false;
+  const cache = new Map(); // id → Promise<string|null> (JSON анимации текстом; парсится на каждый экземпляр)
+  const live = new Set();
+  const vis = 'IntersectionObserver' in window ? new IntersectionObserver((ents) => { for (const e of ents) { const a = e.target._anim; if (!a) continue; if (e.isIntersecting) a.play(); else a.pause(); } }) : null;
+  function idOf(g) {
+    const cps = Array.from(g).map((c) => c.codePointAt(0).toString(16));
+    let id = cps.join('_'); if (IDS.has(id)) return id;
+    const noVs = cps.filter((h) => h !== 'fe0f'); id = noVs.join('_'); if (IDS.has(id)) return id;
+    if (noVs.length === 1 && IDS.has(noVs[0] + '_fe0f')) return noVs[0] + '_fe0f';
+    return null;
+  }
+  const ok = () => on && !broken && !!S.animEmoji;
+  // Разметка для текста из эмодзи: анимируемые → <span class="aemoji">, остальные — обычным текстом
+  function render(text, size) {
+    if (!ok()) return null;
+    const emo = (String(text).match(GRAPHEME) || []).filter((g) => !/^\s+$/.test(g));
+    const n = emo.length; if (!n || n > 3) return null;
+    const px = size || (n === 1 ? 128 : n === 2 ? 96 : 76);
+    let anim = 0;
+    const html = emo.map((g) => { const id = idOf(g); if (!id) return `<span class="aemoji-st" style="font-size:${Math.round(px * 0.78)}px">${esc(g)}</span>`; anim++; return `<span class="aemoji" data-eid="${id}" style="width:${px}px;height:${px}px;font-size:${Math.round(px * 0.78)}px"><span class="aemoji-txt">${esc(g)}</span></span>`; }).join('');
+    return anim ? { html, n, px, all: anim === n } : null;
+  }
+  function loadLib() {
+    if (lib) return Promise.resolve(lib);
+    if (libP) return libP;
+    libP = new Promise((resolve) => {
+      if (window.lottie) { lib = window.lottie; return resolve(lib); }
+      const sc = document.createElement('script'); sc.src = '/vendor/lottie.js';
+      sc.onload = () => { lib = window.lottie || null; if (!lib) broken = true; resolve(lib); };
+      sc.onerror = () => { broken = true; resolve(null); };
+      document.head.appendChild(sc);
+    });
+    return libP;
+  }
+  function getData(id) {
+    if (!cache.has(id)) cache.set(id, fetch('/emoji/' + id + '.json').then((r) => (r.ok ? r.text() : null)).catch(() => null));
+    return cache.get(id);
+  }
+  function drop(it) { try { it.anim.destroy(); } catch { } if (vis) vis.unobserve(it.el); it.el._anim = null; live.delete(it); }
+  function gc() { for (const it of live) if (!it.el.isConnected) drop(it); }
+  async function mount(root) {
+    if (!ok() || !root || !root.querySelectorAll) return;
+    const els = [...root.querySelectorAll('.aemoji:not([data-ready])')]; if (!els.length) return;
+    els.forEach((el) => { el.dataset.ready = '1'; });
+    const L = await loadLib(); if (!L) return;
+    gc();
+    for (const el of els) {
+      getData(el.dataset.eid).then((txt) => {
+        if (!txt || !el.isConnected || !ok()) return;
+        let data; try { data = JSON.parse(txt); } catch { return; }
+        const holder = document.createElement('span'); holder.className = 'aemoji-cv'; el.appendChild(holder);
+        try {
+          const anim = L.loadAnimation({ container: holder, renderer: 'svg', loop: true, autoplay: true, animationData: data, rendererSettings: { preserveAspectRatio: 'xMidYMid meet', progressiveLoad: false } });
+          el._anim = anim; el.classList.add('on'); live.add({ el, anim }); if (vis) vis.observe(el);
+        } catch { holder.remove(); }
+      });
+    }
+  }
+  // Эффект реакции: эмодзи один раз проигрывается поверх сообщения и растворяется (как в Telegram)
+  function burst(target, emoji, size = 84) {
+    if (!ok() || !target) return; const id = idOf(emoji); if (!id) return;
+    loadLib().then((L) => L && getData(id).then((txt) => {
+      if (!txt || !target.isConnected) return;
+      const r = target.getBoundingClientRect(); if (!r.width) return;
+      const el = document.createElement('div'); el.className = 'aemoji-burst';
+      el.style.cssText = `left:${Math.round(r.left + r.width / 2 - size / 2)}px;top:${Math.round(r.top + r.height / 2 - size / 2)}px;width:${size}px;height:${size}px`;
+      document.body.appendChild(el);
+      let anim = null; try { anim = L.loadAnimation({ container: el, renderer: 'svg', loop: false, autoplay: true, animationData: JSON.parse(txt) }); } catch { el.remove(); return; }
+      const done = () => { try { anim.destroy(); } catch { } el.remove(); };
+      el.addEventListener('animationend', done, { once: true }); setTimeout(done, 3000);
+    }));
+  }
+  function setEnabled(v) { on = !!v; localStorage.setItem('nm_anim_emoji', on ? '1' : '0'); if (!on) for (const it of [...live]) drop(it); }
+  return { render, mount, gc, burst, setEnabled, idOf, enabled: () => on, active: () => live.size };
+})();
+function bigTextHTML(text, q, meta, transform) {
+  const big = isEmojiOnly(text);
+  if (big && !q) { const a = AnimEmoji.render(text); if (a) return { html: `<div class="b-text big anim">${a.html}${meta}</div>`, emo: a.all }; }
+  const inner = renderText(text, q);
+  return { html: `<div class="b-text ${big ? 'big' : ''}">${transform ? transform(inner) : inner}${meta}</div>`, emo: false };
 }
 function uaParse(ua) {
   ua = ua || '';
@@ -1327,7 +1433,7 @@ async function onAuthOk(d) {
   S.convs = new Map(d.conversations.map((c) => [c.id, c]));
   S.livekit = !!d.livekit; S.settings = d.settings || {}; S.blocked = new Set((d.blocked || []).map(key));
   S.pubKeys = d.pubKeys || {}; S.textMax = d.textMax || 4000; S.folders = d.folders || []; S.bots = d.bots || [];
-  S.ai = d.ai || { llm: false, actions: ['fix'] }; S.isMod = !!d.isMod; S.isOwner = !!d.isOwner;
+  S.ai = d.ai || { llm: false, actions: ['fix'] }; S.isMod = !!d.isMod; S.isOwner = !!d.isOwner; S.animEmoji = !!d.animEmoji;
   S.ready = true;
   applySettings(); renderDrawer(); renderFolders(); renderChatList(); updateTitle();
   await E2E.init().catch((e) => console.warn('E2E init', e));
@@ -1648,7 +1754,7 @@ function msgHTML(m, first, last) {
   const status = out && !m.deleted && c?.type !== 'fav' ? (isReadByOthers(c, m.ts) ? icon('check2', 'read') : icon('check')) : '';
   const metaInner = `${m.edited && !m.deleted ? '<span class="edited">изм.</span>' : ''}${c?.type === 'secret' ? icon('lock', 'xs') : ''}<span>${m.time || fmtTime(m.ts)}</span>${status}`;
   const meta = `<span class="b-meta" title="${fmtFull(m.ts)}">${metaInner}</span>`;
-  let body = '', imgOnly = false;
+  let body = '', imgOnly = false, emo = false;
   if (m.starredFrom && c?.type === 'fav') { const sc = S.convs.get(m.starredFrom); body += `<div class="b-star">${icon('bookmark')}Из: ${esc(sc ? convTitle(sc) : 'чата')}</div>`; }
   if (m.deleted) body += `<div class="b-text deleted">${icon('trash', 'sm')}Сообщение удалено${meta}</div>`;
   else if (m.type === 'call') {
@@ -1668,14 +1774,15 @@ function msgHTML(m, first, last) {
       body += pollHTML(m) + `<div class="b-meta-row">${meta}</div>`;
     } else if (m.type === 'secret') {
       const pt = m._plain;
-      body += typeof pt === 'string' ? `<div class="b-text ${isEmojiOnly(pt) ? 'big' : ''}">${renderText(pt, q)}${meta}</div>` : `<div class="b-text dim">${icon('lock', 'sm')} ${pt === false ? 'Не удалось расшифровать (ключ другого устройства)' : 'Расшифровка…'}${meta}</div>`;
-    } else body += `<div class="b-text ${isEmojiOnly(m.text) ? 'big' : ''}">${userOf(m.from)?.isBot ? linkCmds(renderText(m.text, q)) : renderText(m.text, q)}${meta}</div>`;
+      if (typeof pt === 'string') { const r = bigTextHTML(pt, q, meta); body += r.html; emo = r.emo; } else body += `<div class="b-text dim">${icon('lock', 'sm')} ${pt === false ? 'Не удалось расшифровать (ключ другого устройства)' : 'Расшифровка…'}${meta}</div>`;
+    } else { const r = bigTextHTML(m.text, q, meta, userOf(m.from)?.isBot ? linkCmds : null); body += r.html; emo = r.emo; }
   }
   if (imgOnly) body += `<span class="b-meta over" title="${fmtFull(m.ts)}">${metaInner}</span>`;
   const showName = isGroup && !out && first && m.type !== 'call';
   const av = isGroup && !out ? avatarHTML({ name, avatar: u?.avatar, username: m.from, isBot: u?.isBot }, 34, 'm-av') : '';
+  const plainEmo = emo && !showName && !(m.replyTo && m.replyTo.id) && !(m.starredFrom && c?.type === 'fav');
   const actions = m.deleted ? '' : `<div class="msg-actions"><button data-act="react" title="Реакция">${icon('smile')}</button><button data-act="reply" title="Ответить">${icon('reply')}</button><button data-act="more" title="Ещё">${icon('more-h')}</button></div>`;
-  return `<div class="msg ${out ? 'out' : 'in'} ${first ? 'first' : ''} ${last ? 'last' : ''} ${m.type === 'image' && imgOnly ? 'has-img' : m.type === 'image' ? 'has-img cap' : ''}" data-id="${esc(m.id)}" data-from="${esc(m.from)}">${av}<div class="bubble">${showName ? `<div class="b-name" data-user="${esc(m.from)}">${esc(name)}${vbadge(u, 'sm')}</div>` : ''}${body}${reactionsHTML(m)}${actions}</div></div>`;
+  return `<div class="msg ${out ? 'out' : 'in'} ${first ? 'first' : ''} ${last ? 'last' : ''} ${plainEmo ? 'emo' : ''} ${m.type === 'image' && imgOnly ? 'has-img' : m.type === 'image' ? 'has-img cap' : ''}" data-id="${esc(m.id)}" data-from="${esc(m.from)}">${av}<div class="bubble">${showName ? `<div class="b-name" data-user="${esc(m.from)}">${esc(name)}${vbadge(u, 'sm')}</div>` : ''}${body}${reactionsHTML(m)}${actions}</div></div>`;
 }
 /* ---------- опросы ---------- */
 function pollKind(p) { return (p.quiz ? 'Викторина' : 'Опрос') + (p.anonymous ? ' · анонимно' : ' · публично') + (p.multiple ? ' · несколько ответов' : ''); }
@@ -1776,7 +1883,7 @@ function renderMessages(opts = {}) {
   if (!arr.length) { msgsEl.innerHTML = `<div class="list-empty" style="margin:auto">${c.type === 'secret' ? icon('lock') : icon('chat')}${c.type === 'secret' ? 'Секретный чат. Сообщения шифруются на устройстве<br>и не читаются сервером.' : c.type === 'fav' ? 'Здесь можно хранить заметки, ссылки и файлы' : 'Нет сообщений. Напишите первым!'}</div>`; return; }
   let h = '', prevTs = 0;
   arr.forEach((m, i) => { if (!sameDay(m.ts, prevTs)) h += `<div class="date-sep" data-ts="${m.ts}">${fmtDateSep(m.ts)}</div>`; prevTs = m.ts; const { first, last } = groupFlags(arr, i); h += msgHTML(m, first, last); });
-  msgsEl.innerHTML = h;
+  msgsEl.innerHTML = h; AnimEmoji.mount(msgsEl);
   if (opts.keepScroll) return;
   scrollBottom(false); requestAnimationFrame(() => { scrollBottom(false); updateScrollBtn(); });
 }
@@ -1788,13 +1895,13 @@ function appendMessage(m) {
   const wasNear = nearBottom();
   let h = ''; if (!prev || !sameDay(m.ts, prev.ts)) h += `<div class="date-sep" data-ts="${m.ts}">${fmtDateSep(m.ts)}</div>`;
   const { first, last } = groupFlags(arr, i); h += msgHTML(m, first, last);
-  msgsEl.insertAdjacentHTML('beforeend', h);
+  msgsEl.insertAdjacentHTML('beforeend', h); AnimEmoji.mount(msgsEl.lastElementChild);
   if (wasNear || isMe(m.from)) scrollBottom(true);
 }
 function replaceMessageNode(m) {
   const node = msgsEl.querySelector(`[data-id="${CSS.escape(m.id)}"]`); if (!node) return;
   const arr = S.msgs.get(m.conversationId) || []; const i = arr.indexOf(m); const { first, last } = i >= 0 ? groupFlags(arr, i) : { first: true, last: true };
-  const nb = nearBottom(); const tmp = document.createElement('div'); tmp.innerHTML = msgHTML(m, first, last); node.replaceWith(tmp.firstElementChild); if (nb) scrollBottom(false);
+  const nb = nearBottom(); const tmp = document.createElement('div'); tmp.innerHTML = msgHTML(m, first, last); const nn = tmp.firstElementChild; node.replaceWith(nn); AnimEmoji.mount(nn); if (nb) scrollBottom(false);
 }
 function refreshTicks() {
   const c = cur(); if (!c) return; const arr = S.msgs.get(c.id) || [];
@@ -1809,7 +1916,7 @@ msgsEl.addEventListener('click', (e) => {
   if (t.closest('.b-poll')) { pollClick(e); return; }
   const jump = t.closest('.b-reply'); if (jump) { jumpTo(jump.dataset.jump); return; }
   const img = t.closest('.b-img'); if (img) { openLightbox(img.dataset.view, img.dataset.name); return; }
-  const re = t.closest('.react'); if (re) { const msg = t.closest('.msg'); socket.emit('react', { conversationId: S.current, id: msg.dataset.id, emoji: re.dataset.emoji }); return; }
+  const re = t.closest('.react'); if (re) { const msg = t.closest('.msg'); socket.emit('react', { conversationId: S.current, id: msg.dataset.id, emoji: re.dataset.emoji }); if (!re.classList.contains('mine')) AnimEmoji.burst(msg.querySelector('.bubble'), re.dataset.emoji); return; }
   const sp = t.closest('.spoiler'); if (sp) { sp.classList.add('open'); return; }
   const men = t.closest('.mention'); if (men) { e.preventDefault(); openHandle(men.dataset.handle); return; }
   const nm = t.closest('.b-name,.m-av'); if (nm) { const from = t.closest('.msg').dataset.from; openProfile(from); return; }
@@ -2052,7 +2159,7 @@ function showCtx(html, x, y) {
   const w = ctxEl.offsetWidth, h = ctxEl.offsetHeight;
   ctxEl.style.left = clamp(x, 8, window.innerWidth - w - 8) + 'px'; ctxEl.style.top = clamp(y, 8, window.innerHeight - h - 8) + 'px';
 }
-function hideCtx() { ctxEl.classList.add('hidden'); ctxEl.innerHTML = ''; ctxEl.onclick = null; }
+function hideCtx() { ctxEl.classList.add('hidden'); ctxEl.innerHTML = ''; ctxEl.onclick = null; AnimEmoji.gc(); }
 function closeAllPopups() { hideCtx(); $('#emojiPicker').classList.add('hidden'); $('#newMenu').classList.add('hidden'); $('#cmdPop').classList.add('hidden'); $('#aiPop').classList.add('hidden'); $('#attPop').classList.add('hidden'); $('#callSettings').classList.add('hidden'); }
 document.addEventListener('pointerdown', (e) => {
   if (!ctxEl.contains(e.target)) hideCtx();
@@ -2069,7 +2176,7 @@ function msgContextMenu(m, x, y, reactOnly = false) {
   const c = cur(); if (!c) return; const mine = isMe(m.from); const text = msgText(m);
   const canReact = c.type !== 'fav';
   let h = '';
-  if (canReact) h += `<div class="ctx-reacts">${QUICK.map((e) => `<button data-r="${e}">${e}</button>`).join('')}</div><div class="ctx-sep"></div>`;
+  if (canReact) h += `<div class="ctx-reacts">${QUICK.map((e) => `<button data-r="${e}" title="${e}">${AnimEmoji.render(e, 30)?.html || e}</button>`).join('')}</div><div class="ctx-sep"></div>`;
   if (!reactOnly) {
     const items = [];
     if (m.type !== 'call') items.push(['reply', 'reply', 'Ответить']);
@@ -2085,9 +2192,9 @@ function msgContextMenu(m, x, y, reactOnly = false) {
     else if (S.isMod && m.type !== 'call') items.push(['delete', 'trash', 'Удалить (модерация)', 'danger']);
     h += items.map(([a, i, l, cls]) => `<div class="ctx-item ${cls || ''}" data-a="${a}">${icon(i)}${l}</div>`).join('');
   }
-  showCtx(h, x, y);
+  showCtx(h, x, y); AnimEmoji.mount(ctxEl);
   ctxEl.onclick = (e) => {
-    const r = e.target.closest('[data-r]'); if (r) { socket.emit('react', { conversationId: c.id, id: m.id, emoji: r.dataset.r }); hideCtx(); return; }
+    const r = e.target.closest('[data-r]'); if (r) { const em = r.dataset.r; const already = m.reactions && (m.reactions[em] || []).some(isMe); socket.emit('react', { conversationId: c.id, id: m.id, emoji: em }); hideCtx(); if (!already) AnimEmoji.burst(msgsEl.querySelector(`[data-id="${CSS.escape(m.id)}"] .bubble`), em); return; }
     const it = e.target.closest('[data-a]'); if (!it) return; hideCtx();
     switch (it.dataset.a) {
       case 'reply': setReply(m); break;
@@ -2570,6 +2677,8 @@ const Settings = {
         <h4>Текст</h4>
         <div class="row-item"><div class="rb"><div class="rt">Размер сообщений</div><div class="rs">Сейчас: <span id="fsVal">${s.fontSize || 15}</span> px</div></div><input type="range" min="13" max="20" step="1" value="${s.fontSize || 15}" data-range="fontSize"></div>
         <div class="row-item"><div class="rb"><div class="rt">Отправлять по Enter</div><div class="rs">Выключено — отправка по Ctrl+Enter, Enter — новая строка</div></div>${sw('enterToSend', s.enterToSend !== false)}</div>
+        <h4>Эмодзи</h4>
+        <div class="row-item"><div class="rb"><div class="rt">Анимированные эмодзи</div><div class="rs">${S.animEmoji ? 'Сообщения из одних эмодзи (до трёх) оживают, как в Telegram' : 'Отключено на сервере (ANIMATED_EMOJI=0)'}</div></div>${S.animEmoji ? sw('animEmoji', AnimEmoji.enabled()) : ''}</div>
         <h4>Форматирование</h4><p class="md-text">**жирный**, __курсив__, ~~зачёркнутый~~, \`код\`, \`\`\`блок кода\`\`\`, ||спойлер||, @упоминание</p>`;
         break;
       }
@@ -2619,12 +2728,13 @@ const Settings = {
         break;
       }
       case 'about':
-        h = `<div style="text-align:center;padding:10px 0 16px"><div class="logo" style="width:72px;height:72px"><svg><use href="#i-logo"/></svg></div><h3 style="margin-top:10px">NMessenger</h3><p class="md-text">Версия 1.0</p></div>
+        h = `<div style="text-align:center;padding:10px 0 16px"><div class="logo" style="width:72px;height:72px"><svg><use href="#i-logo"/></svg></div><h3 style="margin-top:10px">NMessenger</h3><p class="md-text">Версия 3.1</p></div>
         <div class="row-item"><div class="rb"><div class="rt">Чаты, группы, каналы</div><div class="rs">Ответы, реакции, редактирование, пересылка, избранное, папки</div></div></div>
         <div class="row-item"><div class="rb"><div class="rt">Звонки</div><div class="rs">Аудио/видео P2P через WebRTC, демонстрация экрана${S.livekit ? ', групповые звонки через LiveKit' : ''}</div></div></div>
         <div class="row-item"><div class="rb"><div class="rt">Секретные чаты</div><div class="rs">Сквозное шифрование ECDH P-256 + AES-256-GCM в браузере</div></div></div>
         <div class="row-item"><div class="rb"><div class="rt">Bot API</div><div class="rs">HTTP API для ботов: sendMessage, me</div></div></div>
-        <div class="row-item"><div class="rb"><div class="rt">Горячие клавиши</div><div class="rs">Ctrl+K — поиск · Esc — закрыть · ↑ — изменить последнее · Enter — отправить</div></div></div>`;
+        <div class="row-item"><div class="rb"><div class="rt">Горячие клавиши</div><div class="rs">Ctrl+K — поиск · Esc — закрыть · ↑ — изменить последнее · Enter — отправить</div></div></div>
+        <div class="row-item"><div class="rb"><div class="rt">Анимированные эмодзи</div><div class="rs">Noto Animated Emoji © Google, лицензия CC BY 4.0 · проигрыватель lottie-web (MIT)</div></div></div>`;
         break;
     }
     body.innerHTML = h;
@@ -2638,7 +2748,7 @@ const Settings = {
     body.onclick = async (e) => {
       const t = e.target;
       const cp = t.closest('[data-copy]'); if (cp) { copyText(cp.dataset.copy); return; }
-      const sw = t.closest('[data-sw]'); if (sw) { const k = sw.dataset.sw; const on = !sw.classList.contains('on'); sw.classList.toggle('on', on); if (k === 'useLK') { S.useLK = on; localStorage.setItem('nm_uselk', on ? '1' : '0'); } else emit({ [k]: on }); return; }
+      const sw = t.closest('[data-sw]'); if (sw) { const k = sw.dataset.sw; const on = !sw.classList.contains('on'); sw.classList.toggle('on', on); if (k === 'useLK') { S.useLK = on; localStorage.setItem('nm_uselk', on ? '1' : '0'); } else if (k === 'animEmoji') { AnimEmoji.setEnabled(on); if (cur()) renderMessages({ keepScroll: true }); } else emit({ [k]: on }); return; }
       const tp = t.closest('[data-theme-pick]'); if (tp) { emit({ theme: tp.dataset.themePick }); return; }
       if (t.closest('#avEdit')) { $('#avatarInput').click(); return; }
       const ms = t.closest('[data-msect]'); if (ms) { S.modSect = ms.dataset.msect; this.render(); return; }

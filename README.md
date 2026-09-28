@@ -39,6 +39,13 @@ npm start            # http://localhost:10000
 прямо во время звонка (кнопка «Устройства») или заранее в Настройки → Звонки. Свёрнутый и полноэкранный режим,
 индикатор качества, лог звонков в чате.
 
+**Анимированные эмодзи** — как в Telegram: сообщение из одних эмодзи (до трёх) показывается крупно и «живёт»
+(машет, горит, бьётся…), быстрые реакции в меню сообщения тоже анимированы, а поставленная реакция взлетает над
+сообщением. Используются [Noto Animated Emoji](https://googlefonts.github.io/noto-emoji-animation/) от Google
+(лицензия CC BY 4.0, ~880 эмодзи; для остальных — обычный крупный символ). Анимации сервер один раз скачивает с
+`fonts.gstatic.com` и кеширует в `data/cache/emoji/`, браузеры ходят только на ваш сервер. Отключить у себя —
+Настройки → Оформление → «Анимированные эмодзи»; отключить на сервере — `ANIMATED_EMOJI=0` в `.env`.
+
 **Организация**: папки чатов (по типам и конкретным чатам), закрепление, «без звука», скрытие чата,
 очистка истории, непрочитанные, счётчик во вкладке браузера, системные уведомления и звуки.
 
@@ -118,8 +125,9 @@ npm run build -- --key мойКлюч      # release/: обфусцирован�
 ## Структура
 
 - `server.js` — Express + Socket.IO, данные в `data/store.json`, файлы в `data/files/`, автокопии в `data/backups/`
-- `index.html` — весь фронтенд (HTML + CSS + JS без сборки и фреймворков); `livekit-client` отдаётся сервером из
-  `node_modules` (`/vendor/livekit-client.umd.js`, версия закреплена — 2.15.16)
+- `index.html` — весь фронтенд (HTML + CSS + JS без сборки и фреймворков); `livekit-client` и `lottie-web`
+  (анимированные эмодзи) отдаются сервером из `node_modules` (`/vendor/livekit-client.umd.js` — версия закреплена 2.15.16,
+  `/vendor/lottie.js` — 5.13.0), без CDN
 - `sdk/` — Python SDK для ботов, `tools/` — генерация ключа владельца и сборка релиза
 
 ## Серверный API (для интеграций)
@@ -131,7 +139,8 @@ Socket.IO (после `auth`): `open_dm`, `open_handle`, `join_handle`, `create_
 HTTP: `POST /api/register`, `POST /api/login`, `GET /api/sessions`, `POST /api/upload` (≤ 10 МБ),
 `POST /api/qr/new` → `{id, secret, ttl}`, `GET /api/qr/status/:id?secret=…`, `POST /api/qr/approve {id}` (Bearer),
 `POST /get-livekit-token`, `GET /livekit-status`, `POST /api/ai {action,text}`, `GET /api/ai/info`, `POST /api/activate {key}`,
-`GET /api/admin/backup`, `POST /api/admin/restore` (владелец), Bot API `/api/bot/:token/*` (см. выше).
+`GET /api/admin/backup`, `POST /api/admin/restore` (владелец), Bot API `/api/bot/:token/*` (см. выше),
+`GET /emoji/status`, `GET /emoji/<codepoints>.json` (Lottie-анимация эмодзи из кеша, напр. `/emoji/2764_fe0f.json`).
 Socket.IO: опросы — `send_message {type:'poll', poll:{question, options[], anonymous, multiple, quiz, correct, explanation, closesIn}}`,
 `poll_vote {conversationId, id, options[]}` (пустой массив — отозвать), `poll_close`; история — `get_history_before {conversationId, before, limit}` → `history_more`;
 модерация — `mod_list`, `mod_ban_user`, `mod_set_verified`, `mod_delete_conversation`, `mod_dismiss_report`.

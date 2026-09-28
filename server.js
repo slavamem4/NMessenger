@@ -1105,6 +1105,7 @@ function attachUser(socket, acc) {
     ai: aiInfo(),
     isMod: isMod(username),
     isOwner: isOwnerUser(username),
+    animEmoji: animEmojiEnabled(),
   });
   io.emit('users_update', listUsers());
 }
@@ -1122,6 +1123,58 @@ app.get('/vendor/livekit-client.umd.js', (req, res) => {
   if (!LK_CLIENT_FILE) return res.status(404).end();
   res.set('Cache-Control', 'public, max-age=86400');
   res.sendFile(LK_CLIENT_FILE);
+});
+
+// ---------- Анимированные эмодзи (Google Noto Animated Emoji, лицензия CC BY 4.0) ----------
+// Lottie-анимации берутся с fonts.gstatic.com один раз и кешируются в DATA_DIR/cache/emoji,
+// браузеры клиентов ходят только на наш сервер. Отключить: ANIMATED_EMOJI=0 (клиент покажет обычные эмодзи).
+const ANIM_EMOJI = !/^(0|false|off|no)$/i.test(String(process.env.ANIMATED_EMOJI || '1'));
+const EMOJI_CACHE_DIR = path.join(DATA_DIR, 'cache', 'emoji');
+const EMOJI_SRC = 'https://fonts.gstatic.com/s/e/notoemoji/latest/';
+const LOTTIE_FILE = (() => {
+  try { const p = require.resolve('lottie-web'); const f = path.join(path.dirname(p), 'lottie_light.min.js'); return fs.existsSync(f) ? f : null; } catch { return null; }
+})();
+const animEmojiEnabled = () => ANIM_EMOJI && !!LOTTIE_FILE;
+app.get('/vendor/lottie.js', (req, res) => {
+  if (!animEmojiEnabled()) return res.status(404).end();
+  res.set('Cache-Control', 'public, max-age=86400');
+  res.sendFile(LOTTIE_FILE);
+});
+app.get('/emoji/status', (req, res) => res.json({ enabled: animEmojiEnabled() }));
+const emojiInflight = new Map();
+function fetchEmojiAnim(id) {
+  if (emojiInflight.has(id)) return emojiInflight.get(id);
+  const job = (async () => {
+    const file = path.join(EMOJI_CACHE_DIR, id + '.json');
+    const miss = path.join(EMOJI_CACHE_DIR, id + '.missing');
+    try { return await fs.promises.readFile(file); } catch { }
+    try { const st = await fs.promises.stat(miss); if (Date.now() - st.mtimeMs < 7 * 86400e3) return null; } catch { }
+    await fs.promises.mkdir(EMOJI_CACHE_DIR, { recursive: true });
+    const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), 10000);
+    try {
+      const r = await fetch(EMOJI_SRC + id + '/lottie.json', { signal: ctrl.signal });
+      if (r.status === 404) { await fs.promises.writeFile(miss, '').catch(() => { }); return null; }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const buf = Buffer.from(await r.arrayBuffer());
+      if (buf.length < 2 || buf.length > 3e6 || buf[0] !== 0x7b) throw new Error('bad payload');
+      const tmp = file + '.' + process.pid + '.tmp'; await fs.promises.writeFile(tmp, buf); await fs.promises.rename(tmp, file);
+      return buf;
+    } finally { clearTimeout(timer); }
+  })().finally(() => emojiInflight.delete(id));
+  emojiInflight.set(id, job);
+  return job;
+}
+app.get('/emoji/:id.json', async (req, res) => {
+  if (!animEmojiEnabled()) return res.status(404).end();
+  const id = String(req.params.id || '').toLowerCase();
+  if (!/^[0-9a-f]{2,6}(_[0-9a-f]{2,6}){0,9}$/.test(id)) return res.status(400).end();
+  try {
+    const buf = await fetchEmojiAnim(id);
+    if (!buf) { res.set('Cache-Control', 'public, max-age=3600'); return res.status(404).end(); }
+    res.set('Content-Type', 'application/json; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=2592000, immutable');
+    res.send(buf);
+  } catch (e) { res.status(502).json({ error: 'Источник анимаций недоступен' }); }
 });
 
 app.post('/get-livekit-token', async (req, res) => {
