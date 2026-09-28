@@ -57,10 +57,70 @@ HTTP API бота: `POST /api/bot/<token>/sendMessage {"chat_id":"...","text":".
 
 Горячие клавиши: `Ctrl+K` — поиск, `Ctrl+F` — поиск по чату, `↑` — редактировать последнее, `Esc` — закрыть.
 
+## Данные, обновления и резервные копии
+
+- Всё (аккаунты, чаты, каналы, боты, папки, файлы) лежит в **`data/`** рядом с `server.js`
+  (`store.json` + `files/` + `backups/`). Папку можно вынести: `DATA_DIR=/var/data/nmessenger` в `.env`.
+- **Обновление мессенджера** = замена `server.js`, `index.html`, `sdk/` (и `npm install`). Папку `data/` не трогать —
+  ничего не пропадёт. `data/` в `.gitignore`, в сборку `release/` она не попадает.
+- Запись атомарная (`store.json.tmp` → `store.json`, предыдущая версия — `store.json.bak`); при `SIGTERM`/`Ctrl+C`
+  данные сбрасываются на диск. Если `store.json` побит — сервер сам берёт `.bak` или последнюю автокопию
+  (битый файл сохраняется как `store.corrupt-*.json`). Автокопии: при старте и каждые 6 часов в `data/backups/`
+  (`BACKUP_KEEP`, по умолчанию 20). История: `HISTORY_KEEP` сообщений на чат (по умолчанию 5000), старые
+  подгружаются при прокрутке вверх.
+- Владелец: **Настройки → Модерация → «Данные и резервные копии»** — статистика, «Скачать копию» (JSON со всеми
+  данными и файлами) и «Восстановить из копии» (`GET /api/admin/backup?files=1|0`, `POST /api/admin/restore`).
+- Хостинги с одноразовым диском (Render Free, Railway без Volume, Heroku) стирают файлы при каждом деплое —
+  там нужен постоянный диск/Volume и `DATA_DIR`, иначе спасает только ручная копия перед деплоем.
+
+## Владелец, галочки и модерация
+
+- `OWNER_USERNAMES=newrizer` (через запятую). Аккаунт **не создаётся заранее** — его регистрируете вы сами.
+  Если задан `OWNER_KEY_HASH` (или ключ вшит сборкой), зарегистрировать имя владельца можно только зная ключ:
+  форма регистрации сама попросит «Ключ владельца». Без ключа защита имени выключена (сервер предупреждает в логе).
+- Владелец и верифицированные (синяя галочка) аккаунты: бан/разбан, удаление любых сообщений, групп и каналов, жалобы.
+  Галочки выдаёт/снимает только владелец. Всё — в Настройки → Модерация или из профиля/меню чата.
+
+## Опросы
+
+Скрепка → «Опрос»: вопрос до 255 символов, 2–10 вариантов, анонимный/публичный, несколько ответов, режим викторины
+(правильный ответ + пояснение, ответ нельзя изменить), автозакрытие (5 мин … 7 дней). Голос можно отозвать,
+автор/админ/модератор может завершить опрос («Завершить опрос» в меню сообщения). В публичных опросах — «Кто голосовал».
+Голоса анонимных опросов сервер никому не отдаёт (клиент получает только счётчики и свой выбор).
+Боты: `send_poll(chat_id, question, options, anonymous=, multiple=, quiz=, correct_option=, explanation=, open_period=)`,
+`stop_poll`, входящие опросы приходят как `type == "poll"` с полем `m.poll`.
+
+## AI-помощник
+
+Кнопка **AI** появляется в поле ввода, как только есть текст: «Исправить ошибки» работает всегда (встроенный корректор:
+опечатки, пунктуация, регистр, частицы «-то/-нибудь», -тся/-ться и т. п., с наглядным diff), остальное
+(короче / вежливее / деловой стиль / перевод / эмодзи) — через любой OpenAI-совместимый API: `AI_API_URL`, `AI_API_KEY`,
+`AI_MODEL` в `.env` (OpenAI, OpenRouter, DeepSeek, Groq, локальный Ollama).
+
+## Боты на Python
+
+`sdk/nmessenger_bot.py` — SDK без зависимостей (`GET /sdk/nmessenger_bot.py` отдаёт сам сервер), пример `sdk/example_bot.py`.
+Создать бота — в чате с @BotFather (`/newbot`, `/setcommands`, `/token`). Bot API (`/api/bot/<token>/…`): `getUpdates`
+(long-polling), `sendMessage`, `sendPhoto`, `sendDocument`, `sendPoll`, `stopPoll`, `editMessageText`, `deleteMessage`,
+`sendChatAction`, `getChat`, `setMyCommands`, `getMyCommands`, `me`.
+
+## Защищённая сборка
+
+```bash
+npm run owner-key -- мойКлюч        # хеш ключа для .env (OWNER_KEY_HASH=...)
+npm run build -- --key мойКлюч      # release/: обфусцированный server.js + минифицированный index.html + sdk
+```
+
+Сборка при первом запуске на новом компьютере требует ввести ключ владельца в браузере (5 попыток / 15 мин),
+привязка хранится в `data/.instance.lock`. Это защита от «скопировал и запустил у себя», а не криптографическая
+гарантия: обфусцированный JS при желании можно разобрать — исходники держите у себя.
+
 ## Структура
 
-- `server.js` — Express + Socket.IO, данные в `data/store.json`, файлы в `data/files/`
-- `index.html` — весь фронтенд (HTML + CSS + JS без сборки и фреймворков)
+- `server.js` — Express + Socket.IO, данные в `data/store.json`, файлы в `data/files/`, автокопии в `data/backups/`
+- `index.html` — весь фронтенд (HTML + CSS + JS без сборки и фреймворков); `livekit-client` отдаётся сервером из
+  `node_modules` (`/vendor/livekit-client.umd.js`, версия закреплена — 2.15.16)
+- `sdk/` — Python SDK для ботов, `tools/` — генерация ключа владельца и сборка релиза
 
 ## Серверный API (для интеграций)
 
@@ -70,4 +130,8 @@ Socket.IO (после `auth`): `open_dm`, `open_handle`, `join_handle`, `create_
 
 HTTP: `POST /api/register`, `POST /api/login`, `GET /api/sessions`, `POST /api/upload` (≤ 10 МБ),
 `POST /api/qr/new` → `{id, secret, ttl}`, `GET /api/qr/status/:id?secret=…`, `POST /api/qr/approve {id}` (Bearer),
-`POST /get-livekit-token`, `GET /livekit-status`, `GET /api/bot/:token/me`, `POST /api/bot/:token/sendMessage`.
+`POST /get-livekit-token`, `GET /livekit-status`, `POST /api/ai {action,text}`, `GET /api/ai/info`, `POST /api/activate {key}`,
+`GET /api/admin/backup`, `POST /api/admin/restore` (владелец), Bot API `/api/bot/:token/*` (см. выше).
+Socket.IO: опросы — `send_message {type:'poll', poll:{question, options[], anonymous, multiple, quiz, correct, explanation, closesIn}}`,
+`poll_vote {conversationId, id, options[]}` (пустой массив — отозвать), `poll_close`; история — `get_history_before {conversationId, before, limit}` → `history_more`;
+модерация — `mod_list`, `mod_ban_user`, `mod_set_verified`, `mod_delete_conversation`, `mod_dismiss_report`.

@@ -33,7 +33,7 @@ catch { console.error('Установите dev-зависимости: npm inst
   // ---- server.js ----
   let server = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
   if (!server.includes("'__NM_OWNER_KEY_HASH__'")) throw new Error('В server.js нет метки __NM_OWNER_KEY_HASH__');
-  server = server.replace("'__NM_OWNER_KEY_HASH__'", JSON.stringify(ownerHash));
+  server = server.replace("'__NM_OWNER_KEY_HASH__'", () => JSON.stringify(ownerHash));
   process.stdout.write('Обфускация server.js… ');
   const obf = JavaScriptObfuscator.obfuscate(server, {
     compact: true,
@@ -72,8 +72,8 @@ catch { console.error('Установите dev-зависимости: npm inst
     format: { comments: false, ascii_only: false },
   });
   if (min.error) throw min.error;
-  html = html.replace(m[0], '<script>' + min.code + '</script>');
-  html = html.replace(/<!--[\s\S]*?-->/g, '');
+  const at = html.indexOf(m[0]); const stripC = (x) => x.replace(/<!--[\s\S]*?-->/g, '');
+  html = stripC(html.slice(0, at)) + '<script>' + min.code + '</script>' + stripC(html.slice(at + m[0].length));
   html = html.replace(/<style>([\s\S]*?)<\/style>/, (mm, css) => '<style>' + css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s*\n\s*/g, '\n').trim() + '</style>');
   html = html.replace('<head>', '<head>\n<!-- NMessenger © владелец сервера. Копирование запрещено. -->');
   fs.writeFileSync(path.join(out, 'index.html'), html);
@@ -82,7 +82,7 @@ catch { console.error('Установите dev-зависимости: npm inst
   // ---- прочее ----
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
   fs.writeFileSync(path.join(out, 'package.json'), JSON.stringify({ name: pkg.name, version: pkg.version, private: true, scripts: { start: 'node server.js' }, dependencies: pkg.dependencies }, null, 2));
-  for (const f of fs.readdirSync(path.join(root, 'sdk'))) fs.copyFileSync(path.join(root, 'sdk', f), path.join(out, 'sdk', f));
+  for (const f of fs.readdirSync(path.join(root, 'sdk'))) { const fp = path.join(root, 'sdk', f); if (fs.statSync(fp).isFile() && !f.endsWith('.pyc')) fs.copyFileSync(fp, path.join(out, 'sdk', f)); }
   if (fs.existsSync(path.join(root, '.env.example'))) fs.copyFileSync(path.join(root, '.env.example'), path.join(out, '.env.example'));
   fs.writeFileSync(path.join(out, 'README.txt'), [
     'NMessenger — защищённая сборка',
@@ -90,6 +90,11 @@ catch { console.error('Установите dev-зависимости: npm inst
     'Запуск:  npm install --omit=dev  и затем  node server.js',
     'Настройки — в файле .env (см. .env.example). OWNER_KEY_HASH уже вшит в сборку, в .env он не нужен.',
     'При первом запуске на новом компьютере сервер попросит ключ владельца в браузере.',
+    'Имя владельца (OWNER_USERNAMES) при регистрации тоже требует этот ключ.',
+    '',
+    'ОБНОВЛЕНИЕ: замените server.js, index.html и папку sdk новыми. Папку data (или DATA_DIR) не трогайте —',
+    'там аккаунты, чаты, боты, каналы, файлы и автокопии (data/backups). Перед обновлением можно скачать',
+    'полную копию: Настройки → Модерация → «Данные и резервные копии» (только владелец).',
     '',
     'Исходный код в эту папку не входит — храните его отдельно и не выкладывайте на общий сервер.',
   ].join('\n'));

@@ -32,7 +32,7 @@ import urllib.parse
 import urllib.request
 
 __all__ = ["Bot", "Message", "Chat", "User", "ApiError"]
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 
 class ApiError(Exception):
@@ -87,6 +87,7 @@ class Message(object):
         self.chat = Chat(d.get("chat"))
         self.from_user = User(d.get("from"))
         self.file = d.get("file")               # {id, name, size, mime, url} или None
+        self.poll = d.get("poll")               # для type == "poll": {question, options, counts, total, quiz, ...}
         r = d.get("reply_to_message")
         self.reply_to = r  # {message_id, text, from} или None
         self.command = None
@@ -226,6 +227,21 @@ class Bot(object):
         if caption:
             headers["x-caption"] = urllib.parse.quote(str(caption))
         return self._call(method, raw=data, params={"chat_id": chat_id}, headers=headers, timeout=120)
+
+    def send_poll(self, chat_id, question, options, anonymous=True, multiple=False, quiz=False,
+                  correct_option=None, explanation=None, open_period=0, reply_to=None):
+        """Опрос как в Telegram. options — список строк (2–10). quiz=True + correct_option=индекс — викторина.
+        open_period — через сколько секунд закрыть (0 — никогда, максимум 7 дней)."""
+        return self._call("sendPoll", {
+            "chat_id": chat_id, "question": question, "options": list(options),
+            "is_anonymous": bool(anonymous), "allows_multiple_answers": bool(multiple),
+            "type": "quiz" if quiz else "regular", "correct_option_id": correct_option,
+            "explanation": explanation, "open_period": int(open_period or 0), "reply_to_message_id": reply_to,
+        })
+
+    def stop_poll(self, chat_id, message_id):
+        """Завершить свой опрос (результаты остаются видны)."""
+        return self._call("stopPoll", {"chat_id": chat_id, "message_id": message_id})
 
     def edit_message(self, chat_id, message_id, text):
         return self._call("editMessageText", {"chat_id": chat_id, "message_id": message_id, "text": str(text)})

@@ -623,6 +623,61 @@ body.resizing iframe,body.resizing video{pointer-events:none}
 .mtag.ban{background:var(--danger-soft);color:var(--danger)}
 .mtag.ver{background:var(--accent-soft);color:var(--accent)}
 .mtag.own{background:rgba(245,166,35,.15);color:var(--warn)}
+/* меню вложений */
+.att-pop{position:absolute;left:10px;bottom:calc(100% + 8px);min-width:230px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:6px;z-index:30;animation:popIn .15s}
+.att-item{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:10px;cursor:pointer;font-size:14px}
+.att-item:hover{background:var(--surface-hover)}
+.att-item .ic{width:20px;height:20px;color:var(--accent);flex-shrink:0}
+.att-item .d{font-size:12px;color:var(--text-3);margin-top:1px}
+/* опросы */
+.b-poll{min-width:min(300px,68vw);max-width:380px;padding:3px 2px 2px}
+.p-q{font-weight:600;font-size:15px;line-height:1.35;white-space:pre-wrap;word-break:break-word}
+.p-sub{font-size:12px;color:var(--text-3);margin:3px 0 8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.p-opt{position:relative;display:flex;align-items:center;gap:10px;padding:7px 4px;border-radius:8px;cursor:pointer;user-select:none}
+.p-opt:hover{background:rgba(127,127,127,.1)}
+.p-chk{width:20px;height:20px;border-radius:50%;border:2px solid var(--text-3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s}
+.p-opt.multi .p-chk{border-radius:6px}
+.p-opt.sel .p-chk{background:var(--accent);border-color:var(--accent)}
+.p-chk .ic{width:13px;height:13px;color:#fff;stroke-width:3;display:none}
+.p-opt.sel .p-chk .ic{display:block}
+.p-txt{flex:1;min-width:0;font-size:14px;line-height:1.3;word-break:break-word}
+.p-res .p-opt{cursor:default;display:block;padding:5px 4px 8px}
+.p-res .p-opt:hover{background:none}
+.p-row{display:flex;align-items:flex-start;gap:8px}
+.p-pct{width:44px;font-weight:700;font-size:13px;flex-shrink:0;text-align:right;padding-top:1px;white-space:nowrap}
+.p-bar{height:5px;border-radius:3px;background:rgba(127,127,127,.2);margin:6px 0 0 52px;overflow:hidden}
+.p-bar i{display:block;height:100%;border-radius:3px;background:var(--accent);width:0;transition:width .4s}
+.p-opt.ok .p-bar i{background:var(--success)} .p-opt.ok .p-pct{color:var(--success)}
+.p-opt.bad .p-bar i{background:var(--danger)} .p-opt.bad .p-pct{color:var(--danger)}
+.p-mark{width:15px;height:15px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;background:var(--accent);flex-shrink:0;vertical-align:-2px;margin-left:5px}
+.p-opt.ok .p-mark{background:var(--success)} .p-opt.bad .p-mark{background:var(--danger)}
+.p-foot{display:flex;align-items:center;gap:12px;margin-top:6px;font-size:12px;color:var(--text-3);flex-wrap:wrap}
+.p-foot button{background:none;border:0;color:var(--accent);font-weight:600;cursor:pointer;font-size:13px;padding:2px 0}
+.p-vote{display:block;width:100%;margin-top:6px;padding:8px;border-radius:10px;border:0;background:var(--accent-soft);color:var(--accent);font-weight:600;cursor:pointer;font-size:14px}
+.p-vote:disabled{opacity:.45;cursor:default}
+.p-expl{margin-top:8px;padding:8px 10px;border-radius:10px;background:rgba(127,127,127,.12);font-size:13px;line-height:1.4}
+.p-vname{font-size:11px;color:var(--text-3);margin:2px 0 0 52px;line-height:1.3}
+.msg.out .p-sub,.msg.out .p-foot,.msg.out .p-vname{color:rgba(255,255,255,.78)} .msg.out .p-bar{background:rgba(255,255,255,.28)} .msg.out .p-bar i{background:#fff} .msg.out .p-foot button{color:#fff} .msg.out .p-chk{border-color:rgba(255,255,255,.75)} .msg.out .p-opt.sel .p-chk{background:#fff;border-color:#fff} .msg.out .p-opt.sel .p-chk .ic{color:var(--accent)} .msg.out .p-vote{background:rgba(255,255,255,.2);color:#fff} .msg.out .p-mark{background:#fff;color:var(--accent)} .msg.out .p-opt.ok .p-mark,.msg.out .p-opt.bad .p-mark{color:#fff} .msg.out .p-opt:hover{background:rgba(255,255,255,.1)} .msg.out .p-expl{background:rgba(255,255,255,.14)}
+/* создание опроса */
+.po-opt{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.po-opt input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;outline:0;color:var(--text);transition:border-color .15s}
+.po-opt input:focus{border-color:var(--accent)}
+.po-row select{background-color:var(--surface);border:1px solid var(--border);border-radius:10px;padding:7px 32px 7px 10px;outline:0;color:var(--text)}
+.po-opt .rm{width:34px;height:34px;border-radius:50%;border:0;background:none;color:var(--text-3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.po-opt .rm:hover{color:var(--danger);background:var(--danger-soft)}
+.po-opt .cor{width:24px;height:24px;border-radius:50%;border:2px solid var(--text-3);flex-shrink:0;cursor:pointer;display:none;align-items:center;justify-content:center;background:none;padding:0}
+.po-opt .cor .ic{width:14px;height:14px;color:#fff;display:none}
+.po-opt .cor.on{border-color:var(--success);background:var(--success)} .po-opt .cor.on .ic{display:block}
+.po.quiz .po-opt .cor{display:flex}
+.po-add{background:none;border:0;color:var(--accent);font-weight:600;cursor:pointer;padding:4px 0 10px;font-size:14px}
+.po-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.po-row:last-child{border-bottom:0}
+.po-row .t{font-size:14px} .po-row .d{font-size:12px;color:var(--text-3);margin-top:2px}
+.po-quiz{display:none;margin-top:8px} .po.quiz .po-quiz{display:block}
+.po-hint{font-size:12px;color:var(--text-3);margin:-2px 0 10px}
+/* статистика хранилища */
+.st-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px;margin:10px 0}
+.st-stat{background:var(--bg-3);border-radius:10px;padding:10px 12px} .st-stat b{display:block;font-size:18px} .st-stat span{font-size:12px;color:var(--text-3)}
 .mod-tabs{display:flex;gap:6px;margin:6px 0 10px;flex-wrap:wrap}
 .mod-tabs button{padding:6px 12px;border-radius:10px;background:var(--bg-3);font-size:13px;font-weight:600;color:var(--text-2)}
 .mod-tabs button.active{background:var(--accent);color:#fff}
@@ -732,6 +787,7 @@ body.resizing iframe,body.resizing video{pointer-events:none}
   <symbol id="i-hash" viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></symbol>
   <symbol id="i-broom" viewBox="0 0 24 24"><path d="M19 3l-8 8"/><path d="M11 11l-2-2-6 6c-1 1-1 3 1 5s4 2 5 1l6-6-2-2z"/><path d="M5 17l3 3"/></symbol>
   <symbol id="i-wifi-off" viewBox="0 0 24 24"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></symbol>
+  <symbol id="i-poll" viewBox="0 0 24 24"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></symbol>
   <symbol id="i-cast" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></symbol>
 </svg>
 
@@ -762,6 +818,7 @@ body.resizing iframe,body.resizing video{pointer-events:none}
       <div class="field"><label>Имя</label><input name="displayName" placeholder="Как вас называть" maxlength="32" autocomplete="name"></div>
       <div class="field"><label>Логин</label><input name="username" placeholder="латиница, цифры, . _ -" autocomplete="username" required maxlength="24"><span class="hint">2–24 символа. По нему вас найдут: @логин</span></div>
       <div class="field"><label>Пароль</label><div class="pw-wrap"><input name="password" type="password" placeholder="минимум 6 символов" autocomplete="new-password" required minlength="6" maxlength="72"><button type="button" class="icon-btn pw-toggle"><svg class="ic sm"><use href="#i-eye"/></svg></button></div></div>
+      <div class="field hidden" id="ownerKeyField"><label>Ключ владельца</label><input name="ownerKey" type="password" placeholder="ключ, заданный при сборке / в .env" autocomplete="off" maxlength="200"><span class="hint">Это имя закреплено за владельцем сервера</span></div>
       <div class="auth-error" id="regError"></div>
       <button class="btn block" type="submit" id="regBtn">Создать аккаунт</button>
     </form>
@@ -841,6 +898,11 @@ body.resizing iframe,body.resizing video{pointer-events:none}
         <div class="composer-notice hidden" id="composerNotice"></div>
         <div class="cmd-pop hidden" id="cmdPop"></div>
         <div class="ai-pop hidden" id="aiPop"></div>
+        <div class="att-pop hidden" id="attPop">
+          <div class="att-item" data-att="image"><svg class="ic"><use href="#i-image"/></svg><div>Фото или видео<div class="d">до 10 МБ</div></div></div>
+          <div class="att-item" data-att="file"><svg class="ic"><use href="#i-file"/></svg><div>Файл<div class="d">документ, архив, аудио</div></div></div>
+          <div class="att-item" data-att="poll" id="attPoll"><svg class="ic"><use href="#i-poll"/></svg><div>Опрос<div class="d">анонимный, викторина, несколько ответов</div></div></div>
+        </div>
       </div>
     </div>
   </main>
@@ -912,6 +974,8 @@ body.resizing iframe,body.resizing video{pointer-events:none}
 
 <div class="toasts" id="toasts"></div>
 <input type="file" id="fileInput" multiple hidden>
+<input type="file" id="fileInputImg" accept="image/*,video/*" multiple hidden>
+<input type="file" id="restoreInput" accept="application/json,.json" hidden>
 <input type="file" id="avatarInput" accept="image/*" hidden>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -1038,6 +1102,7 @@ const S = {
   token: localStorage.getItem('nm_token') || '',
   me: null, users: new Map(), convs: new Map(), msgs: new Map(),
   current: null, settings: {}, blocked: new Set(), pubKeys: {}, folders: [], bots: [],
+  hasMore: new Map(), loadingMore: false, pollSel: {},
   folder: 'all', typing: new Map(), reply: null, editing: null, pendingOpen: false,
   livekit: false, textMax: 4000, drafts: {}, search: '', chatSearch: null,
   connected: false, newBelow: 0, lastTypingSent: 0, focused: document.hasFocus(),
@@ -1078,7 +1143,7 @@ function saveDrafts() { try { localStorage.setItem('nm_drafts', JSON.stringify(S
 async function api(path, body, method = 'POST') {
   const r = await fetch(path, { method, headers: { 'Content-Type': 'application/json', ...(S.token ? { Authorization: 'Bearer ' + S.token } : {}) }, body: body ? JSON.stringify(body) : undefined });
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.error || 'Ошибка сервера');
+  if (!r.ok) { const e = new Error(j.error || 'Ошибка сервера'); if (j.needOwnerKey) e.needOwnerKey = true; throw e; }
   return j;
 }
 function upload(file, name, onProgress) {
@@ -1207,8 +1272,8 @@ $('#loginForm').addEventListener('submit', async (e) => {
 });
 $('#registerForm').addEventListener('submit', async (e) => {
   e.preventDefault(); const f = e.target; const btn = $('#regBtn'); btn.disabled = true; $('#regError').textContent = '';
-  try { const j = await api('/api/register', { username: f.username.value.trim(), password: f.password.value, displayName: f.displayName.value.trim() }); onLoggedIn(j); }
-  catch (err) { $('#regError').textContent = err.message; } finally { btn.disabled = false; }
+  try { const j = await api('/api/register', { username: f.username.value.trim(), password: f.password.value, displayName: f.displayName.value.trim(), ownerKey: f.ownerKey.value || undefined }); onLoggedIn(j); }
+  catch (err) { $('#regError').textContent = err.message; if (err.needOwnerKey) { $('#ownerKeyField').classList.remove('hidden'); f.ownerKey.focus(); } } finally { btn.disabled = false; }
 });
 function onLoggedIn(j) { QRLogin.stop(); S.token = j.token; localStorage.setItem('nm_token', j.token); $('#auth').classList.add('hidden'); startApp(); }
 function startApp() {
@@ -1234,6 +1299,8 @@ function connect() {
   socket.on('mod_list_ok', (d) => { S.modData = d; if (Modal.isOpen() && Settings.tab === 'mod') Settings.render(); });
   socket.on('mod_ok', (d) => { const t = { ban: 'Пользователь заблокирован в мессенджере', unban: 'Пользователь разблокирован', verify: 'Галочка выдана', unverify: 'Галочка снята', delete_conversation: 'Чат удалён' }; toast(t[d.type] || 'Готово', 'ok'); if (S.isMod) socket.emit('mod_list'); });
   socket.on('history', onHistory);
+  socket.on('history_more', onHistoryMore);
+  socket.on('force_reload', () => { toast('Данные сервера обновлены — перезагрузка…'); setTimeout(() => location.reload(), 1200); });
   socket.on('receive_message', onReceive);
   socket.on('message_updated', onUpdated);
   socket.on('typing', ({ conversationId, user }) => { if (!S.typing.has(conversationId)) S.typing.set(conversationId, new Map()); S.typing.get(conversationId).set(user, Date.now()); renderChatList(); if (S.current === conversationId) renderHeader(); setTimeout(() => { renderChatList(); if (S.current === conversationId) renderHeader(); }, 3600); });
@@ -1274,12 +1341,30 @@ async function onAuthOk(d) {
     window.addEventListener('click', ask);
   }
 }
-async function onHistory({ conversationId, messages }) {
+async function onHistory({ conversationId, messages, hasMore }) {
   await Promise.all(messages.map(prepareMsg));
   S.msgs.set(conversationId, messages);
+  S.hasMore.set(conversationId, !!hasMore); S.loadingMore = false;
   if (S.bfPendingCmd && S.pendingOpen) { const cmd = S.bfPendingCmd; S.bfPendingCmd = null; setTimeout(() => { if (isBotFatherChat()) { input.value = cmd; sendText(); } }, 300); }
   if (S.pendingOpen) { if (takePending()) { selectConv(conversationId, { skipFetch: true }); return; } }
   if (S.current === conversationId) { renderMessages(); markReadSoon(); }
+}
+async function onHistoryMore({ conversationId, messages, hasMore }) {
+  S.loadingMore = false; S.hasMore.set(conversationId, !!hasMore);
+  if (!messages.length) return;
+  await Promise.all(messages.map(prepareMsg));
+  const arr = S.msgs.get(conversationId) || []; const ids = new Set(arr.map((x) => x.id));
+  S.msgs.set(conversationId, [...messages.filter((x) => !ids.has(x.id)), ...arr]);
+  if (S.current !== conversationId) return;
+  const prevH = msgsEl.scrollHeight, prevTop = msgsEl.scrollTop;
+  renderMessages({ keepScroll: true });
+  msgsEl.scrollTop = msgsEl.scrollHeight - prevH + prevTop;
+}
+function maybeLoadOlder() {
+  const c = cur(); if (!c || S.loadingMore || !S.hasMore.get(c.id)) return;
+  if (msgsEl.scrollTop > 160) return;
+  const arr = S.msgs.get(c.id) || []; if (!arr.length) return;
+  S.loadingMore = true; socket.emit('get_history_before', { conversationId: c.id, before: arr[0].id, limit: 100 });
 }
 async function onReceive(m) {
   await prepareMsg(m);
@@ -1339,6 +1424,7 @@ function previewText(m, c) {
   if (m.type === 'image') return '📷 Изображение' + (m.text && m.text !== 'Изображение' ? ' · ' + m.text : '');
   if (m.type === 'file') return m.file?.mime?.startsWith('audio/') ? '🎤 Голосовое сообщение' : '📎 ' + (m.file?.name || 'Файл');
   if (m.type === 'call') return '📞 ' + m.text;
+  if (m.type === 'poll') return '📊 ' + (m.poll?.question || m.text || 'Опрос');
   return m.text || '';
 }
 ['pointerdown', 'keydown'].forEach((ev) => window.addEventListener(ev, function unlock() { Snd.get(); window.removeEventListener(ev, unlock); }, { once: true }));
@@ -1527,7 +1613,7 @@ const msgsEl = $('#messages');
 function nearBottom() { return msgsEl.scrollHeight - msgsEl.scrollTop - msgsEl.clientHeight < 120; }
 function scrollBottom(smooth) { msgsEl.scrollTo({ top: msgsEl.scrollHeight, behavior: smooth ? 'smooth' : 'auto' }); }
 function updateScrollBtn() { const nb = nearBottom(); $('#btnScrollDown').classList.toggle('hidden', nb); if (nb) S.newBelow = 0; const b = $('#sdBadge'); b.classList.toggle('hidden', !S.newBelow); b.textContent = S.newBelow; }
-msgsEl.addEventListener('scroll', updateScrollBtn, { passive: true });
+msgsEl.addEventListener('scroll', () => { updateScrollBtn(); maybeLoadOlder(); }, { passive: true });
 $('#btnScrollDown').addEventListener('click', () => { scrollBottom(true); S.newBelow = 0; markReadSoon(); });
 function groupFlags(arr, i) {
   const m = arr[i], p = arr[i - 1], n = arr[i + 1];
@@ -1578,6 +1664,8 @@ function msgHTML(m, first, last) {
       body += fileBody(m);
       const cap = m.text && m.text !== m.file.name && m.text !== 'Голосовое сообщение';
       body += cap ? `<div class="b-text">${renderText(m.text, q)}${meta}</div>` : `<div class="b-meta-row">${meta}</div>`;
+    } else if (m.type === 'poll' && m.poll) {
+      body += pollHTML(m) + `<div class="b-meta-row">${meta}</div>`;
     } else if (m.type === 'secret') {
       const pt = m._plain;
       body += typeof pt === 'string' ? `<div class="b-text ${isEmojiOnly(pt) ? 'big' : ''}">${renderText(pt, q)}${meta}</div>` : `<div class="b-text dim">${icon('lock', 'sm')} ${pt === false ? 'Не удалось расшифровать (ключ другого устройства)' : 'Расшифровка…'}${meta}</div>`;
@@ -1589,7 +1677,98 @@ function msgHTML(m, first, last) {
   const actions = m.deleted ? '' : `<div class="msg-actions"><button data-act="react" title="Реакция">${icon('smile')}</button><button data-act="reply" title="Ответить">${icon('reply')}</button><button data-act="more" title="Ещё">${icon('more-h')}</button></div>`;
   return `<div class="msg ${out ? 'out' : 'in'} ${first ? 'first' : ''} ${last ? 'last' : ''} ${m.type === 'image' && imgOnly ? 'has-img' : m.type === 'image' ? 'has-img cap' : ''}" data-id="${esc(m.id)}" data-from="${esc(m.from)}">${av}<div class="bubble">${showName ? `<div class="b-name" data-user="${esc(m.from)}">${esc(name)}${vbadge(u, 'sm')}</div>` : ''}${body}${reactionsHTML(m)}${actions}</div></div>`;
 }
-function renderMessages() {
+/* ---------- опросы ---------- */
+function pollKind(p) { return (p.quiz ? 'Викторина' : 'Опрос') + (p.anonymous ? ' · анонимно' : ' · публично') + (p.multiple ? ' · несколько ответов' : ''); }
+function pollTimeLeft(p) { if (!p.closesAt) return ''; const d = p.closesAt - Date.now(); if (d <= 0) return ''; const m = Math.floor(d / 60000), sec = Math.floor((d % 60000) / 1000); return m >= 60 ? `${Math.floor(m / 60)} ч ${m % 60} мин` : `${m}:${String(sec).padStart(2, '0')}`; }
+function pollHTML(m) {
+  const p = m.poll; const c = S.convs.get(m.conversationId);
+  const voted = p.myVotes && p.myVotes.length > 0; const closed = p.closed || (p.closesAt && Date.now() >= p.closesAt);
+  const showRes = voted || closed || (c && c.type === 'channel' && !isAdmin(c) && false);
+  const sel = S.pollSel[m.id] || new Set();
+  let h = `<div class="b-poll ${showRes ? 'p-res' : ''}" data-poll="${esc(m.id)}"><div class="p-q">${esc(p.question)}</div><div class="p-sub">${esc(pollKind(p))}${closed ? '<span>· завершён</span>' : p.closesAt ? `<span class="p-left" data-closes="${p.closesAt}">· ${esc(pollTimeLeft(p))}</span>` : ''}</div>`;
+  if (showRes) {
+    const total = p.total || 0;
+    h += p.options.map((o, i) => {
+      const n = p.counts ? p.counts[i] || 0 : 0; const pct = total ? Math.round(n * 100 / total) : 0;
+      const mine = (p.myVotes || []).includes(i);
+      const cls = p.quiz && p.correct !== undefined ? (i === p.correct ? 'ok' : mine ? 'bad' : '') : '';
+      const mark = mine ? `<span class="p-mark" title="Ваш голос">${p.quiz && p.correct !== undefined ? (i === p.correct ? '✓' : '✕') : '✓'}</span>` : (p.quiz && i === p.correct ? '<span class="p-mark" title="Правильный ответ">✓</span>' : '');
+      const names = !p.anonymous && p.voters && p.voters[i] && p.voters[i].length ? `<div class="p-vname">${p.voters[i].slice(0, 6).map((u) => esc(displayOf(u))).join(', ')}${p.voters[i].length > 6 ? ` и ещё ${p.voters[i].length - 6}` : ''}</div>` : '';
+      return `<div class="p-opt ${cls} ${mine ? 'mine' : ''}"><div class="p-row"><div class="p-pct">${pct}%</div><div class="p-txt">${esc(o.text)}${mark}</div></div><div class="p-bar"><i style="width:${pct}%"></i></div>${names}</div>`;
+    }).join('');
+    if (p.quiz && p.explanation && voted) h += `<div class="p-expl">💡 ${esc(p.explanation)}</div>`;
+    h += `<div class="p-foot"><span>${total ? `${total} ${plural(total, ['голос', 'голоса', 'голосов'])}` : 'Пока никто не голосовал'}</span>${voted && !closed && !p.quiz ? '<button data-pact="retract">Отозвать голос</button>' : ''}${!p.anonymous && total ? '<button data-pact="voters">Кто голосовал</button>' : ''}</div>`;
+  } else {
+    h += p.options.map((o, i) => `<div class="p-opt ${p.multiple ? 'multi' : ''} ${sel.has(i) ? 'sel' : ''}" data-opt="${i}"><div class="p-chk">${icon('check')}</div><div class="p-txt">${esc(o.text)}</div></div>`).join('');
+    if (p.multiple) h += `<button class="p-vote" data-pact="vote" ${sel.size ? '' : 'disabled'}>Голосовать${sel.size ? ` (${sel.size})` : ''}</button>`;
+    h += `<div class="p-foot"><span>${p.total ? `${p.total} ${plural(p.total, ['голос', 'голоса', 'голосов'])}` : 'Пока никто не голосовал'}</span>${!p.anonymous && p.total ? '<button data-pact="voters">Кто голосовал</button>' : ''}</div>`;
+  }
+  return h + '</div>';
+}
+function pollClick(e) {
+  const box = e.target.closest('.b-poll'); if (!box) return false;
+  const c = cur(); const m = (S.msgs.get(S.current) || []).find((x) => x.id === box.dataset.poll); if (!c || !m || !m.poll) return true;
+  const act = e.target.closest('[data-pact]');
+  if (act) {
+    const a = act.dataset.pact;
+    if (a === 'vote') { const sel = S.pollSel[m.id]; if (sel && sel.size) { socket.emit('poll_vote', { conversationId: c.id, id: m.id, options: [...sel] }); delete S.pollSel[m.id]; } }
+    else if (a === 'retract') socket.emit('poll_vote', { conversationId: c.id, id: m.id, options: [] });
+    else if (a === 'voters') openPollVoters(m);
+    return true;
+  }
+  const opt = e.target.closest('[data-opt]'); if (!opt) return true;
+  const i = +opt.dataset.opt;
+  if (m.poll.multiple) { const sel = S.pollSel[m.id] || (S.pollSel[m.id] = new Set()); sel.has(i) ? sel.delete(i) : sel.add(i); replaceMessageNode(m); }
+  else socket.emit('poll_vote', { conversationId: c.id, id: m.id, options: [i] });
+  return true;
+}
+function openPollVoters(m) {
+  const p = m.poll; const rows = p.options.map((o, i) => { const list = (p.voters && p.voters[i]) || []; return `<div class="row-item" style="flex-direction:column;align-items:stretch"><div style="display:flex;justify-content:space-between;gap:10px"><b>${esc(o.text)}</b><span style="color:var(--text-3)">${list.length}</span></div>${list.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${list.map((u) => { const usr = userOf(u) || { username: u, displayName: u }; return `<span class="mtag" style="display:inline-flex;align-items:center;gap:6px;padding:4px 8px 4px 4px;font-size:13px">${avatarHTML({ ...usr, name: usr.displayName }, 22)}${esc(usr.displayName || u)}</span>`; }).join('')}</div>` : ''}</div>`; }).join('');
+  Modal.open(`${mdHead('Кто голосовал')}<div class="md-body"><p class="md-text" style="margin-top:0">${esc(p.question)}</p>${rows}</div>`);
+}
+setInterval(() => { $$('.p-left[data-closes]').forEach((el) => { const left = pollTimeLeft({ closesAt: +el.dataset.closes }); if (!left) { const box = el.closest('.b-poll'); const m = (S.msgs.get(S.current) || []).find((x) => x.id === box?.dataset.poll); if (m) { m.poll.closed = true; replaceMessageNode(m); } } else el.textContent = '· ' + left; }); }, 1000);
+function openNewPoll() {
+  const c = cur(); if (!c || c.type === 'secret') return;
+  const st = { opts: ['', ''], anonymous: true, multiple: false, quiz: false, correct: -1, closesIn: 0 };
+  const draw = () => {
+    const html = `${mdHead('Новый опрос')}<div class="md-body po ${st.quiz ? 'quiz' : ''}" id="po">
+      <div class="field"><label>Вопрос</label><textarea id="poQ" rows="2" maxlength="255" placeholder="Задайте вопрос">${esc(st.q || '')}</textarea></div>
+      <label style="font-size:13px;color:var(--text-2);display:block;margin-bottom:6px">Варианты ответа</label>
+      <div id="poOpts">${st.opts.map((o, i) => `<div class="po-opt"><button type="button" class="cor ${st.correct === i ? 'on' : ''}" data-cor="${i}" title="Правильный ответ">${icon('check')}</button><input type="text" data-opt="${i}" maxlength="100" placeholder="Вариант ${i + 1}" value="${esc(o)}">${st.opts.length > 2 ? `<button type="button" class="rm" data-rm="${i}" title="Удалить">${icon('x', 'sm')}</button>` : '<span style="width:34px"></span>'}</div>`).join('')}</div>
+      ${st.opts.length < 10 ? `<button type="button" class="po-add" id="poAdd">+ Добавить вариант</button>` : '<div class="po-hint">Максимум 10 вариантов</div>'}
+      ${st.quiz ? '<div class="po-hint">Отметьте кружком правильный ответ</div>' : ''}
+      <div class="po-row"><div><div class="t">Анонимное голосование</div><div class="d">Никто не увидит, кто как проголосовал</div></div><div class="switch ${st.anonymous ? 'on' : ''}" data-po="anonymous"></div></div>
+      <div class="po-row"><div><div class="t">Несколько ответов</div><div class="d">Можно выбрать больше одного варианта</div></div><div class="switch ${st.multiple ? 'on' : ''} ${st.quiz ? 'dis' : ''}" data-po="multiple" ${st.quiz ? 'style="opacity:.4;pointer-events:none"' : ''}></div></div>
+      <div class="po-row"><div><div class="t">Режим викторины</div><div class="d">Один правильный ответ, изменить выбор нельзя</div></div><div class="switch ${st.quiz ? 'on' : ''}" data-po="quiz"></div></div>
+      <div class="po-quiz"><div class="field"><label>Пояснение (необязательно)</label><input id="poExpl" maxlength="200" placeholder="Покажется после ответа — почему так" value="${esc(st.explanation || '')}"></div></div>
+      <div class="po-row"><div><div class="t">Закрыть опрос через</div><div class="d">После этого голосовать нельзя</div></div><select id="poClose" style="max-width:150px">${[[0, 'Никогда'], [300, '5 минут'], [1800, '30 минут'], [3600, '1 час'], [21600, '6 часов'], [86400, '24 часа'], [604800, '7 дней']].map(([v, l]) => `<option value="${v}" ${st.closesIn === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+    </div><div class="md-foot"><button class="btn ghost" data-close>Отмена</button><button class="btn" id="poSend">Создать</button></div>`;
+    if ($('#po')) { const sc = $('#po').scrollTop; $('#modal').innerHTML = html; $('#po').scrollTop = sc; } else Modal.open(html);
+    const root = $('#po');
+    const collect = () => { st.q = $('#poQ').value; $$('#poOpts input[data-opt]').forEach((inp) => { st.opts[+inp.dataset.opt] = inp.value; }); st.explanation = $('#poExpl').value; st.closesIn = +$('#poClose').value; };
+    root.onclick = (e) => {
+      const sw = e.target.closest('[data-po]'); if (sw) { collect(); const k = sw.dataset.po; st[k] = !st[k]; if (k === 'quiz' && st.quiz) st.multiple = false; draw(); return; }
+      const cor = e.target.closest('[data-cor]'); if (cor) { collect(); st.correct = +cor.dataset.cor; st.quiz = true; st.multiple = false; draw(); return; }
+      const rm = e.target.closest('[data-rm]'); if (rm) { collect(); const i = +rm.dataset.rm; st.opts.splice(i, 1); if (st.correct === i) st.correct = -1; else if (st.correct > i) st.correct--; draw(); return; }
+      if (e.target.closest('#poAdd')) { collect(); st.opts.push(''); draw(); setTimeout(() => { const last = $$('#poOpts input[data-opt]').pop(); last && last.focus(); }, 30); }
+    };
+    root.onkeydown = (e) => { if (e.key === 'Enter' && e.target.matches('input[data-opt]')) { e.preventDefault(); const i = +e.target.dataset.opt; if (i === st.opts.length - 1 && st.opts.length < 10) { collect(); st.opts.push(''); draw(); setTimeout(() => { const last = $$('#poOpts input[data-opt]').pop(); last && last.focus(); }, 30); } else { const nx = $(`#poOpts input[data-opt="${i + 1}"]`); nx && nx.focus(); } } };
+    $('#poSend').onclick = () => {
+      collect();
+      const q = (st.q || '').trim(); const opts = st.opts.map((o) => o.trim()).filter(Boolean);
+      if (!q) { toast('Введите вопрос', 'err'); $('#poQ').focus(); return; }
+      if (opts.length < 2) { toast('Нужно минимум 2 варианта', 'err'); return; }
+      if (new Set(opts.map((o) => o.toLowerCase())).size !== opts.length) { toast('Варианты не должны повторяться', 'err'); return; }
+      if (st.quiz) { const ct = (st.opts[st.correct] || '').trim(); if (st.correct < 0 || !ct) { toast('Отметьте правильный ответ', 'err'); return; } st.correctIdx = opts.indexOf(ct); }
+      const replyTo = S.reply ? { id: S.reply.id } : null;
+      socket.emit('send_message', { conversationId: c.id, type: 'poll', replyTo, poll: { question: q, options: opts, anonymous: st.anonymous, multiple: st.multiple, quiz: st.quiz, correct: st.quiz ? st.correctIdx : -1, explanation: st.explanation || '', closesIn: st.closesIn } });
+      S.reply = null; hideComposerBar(); Modal.close();
+    };
+  };
+  draw();
+  setTimeout(() => $('#poQ')?.focus(), 60);
+}
+function renderMessages(opts = {}) {
   const c = cur(); if (!c) return;
   const arr = S.msgs.get(c.id) || [];
   const botPeer = botPeerOf(cur());
@@ -1598,6 +1777,7 @@ function renderMessages() {
   let h = '', prevTs = 0;
   arr.forEach((m, i) => { if (!sameDay(m.ts, prevTs)) h += `<div class="date-sep" data-ts="${m.ts}">${fmtDateSep(m.ts)}</div>`; prevTs = m.ts; const { first, last } = groupFlags(arr, i); h += msgHTML(m, first, last); });
   msgsEl.innerHTML = h;
+  if (opts.keepScroll) return;
   scrollBottom(false); requestAnimationFrame(() => { scrollBottom(false); updateScrollBtn(); });
 }
 function appendMessage(m) {
@@ -1626,6 +1806,7 @@ function jumpTo(id) {
 }
 msgsEl.addEventListener('click', (e) => {
   const t = e.target;
+  if (t.closest('.b-poll')) { pollClick(e); return; }
   const jump = t.closest('.b-reply'); if (jump) { jumpTo(jump.dataset.jump); return; }
   const img = t.closest('.b-img'); if (img) { openLightbox(img.dataset.view, img.dataset.name); return; }
   const re = t.closest('.react'); if (re) { const msg = t.closest('.msg'); socket.emit('react', { conversationId: S.current, id: msg.dataset.id, emoji: re.dataset.emoji }); return; }
@@ -1734,10 +1915,8 @@ const AI_ACTIONS = [['fix', 'Исправить ошибки', 'edit'], ['shorte
 function updateAIBtn() {
   const b = $('#btnAI'); if (!b) return;
   const v = input.value; const c = cur();
-  const cs = getComputedStyle(input); const lh = parseFloat(cs.lineHeight) || 21;
-  const pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
-  const multi = v.includes('\n') || Math.round((input.scrollHeight - pad) / lh) >= 2;
-  b.classList.toggle('show', !!c && c.type !== 'secret' && multi && v.trim().length >= 8);
+  // кнопка видна всегда, когда есть текст (кроме секретных чатов и команд ботам)
+  b.classList.toggle('show', !!c && c.type !== 'secret' && v.trim().length >= 2 && !v.startsWith('/'));
   if (!b.classList.contains('show')) $('#aiPop').classList.add('hidden');
 }
 function renderAIPop() {
@@ -1805,7 +1984,9 @@ msgsEl.addEventListener('click', (e) => { if (e.target.closest('#bfStart')) { in
 $('#composerNotice').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; const c = cur(); if (b.dataset.n === 'mute') socket.emit('set_conv_flag', { id: c.id, mute: !c.muted }); if (b.dataset.n === 'unblock') socket.emit('unblock_user', peerOf(c)); });
 
 /* attachments */
-$('#btnAttach').addEventListener('click', () => $('#fileInput').click());
+$('#btnAttach').addEventListener('click', () => { const c = cur(); if (!c) return; if (c.type === 'secret') { $('#fileInput').click(); return; } const pop = $('#attPop'); $('#attPoll').classList.toggle('hidden', c.type === 'secret'); pop.classList.toggle('hidden'); });
+$('#attPop').addEventListener('click', (e) => { const it = e.target.closest('[data-att]'); if (!it) return; $('#attPop').classList.add('hidden'); if (it.dataset.att === 'image') $('#fileInputImg').click(); else if (it.dataset.att === 'file') $('#fileInput').click(); else openNewPoll(); });
+$('#fileInputImg').addEventListener('change', (e) => { const files = [...e.target.files]; e.target.value = ''; if (files.length) sendFiles(files); });
 $('#fileInput').addEventListener('change', (e) => { const files = [...e.target.files]; e.target.value = ''; if (files.length) sendFiles(files); });
 const chatEl = $('#chat'); let dragN = 0;
 chatEl.addEventListener('dragenter', (e) => { if (!S.current || !e.dataTransfer?.types?.includes('Files')) return; e.preventDefault(); dragN++; $('#dropzone').classList.remove('hidden'); });
@@ -1872,13 +2053,14 @@ function showCtx(html, x, y) {
   ctxEl.style.left = clamp(x, 8, window.innerWidth - w - 8) + 'px'; ctxEl.style.top = clamp(y, 8, window.innerHeight - h - 8) + 'px';
 }
 function hideCtx() { ctxEl.classList.add('hidden'); ctxEl.innerHTML = ''; ctxEl.onclick = null; }
-function closeAllPopups() { hideCtx(); $('#emojiPicker').classList.add('hidden'); $('#newMenu').classList.add('hidden'); $('#cmdPop').classList.add('hidden'); $('#aiPop').classList.add('hidden'); $('#callSettings').classList.add('hidden'); }
+function closeAllPopups() { hideCtx(); $('#emojiPicker').classList.add('hidden'); $('#newMenu').classList.add('hidden'); $('#cmdPop').classList.add('hidden'); $('#aiPop').classList.add('hidden'); $('#attPop').classList.add('hidden'); $('#callSettings').classList.add('hidden'); }
 document.addEventListener('pointerdown', (e) => {
   if (!ctxEl.contains(e.target)) hideCtx();
   if (!$('#emojiPicker').contains(e.target) && !e.target.closest('#btnEmoji')) $('#emojiPicker').classList.add('hidden');
   if (!$('#newMenu').contains(e.target) && !e.target.closest('#btnNew')) $('#newMenu').classList.add('hidden');
   if (!$('#cmdPop').contains(e.target) && !e.target.closest('#btnCmds') && e.target !== input) $('#cmdPop').classList.add('hidden');
   if (!$('#aiPop').contains(e.target) && !e.target.closest('#btnAI')) $('#aiPop').classList.add('hidden');
+  if (!$('#attPop').contains(e.target) && !e.target.closest('#btnAttach')) $('#attPop').classList.add('hidden');
   if (!$('#callSettings').contains(e.target) && !e.target.closest('#ccSettings')) $('#callSettings').classList.add('hidden');
 });
 window.addEventListener('resize', closeAllPopups);
@@ -1895,6 +2077,7 @@ function msgContextMenu(m, x, y, reactOnly = false) {
     if (m.type !== 'call' && m.type !== 'system') items.push(['forward', 'forward', 'Переслать']);
     if (mine && (m.type === 'text' || m.type === 'secret')) items.push(['edit', 'edit', 'Изменить']);
     if (c.type !== 'fav' && m.type !== 'call') items.push(['star', 'bookmark', 'В избранное']);
+    if (m.type === 'poll' && m.poll && !m.poll.closed && (mine || ((c.type === 'group' || c.type === 'channel') && isAdmin(c)) || S.isMod)) items.push(['pollclose', 'lock', 'Завершить опрос']);
     if (m.type === 'image' || m.type === 'file') items.push(['download', 'download', 'Скачать']);
     if (!mine && c.type !== 'fav') items.push(['report', 'flag', 'Пожаловаться']);
     const adminHere = (c.type === 'group' || c.type === 'channel') && isAdmin(c);
@@ -1908,6 +2091,7 @@ function msgContextMenu(m, x, y, reactOnly = false) {
     const it = e.target.closest('[data-a]'); if (!it) return; hideCtx();
     switch (it.dataset.a) {
       case 'reply': setReply(m); break;
+      case 'pollclose': confirmModal('Завершить опрос?', 'Голосовать больше нельзя, результаты останутся видны всем.', 'Завершить').then((ok) => ok && socket.emit('poll_close', { conversationId: c.id, id: m.id })); break;
       case 'copy': copyText(text); break;
       case 'forward': openForward(m); break;
       case 'edit': startEdit(m); break;
@@ -2158,6 +2342,25 @@ function modRowsHTML(u) {
   if (S.isOwner && !u.isBot) h += `<div class="ip-row" data-a="modverify">${icon('check2')}<div class="rb"><div class="rt">${u.verified ? 'Снять галочку' : 'Выдать галочку'}</div><div class="rs">${u.verified ? 'Пользователь потеряет права модератора' : 'Верификация даёт права модератора'}</div></div></div>`;
   return h;
 }
+async function downloadBackup(withFiles) {
+  toast('Готовим копию…');
+  try {
+    const r = await fetch('/api/admin/backup?files=' + (withFiles ? 1 : 0), { headers: { Authorization: 'Bearer ' + S.token } });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'Ошибка');
+    const blob = await r.blob(); const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = (r.headers.get('Content-Disposition') || '').match(/filename="([^"]+)"/)?.[1] || 'nmessenger-backup.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    toast('Копия скачана', 'ok');
+  } catch (e) { toast(e.message, 'err'); }
+}
+$('#restoreInput').addEventListener('change', async (e) => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  toast('Восстанавливаем…');
+  try {
+    const r = await fetch('/api/admin/restore', { method: 'POST', headers: { Authorization: 'Bearer ' + S.token, 'Content-Type': 'application/json' }, body: f });
+    const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'Ошибка');
+    toast(`Восстановлено: ${j.accounts} аккаунтов, ${j.conversations} чатов, ${j.files} файлов`, 'ok');
+  } catch (err) { toast(err.message, 'err'); }
+});
 function modBan(u) {
   const x = typeof u === 'string' ? userOf(u) : u; if (!x) return;
   if (x.banned) { socket.emit('mod_ban_user', { user: x.username, ban: false }); return; }
@@ -2396,6 +2599,13 @@ const Settings = {
         h = `<h4>Модерация${vbadge(S.me)}</h4><p class="md-text" style="margin-top:0">Верифицированные аккаунты могут блокировать пользователей, удалять группы, каналы и любые сообщения.${S.isOwner ? ' Вы владелец: можете выдавать и снимать галочку.' : ''}</p>
         <div class="mod-tabs">${[['reports', `Жалобы${d ? ' · ' + d.reports.length : ''}`], ['users', `Пользователи${d ? ' · ' + d.users.filter((u) => !u.isBot && !isMe(u.username)).length : ''}`], ['chats', `Группы и каналы${d ? ' · ' + d.convs.length : ''}`]].map(([k, l]) => `<button data-msect="${k}" class="${sect === k ? 'active' : ''}">${l}</button>`).join('')}</div>
         ${sect !== 'reports' ? `<div class="field"><input id="modQ" placeholder="Поиск…" value="${esc(S.modQ || '')}" maxlength="48"></div>` : ''}`;
+        if (S.isOwner && d && d.stats) {
+          const st = d.stats; const mb = (n) => (n / 1048576).toFixed(1) + ' МБ';
+          h += `<details class="st-backup" style="margin:4px 0 12px" ${S.modSect === 'data' ? 'open' : ''}><summary style="cursor:pointer;font-weight:600;font-size:14px;padding:6px 0">Данные и резервные копии</summary>
+          <div class="st-stats"><div class="st-stat"><b>${st.accounts}</b><span>аккаунтов</span></div><div class="st-stat"><b>${st.bots}</b><span>ботов</span></div><div class="st-stat"><b>${st.convs}</b><span>чатов</span></div><div class="st-stat"><b>${st.messages}</b><span>сообщений</span></div><div class="st-stat"><b>${st.files}</b><span>файлов · ${mb(st.filesSize)}</span></div><div class="st-stat"><b>${mb(st.storeSize)}</b><span>база store.json</span></div></div>
+          <p class="md-text" style="margin-top:0">Всё хранится в папке <code>${esc(st.dataDir)}</code> (история — ${st.historyKeep} сообщений на чат). При обновлении мессенджера меняйте только файлы программы, папку данных не трогайте — аккаунты, чаты, боты и каналы сохранятся. Автокопии: ${st.backups.length ? st.backups.map(esc).join(', ') : 'пока нет'}.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" data-backup="1">Скачать копию (с файлами)</button><button class="btn sm ghost" data-backup="0">Только база (без файлов)</button><button class="btn sm ghost" id="restoreBtn">Восстановить из копии…</button></div></details>`;
+        }
         if (!d) h += `<p class="md-text">Загрузка…</p>`;
         else if (sect === 'reports') {
           h += d.reports.length ? d.reports.map((r) => `<div class="mod-row"><div class="rb"><div class="rt">${esc(r.fromName)} → ${r.target ? esc(r.targetName) + ' (@' + esc(r.target) + ')' : 'чат'}<span class="mtag">${esc(r.reason)}</span></div><div class="rs">${r.text ? esc(r.text) + ' · ' : ''}${fmtFull(r.ts)}${r.conversationId ? ' · ' + esc(r.conversationId) : ''}</div></div><div class="mod-actions">${r.target && userOf(r.target) && !userOf(r.target).owner ? `<button class="btn sm ${userOf(r.target).banned ? 'ghost' : 'danger'}" data-mban="${esc(r.target)}">${userOf(r.target).banned ? 'Разбан' : 'Бан'}</button>` : ''}${r.conversationId ? `<button class="btn sm ghost" data-mopen="${esc(r.conversationId)}">Открыть</button>` : ''}<button class="btn sm ghost" data-mdismiss="${esc(r.id)}">Скрыть</button></div></div>`).join('') : `<p class="md-text">Жалоб нет 🎉</p>`;
@@ -2432,6 +2642,8 @@ const Settings = {
       const tp = t.closest('[data-theme-pick]'); if (tp) { emit({ theme: tp.dataset.themePick }); return; }
       if (t.closest('#avEdit')) { $('#avatarInput').click(); return; }
       const ms = t.closest('[data-msect]'); if (ms) { S.modSect = ms.dataset.msect; this.render(); return; }
+      const bk = t.closest('[data-backup]'); if (bk) { downloadBackup(bk.dataset.backup === '1'); return; }
+      if (t.closest('#restoreBtn')) { confirmModal('Восстановить данные из копии?', 'Текущие аккаунты, чаты и файлы будут заменены содержимым файла копии. Перед этим сервер сам сделает автокопию текущего состояния.', 'Выбрать файл').then((ok) => { if (ok) { Settings.open('mod'); $('#restoreInput').click(); } }); return; }
       const mb = t.closest('[data-mban]'); if (mb) { modBan(mb.dataset.mban); return; }
       const mv = t.closest('[data-mver]'); if (mv) { const u = userOf(mv.dataset.mver); if (u) socket.emit('mod_set_verified', { user: u.username, verified: !u.verified }); return; }
       const mp = t.closest('[data-mprof]'); if (mp) { openProfile(mp.dataset.mprof); return; }

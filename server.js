@@ -10,7 +10,8 @@ require('dotenv').config();
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: '2mb' }));
+const jsonParser = express.json({ limit: '2mb' });
+app.use((req, res, next) => (req.path === '/api/admin/restore' ? next() : jsonParser(req, res, next))); // восстановление копии читает «сырое» тело без лимита 2 МБ
 
 const MAX_FILE = 10 * 1024 * 1024;
 const TEXT_MAX = 4000;
@@ -22,7 +23,12 @@ const io = new Server(server, {
   maxHttpBufferSize: 2e6,
 });
 
-const DATA_DIR = path.join(__dirname, 'data');
+// Папка с данными. Можно вынести на постоянный диск: DATA_DIR=/var/data/nmessenger в .env
+const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(__dirname, 'data'));
+const BACKUP_DIR = path.join(DATA_DIR, 'backups');
+// Сколько последних сообщений хранить в каждом чате (по умолчанию 5000)
+const HISTORY_KEEP = Math.min(50000, Math.max(200, parseInt(process.env.HISTORY_KEEP || '5000', 10) || 5000));
+const zlib = require('zlib');
 const DATA_FILE = path.join(DATA_DIR, 'store.json');
 const FILES_DIR = path.join(DATA_DIR, 'files');
 
@@ -100,19 +106,47 @@ app.use((req, res, next) => {
 });
 io.use((socket, next) => (instanceLocked ? next(new Error('locked')) : next()));
 
-function loadStore() {
+function normalizeStore(parsed) {
+  return {
+    accounts: parsed.accounts || {},
+    conversations: parsed.conversations || {},
+    sessions: parsed.sessions || {},
+    files: parsed.files || {},
+    reports: parsed.reports || [],
+  };
+}
+function readStoreFile(fp) {
+  let raw = fs.readFileSync(fp);
+  if (fp.endsWith('.gz')) raw = zlib.gunzipSync(raw);
+  const parsed = JSON.parse(raw.toString('utf8'));
+  if (!parsed || typeof parsed !== 'object' || !parsed.accounts) throw new Error('bad store');
+  return parsed;
+}
+function listBackups() {
   try {
-    const parsed = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-    return {
-      accounts: parsed.accounts || {},
-      conversations: parsed.conversations || {},
-      sessions: parsed.sessions || {},
-      files: parsed.files || {},
-      reports: parsed.reports || [],
-    };
-  } catch {
-    return { accounts: {}, conversations: {}, sessions: {}, files: {}, reports: [] };
+    return fs.readdirSync(BACKUP_DIR).filter((f) => /^store-.*\.json(\.gz)?$/.test(f)).sort().map((f) => path.join(BACKUP_DIR, f));
+  } catch { return []; }
+}
+function loadStore() {
+  // 1) основной файл, 2) store.json.bak, 3) последняя резервная копия — данные не теряются даже при битом файле
+  const candidates = [DATA_FILE, DATA_FILE + '.bak', ...listBackups().reverse()];
+  let mainBroken = false;
+  for (const fp of candidates) {
+    if (!fs.existsSync(fp)) continue;
+    try {
+      const parsed = readStoreFile(fp);
+      if (fp !== DATA_FILE) console.warn('⚠️  store.json повреждён или отсутствует — данные восстановлены из', path.basename(fp));
+      return normalizeStore(parsed);
+    } catch (e) {
+      if (fp === DATA_FILE) {
+        mainBroken = true;
+        try { fs.copyFileSync(DATA_FILE, DATA_FILE.replace(/\.json$/, '') + '.corrupt-' + Date.now() + '.json'); } catch { }
+        console.error('❌ store.json не читается (' + e.message + '), копия сохранена как store.corrupt-*.json');
+      }
+    }
   }
+  if (mainBroken) console.error('❌ Не удалось восстановить данные ни из одной копии — старт с пустой базой');
+  return { accounts: {}, conversations: {}, sessions: {}, files: {}, reports: [] };
 }
 
 const store = loadStore();
@@ -125,35 +159,67 @@ const usersBySocket = new Map();
 const socketsByName = new Map();
 const loginTries = new Map();
 
-let persistTimer = null;
-function persist() {
-  clearTimeout(persistTimer);
-  persistTimer = setTimeout(() => {
-    try {
-      if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-      const conversations = {};
-      for (const [id, c] of convMap) {
-        conversations[id] = { ...c, messages: (c.messages || []).slice(-500) };
-      }
-      const acc = {};
-      for (const [k, v] of accounts) acc[k] = v;
-      const now = Date.now();
-      const sess = {};
-      for (const [t, s] of sessions) {
-        if (s.exp > now) sess[t] = s;
-        else sessions.delete(t);
-      }
-      const files = {};
-      for (const [k, v] of filesMeta) files[k] = v;
-      fs.writeFileSync(
-        DATA_FILE,
-        JSON.stringify({ accounts: acc, conversations, sessions: sess, files, reports })
-      );
-    } catch (err) {
-      console.error('persist error:', err.message);
-    }
-  }, 200);
+function snapshotStore({ withSessions = true } = {}) {
+  const conversations = {};
+  for (const [id, c] of convMap) {
+    conversations[id] = { ...c, messages: (c.messages || []).slice(-HISTORY_KEEP) };
+  }
+  const acc = {};
+  for (const [k, v] of accounts) acc[k] = v;
+  const now = Date.now();
+  const sess = {};
+  if (withSessions) for (const [t, s] of sessions) {
+    if (s.exp > now) sess[t] = s;
+    else sessions.delete(t);
+  }
+  const files = {};
+  for (const [k, v] of filesMeta) files[k] = v;
+  return { accounts: acc, conversations, sessions: sess, files, reports };
 }
+let persistTimer = null;
+let dirty = false;
+function persistNow() {
+  // Атомарная запись: сначала во временный файл, потом переименование. Старый файл остаётся как store.json.bak.
+  try {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    const tmp = DATA_FILE + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify(snapshotStore()));
+    if (fs.existsSync(DATA_FILE)) { try { fs.copyFileSync(DATA_FILE, DATA_FILE + '.bak'); } catch { } }
+    fs.renameSync(tmp, DATA_FILE);
+    dirty = false;
+  } catch (err) {
+    console.error('persist error:', err.message);
+  }
+}
+function persist() {
+  dirty = true;
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(persistNow, 200);
+}
+const BACKUP_KEEP = Math.max(3, parseInt(process.env.BACKUP_KEEP || '20', 10) || 20);
+function makeBackup(reason = 'auto') {
+  try {
+    if (!accounts.size) return null;
+    if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    const stamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 16);
+    const fp = path.join(BACKUP_DIR, `store-${stamp}-${reason}.json.gz`);
+    fs.writeFileSync(fp, zlib.gzipSync(JSON.stringify(snapshotStore({ withSessions: false }))));
+    const all = listBackups();
+    for (const old of all.slice(0, Math.max(0, all.length - BACKUP_KEEP))) { try { fs.unlinkSync(old); } catch { } }
+    return fp;
+  } catch (e) { console.error('backup error:', e.message); return null; }
+}
+// Резервная копия при старте и каждые 6 часов (data/backups, хранится BACKUP_KEEP последних)
+setTimeout(() => makeBackup('start'), 3000);
+setInterval(() => makeBackup('auto'), 6 * 60 * 60 * 1000).unref();
+function flushAndExit(sig) {
+  try { clearTimeout(persistTimer); if (dirty) persistNow(); } catch { }
+  console.log(`\n💾 Данные сохранены (${sig}). Папка: ${DATA_DIR}`);
+  process.exit(0);
+}
+process.on('SIGINT', () => flushAndExit('SIGINT'));
+process.on('SIGTERM', () => flushAndExit('SIGTERM'));
+process.on('uncaughtException', (e) => { console.error('uncaughtException:', e); try { persistNow(); } catch { } });
 
 function livekitEnabled() {
   return !!(
@@ -517,7 +583,7 @@ function findBotByToken(token) {
 }
 function pushMessage(conv, msg) {
   conv.messages.push(msg);
-  if (conv.messages.length > 500) conv.messages.splice(0, conv.messages.length - 500);
+  if (conv.messages.length > HISTORY_KEEP) conv.messages.splice(0, conv.messages.length - HISTORY_KEEP);
   conv.hidden = conv.hidden || {};
   conv.unread = conv.unread || {};
   const fromK = key(msg.from);
@@ -571,7 +637,7 @@ function kickUser(username, reason) {
   if (set) for (const sk of Array.from(set)) { try { sk.emit('auth_error', reason); sk.disconnect(true); } catch { } }
 }
 function deleteMsg(conv, msg) {
-  msg.deleted = true; msg.text = ''; msg.file = null; msg.ciphertext = null; msg.replyTo = null;
+  msg.deleted = true; msg.text = ''; msg.file = null; msg.ciphertext = null; msg.replyTo = null; if (msg.poll) msg.poll = null;
   if (conv.lastMessage && conv.messages[conv.messages.length - 1] && conv.messages[conv.messages.length - 1].id === msg.id) conv.lastMessage.text = 'Сообщение удалено';
   persist();
   emitToConv(conv, 'message_updated', msg);
@@ -586,7 +652,7 @@ function modSnapshot() {
   const users = Array.from(accounts.values()).filter((a) => !a.system).map((a) => ({ ...publicAccount(a, null), createdAt: a.createdAt || 0, banReason: a.banReason || '', botOwner: a.botOwner || null }));
   const convs = Array.from(convMap.values()).filter((c) => c.type === 'group' || c.type === 'channel').map((c) => ({ id: c.id, type: c.type, name: c.name, handle: c.handle || '', owner: convOwner(c), members: c.participants.length, messages: (c.messages || []).length, createdAt: c.createdAt || 0 }));
   const reps = reports.slice(-100).reverse().map((r) => ({ ...r, fromName: displayOf(r.from), targetName: r.target ? displayOf(r.target) : '' }));
-  return { users, convs, reports: reps };
+  return { users, convs, reports: reps, stats: storeStats() };
 }
 
 /* ===================== Bot API: очередь обновлений для внешних ботов (Python SDK) ===================== */
@@ -608,8 +674,55 @@ function tgMessage(conv, msg) {
     text: msg.text || '',
   };
   if (msg.file) out.file = { id: msg.file.id, name: msg.file.name, size: msg.file.size, mime: msg.file.mime, url: msg.file.url };
+  if (msg.type === 'poll' && msg.poll) out.poll = msg.poll;
   if (msg.replyTo) out.reply_to_message = { message_id: msg.replyTo.id, text: msg.replyTo.text || '', from: msg.replyTo.from || null };
   return out;
+}
+/* ===================== Опросы (как в Telegram) ===================== */
+const POLL_Q_MAX = 255, POLL_OPT_MAX = 100, POLL_OPTS_MAX = 10, POLL_EXPL_MAX = 200, POLL_MAX_PERIOD = 7 * 24 * 3600;
+function buildPoll(raw) {
+  if (!raw || typeof raw !== 'object') return { error: 'Нет данных опроса' };
+  const question = String(raw.question || '').trim().slice(0, POLL_Q_MAX);
+  if (!question) return { error: 'Введите вопрос' };
+  const seen = new Set();
+  const options = (Array.isArray(raw.options) ? raw.options : []).map((o) => String(typeof o === 'object' && o ? o.text : o || '').trim().slice(0, POLL_OPT_MAX)).filter((t) => { if (!t || seen.has(t.toLowerCase())) return false; seen.add(t.toLowerCase()); return true; }).slice(0, POLL_OPTS_MAX);
+  if (options.length < 2) return { error: 'Нужно минимум 2 разных варианта' };
+  const quiz = !!raw.quiz;
+  const multiple = !quiz && !!raw.multiple;
+  let correct = quiz ? parseInt(raw.correct, 10) : -1;
+  if (quiz && !(correct >= 0 && correct < options.length)) return { error: 'Выберите правильный ответ викторины' };
+  const explanation = quiz ? String(raw.explanation || '').trim().slice(0, POLL_EXPL_MAX) : '';
+  let period = parseInt(raw.closesIn, 10) || 0;
+  period = Math.min(POLL_MAX_PERIOD, Math.max(0, period));
+  return { poll: { question, options: options.map((text) => ({ text })), anonymous: raw.anonymous !== false, multiple, quiz, correct, explanation, closed: false, closesAt: period ? Date.now() + period * 1000 : 0, votes: {} } };
+}
+function pollIsClosed(p) { return !!(p.closed || (p.closesAt && Date.now() >= p.closesAt)); }
+function pollView(p, forUser) {
+  // Что видит конкретный пользователь: счётчики, свои голоса; для публичных опросов — кто голосовал. Сырые голоса не отдаём.
+  const votes = p.votes || {};
+  const counts = p.options.map(() => 0);
+  let total = 0;
+  for (const arr of Object.values(votes)) { if (!arr || !arr.length) continue; total++; for (const i of arr) if (counts[i] !== undefined) counts[i]++; }
+  const my = (forUser && votes[key(forUser)]) || [];
+  const closed = pollIsClosed(p);
+  const out = { question: p.question, options: p.options.map((o) => ({ text: o.text })), anonymous: !!p.anonymous, multiple: !!p.multiple, quiz: !!p.quiz, closed, closesAt: p.closesAt || 0, counts, total, myVotes: my };
+  if (!p.anonymous) { const voters = {}; for (const [u, arr] of Object.entries(votes)) for (const i of arr || []) (voters[i] = voters[i] || []).push(u); out.voters = voters; }
+  if (p.quiz && (my.length || closed)) { out.correct = p.correct; out.explanation = p.explanation || ''; }
+  return out;
+}
+function shapeMsgFor(msg, forUser) {
+  if (!msg || msg.type !== 'poll' || !msg.poll) return msg;
+  return { ...msg, poll: pollView(msg.poll, forUser) };
+}
+function shapeOut(event, data, forUser) {
+  if (!data || typeof data !== 'object') return data;
+  if (event === 'receive_message' || event === 'message_updated') return shapeMsgFor(data, forUser);
+  if ((event === 'history' || event === 'history_more') && Array.isArray(data.messages)) {
+    const conv = convMap.get(data.conversationId);
+    const total = conv ? (conv.messages || []).length : data.messages.length;
+    return { total, hasMore: event === 'history' ? total > data.messages.length : data.hasMore, ...data, messages: data.messages.map((m) => shapeMsgFor(m, forUser)) };
+  }
+  return data;
 }
 function dispatchToBots(conv, msg) {
   if (!msg || msg.type === 'system' || msg.type === 'secret' || msg.type === 'call') return;
@@ -620,7 +733,7 @@ function dispatchToBots(conv, msg) {
     if (!a || !a.isBot || a.system) continue;
     const q = botQueue(p);
     q.seq += 1;
-    q.items.push({ update_id: q.seq, message: tgMessage(conv, msg) });
+    q.items.push({ update_id: q.seq, message: tgMessage(conv, shapeMsgFor(msg, p)) });
     if (q.items.length > 1000) q.items.splice(0, q.items.length - 1000);
     for (const w of q.waiters.splice(0)) { try { w(); } catch { } }
   }
@@ -757,7 +870,7 @@ function displayOf(username) {
 function sysMessage(conv, text) {
   const sys = { id: uid(), conversationId: conv.id, from: 'system', type: 'system', text, ts: Date.now(), time: timeLabel() };
   conv.messages.push(sys);
-  if (conv.messages.length > 500) conv.messages.splice(0, conv.messages.length - 500);
+  if (conv.messages.length > HISTORY_KEEP) conv.messages.splice(0, conv.messages.length - HISTORY_KEEP);
   conv.lastMessage = { text: sys.text, ts: sys.ts, from: 'system', time: sys.time };
   persist();
   for (const p of conv.participants) emitToUser(p, 'receive_message', sys);
@@ -1002,9 +1115,13 @@ app.get('/', (req, res) => {
 app.get('/ping', (req, res) => res.send('Server is alive!'));
 app.get('/livekit-status', (req, res) => res.json({ enabled: livekitEnabled() }));
 // Клиентская библиотека LiveKit раздаётся локально (зафиксированная версия из package.json) — без зависимости от CDN
+const LK_CLIENT_FILE = (() => {
+  try { const p = require.resolve('livekit-client'); const f = p.endsWith('.umd.js') ? p : path.join(path.dirname(p), 'livekit-client.umd.js'); return fs.existsSync(f) ? f : null; } catch { return null; }
+})();
 app.get('/vendor/livekit-client.umd.js', (req, res) => {
-  try { res.set('Cache-Control', 'public, max-age=86400'); res.sendFile(require.resolve('livekit-client/dist/livekit-client.umd.js')); }
-  catch { res.status(404).end(); }
+  if (!LK_CLIENT_FILE) return res.status(404).end();
+  res.set('Cache-Control', 'public, max-age=86400');
+  res.sendFile(LK_CLIENT_FILE);
 });
 
 app.post('/get-livekit-token', async (req, res) => {
@@ -1051,6 +1168,10 @@ app.post('/api/register', (req, res) => {
   }
   if (accounts.has(key(username))) {
     return res.status(409).json({ error: 'Такой логин уже занят' });
+  }
+  // Имя владельца (OWNER_USERNAMES) может зарегистрировать только тот, кто знает ключ владельца (если ключ настроен)
+  if (OWNERS.has(key(username)) && OWNER_KEY_HASH && !verifyOwnerKey(req.body?.ownerKey)) {
+    return res.status(403).json({ error: 'Это имя закреплено за владельцем сервера. Введите ключ владельца', needOwnerKey: true });
   }
   const { hash, salt } = hashPassword(password);
   const acc = {
@@ -1102,6 +1223,53 @@ app.post('/api/logout', (req, res) => {
   if (token) sessions.delete(token);
   persist();
   res.json({ ok: true });
+});
+
+/* ---- Резервные копии (только владелец) ---- */
+function dirSize(dir) { let n = 0; try { for (const f of fs.readdirSync(dir)) { try { const st = fs.statSync(path.join(dir, f)); if (st.isFile()) n += st.size; } catch { } } } catch { } return n; }
+function storeStats() {
+  let messages = 0; for (const c of convMap.values()) messages += (c.messages || []).length;
+  let storeSize = 0; try { storeSize = fs.statSync(DATA_FILE).size; } catch { }
+  return { accounts: Array.from(accounts.values()).filter((a) => !a.system && !a.isBot).length, bots: Array.from(accounts.values()).filter((a) => a.isBot && !a.system).length, convs: convMap.size, messages, files: filesMeta.size, filesSize: dirSize(FILES_DIR), storeSize, dataDir: DATA_DIR, backups: listBackups().map((f) => path.basename(f)).slice(-5).reverse(), historyKeep: HISTORY_KEEP };
+}
+app.get('/api/admin/backup', (req, res) => {
+  const acc = bearerAcc(req) || sessionUser(String(req.query.token || ''));
+  if (!acc || !isOwnerUser(acc.username)) return res.status(403).json({ error: 'Только владелец' });
+  const withFiles = req.query.files !== '0';
+  const name = 'nmessenger-backup-' + new Date().toISOString().slice(0, 10) + (withFiles ? '' : '-nofiles') + '.json';
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="${name}"`);
+  const snap = snapshotStore({ withSessions: false });
+  res.write('{"nm_backup":1,"version":3,"exportedAt":' + Date.now() + ',"store":' + JSON.stringify({ accounts: snap.accounts, conversations: snap.conversations, files: snap.files, reports: snap.reports }) + ',"blobs":{');
+  let first = true;
+  if (withFiles) for (const id of filesMeta.keys()) {
+    const fp = path.join(FILES_DIR, id);
+    if (!fs.existsSync(fp)) continue;
+    try { res.write((first ? '' : ',') + JSON.stringify(id) + ':"' + fs.readFileSync(fp).toString('base64') + '"'); first = false; } catch { }
+  }
+  res.end('}}');
+});
+app.post('/api/admin/restore', express.raw({ type: '*/*', limit: '2gb' }), (req, res) => {
+  const acc = bearerAcc(req);
+  if (!acc || !isOwnerUser(acc.username)) return res.status(403).json({ error: 'Только владелец' });
+  let data;
+  try { data = Buffer.isBuffer(req.body) ? JSON.parse(req.body.toString('utf8')) : (typeof req.body === 'string' ? JSON.parse(req.body) : req.body); } catch { return res.status(400).json({ error: 'Файл не похож на резервную копию NMessenger' }); }
+  if (!data || data.nm_backup !== 1 || !data.store || !data.store.accounts) return res.status(400).json({ error: 'Файл не похож на резервную копию NMessenger' });
+  makeBackup('before-restore');
+  const st = normalizeStore(data.store);
+  accounts.clear(); for (const [k, v] of Object.entries(st.accounts)) accounts.set(k, v);
+  convMap.clear(); for (const [k, v] of Object.entries(st.conversations)) convMap.set(k, { ...v, messages: v.messages || [] });
+  filesMeta.clear(); for (const [k, v] of Object.entries(st.files)) filesMeta.set(k, v);
+  reports.splice(0, reports.length, ...(st.reports || []));
+  let blobs = 0;
+  if (data.blobs && typeof data.blobs === 'object') {
+    if (!fs.existsSync(FILES_DIR)) fs.mkdirSync(FILES_DIR, { recursive: true });
+    for (const [id, b64] of Object.entries(data.blobs)) { if (!/^[\w.-]+$/.test(id) || !filesMeta.has(id)) continue; try { fs.writeFileSync(path.join(FILES_DIR, id), Buffer.from(String(b64), 'base64')); blobs++; } catch { } }
+  }
+  ensureSystemBots();
+  persistNow();
+  io.emit('force_reload', { reason: 'restore' });
+  res.json({ ok: true, accounts: accounts.size, conversations: convMap.size, files: blobs });
 });
 
 app.get('/api/sessions', (req, res) => {
@@ -1179,6 +1347,31 @@ app.post('/api/bot/:token/sendMessage', (req, res) => {
   conv.lastMessage = { text, ts, from: bot.username, time: msg.time };
   pushMessage(conv, msg);
   res.json({ ok: true, result: tgMessage(conv, msg), message_id: msg.id, chat_id: conv.id });
+});
+
+app.post('/api/bot/:token/sendPoll', (req, res) => {
+  const bot = findBotByToken(req.params.token);
+  if (!bot) return res.status(401).json({ error: 'Неверный ключ' });
+  const b = req.body || {};
+  const bc = botChat(bot, b.chat_id);
+  if (bc.error) return res.status(bc.code).json({ error: bc.error });
+  const built = buildPoll({ question: b.question, options: b.options, anonymous: b.is_anonymous !== false, multiple: !!b.allows_multiple_answers, quiz: b.type === 'quiz', correct: b.correct_option_id, explanation: b.explanation, closesIn: b.open_period });
+  if (built.error) return res.status(400).json({ error: built.error });
+  const conv = bc.conv; const ts = Date.now();
+  const msg = { id: uid(), conversationId: conv.id, from: bot.username, type: 'poll', text: built.poll.question, poll: built.poll, ts, time: timeLabel(ts), replyTo: b.reply_to_message_id ? sanitizeReply({ id: String(b.reply_to_message_id) }, conv) : null, reactions: {}, edited: false, deleted: false };
+  conv.lastMessage = { text: '📊 ' + built.poll.question, ts, from: bot.username, time: msg.time };
+  pushMessage(conv, msg);
+  res.json({ ok: true, result: tgMessage(conv, shapeMsgFor(msg, bot.username)), message_id: msg.id, chat_id: conv.id });
+});
+app.post('/api/bot/:token/stopPoll', (req, res) => {
+  const bot = findBotByToken(req.params.token);
+  if (!bot) return res.status(401).json({ error: 'Неверный ключ' });
+  const bc = botChat(bot, req.body?.chat_id);
+  if (bc.error) return res.status(bc.code).json({ error: bc.error });
+  const msg = bc.conv.messages.find((m) => m.id === String(req.body?.message_id || ''));
+  if (!msg || msg.type !== 'poll' || key(msg.from) !== key(bot.username)) return res.status(404).json({ error: 'Опрос не найден' });
+  msg.poll.closed = true; persist(); emitToConv(bc.conv, 'message_updated', msg);
+  res.json({ ok: true, result: pollView(msg.poll, bot.username) });
 });
 
 /* ---- Bot API для внешних ботов (Python SDK: /sdk/nmessenger_bot.py) ---- */
@@ -1392,6 +1585,9 @@ app.get('/files/:id', (req, res) => {
 
 io.on('connection', (socket) => {
   console.log('✅ Подключился:', socket.id);
+  // Персонализация исходящих данных (опросы: свои голоса, скрытие голосов в анонимных опросах)
+  const rawEmit = socket.emit.bind(socket);
+  socket.emit = (event, data, ...rest) => rawEmit(event, shapeOut(event, data, me(socket)), ...rest);
 
   socket.on('auth', (token) => {
     const sess = sessions.get(String(token || ''));
@@ -1739,6 +1935,11 @@ io.on('connection', (socket) => {
         from: username,
         time: msg.time,
       };
+    } else if (data.type === 'poll') {
+      const built = buildPoll(data.poll);
+      if (built.error) { socket.emit('action_error', built.error); return; }
+      msg = { id: uid(), conversationId: conv.id, from: username, type: 'poll', text: built.poll.question, poll: built.poll, ts, time: timeLabel(ts), replyTo: sanitizeReply(data.replyTo, conv), reactions: {}, edited: false, deleted: false };
+      conv.lastMessage = { text: '📊 ' + built.poll.question, ts, from: username, time: msg.time };
     } else {
       const allowed = ['text', 'image', 'file'];
       const type = allowed.includes(data.type) ? data.type : 'text';
@@ -1778,7 +1979,7 @@ io.on('connection', (socket) => {
     }
 
     conv.messages.push(msg);
-    if (conv.messages.length > 500) conv.messages.splice(0, conv.messages.length - 500);
+    if (conv.messages.length > HISTORY_KEEP) conv.messages.splice(0, conv.messages.length - HISTORY_KEEP);
     conv.hidden = conv.hidden || {};
     conv.unread = conv.unread || {};
     for (const p of conv.participants) {
@@ -1795,6 +1996,54 @@ io.on('connection', (socket) => {
       try { botFatherHandle(username, conv, msg); } catch (e) { console.error('BotFather:', e); }
     }
     dispatchToBots(conv, msg);
+  });
+
+  socket.on('get_history_before', (data) => {
+    // Подгрузка старых сообщений при прокрутке вверх
+    const username = me(socket);
+    if (!username || !data) return;
+    const conv = convMap.get(data.conversationId);
+    if (!conv || !conv.participants.some((p) => key(p) === key(username))) return;
+    const limit = Math.min(200, Math.max(20, parseInt(data.limit, 10) || 100));
+    const idx = conv.messages.findIndex((m) => m.id === data.before);
+    if (idx <= 0) return socket.emit('history_more', { conversationId: conv.id, messages: [], hasMore: false });
+    const start = Math.max(0, idx - limit);
+    socket.emit('history_more', { conversationId: conv.id, messages: conv.messages.slice(start, idx), hasMore: start > 0 });
+  });
+  socket.on('poll_vote', (data) => {
+    const username = me(socket);
+    if (!username || !data) return;
+    const conv = convMap.get(data.conversationId);
+    if (!conv || !conv.participants.some((p) => key(p) === key(username))) return;
+    const msg = conv.messages.find((m) => m.id === data.id);
+    if (!msg || msg.deleted || msg.type !== 'poll' || !msg.poll) return;
+    const p = msg.poll;
+    if (pollIsClosed(p)) return socket.emit('action_error', 'Опрос уже завершён');
+    const n = p.options.length;
+    let opts = (Array.isArray(data.options) ? data.options : [data.options]).map((x) => parseInt(x, 10)).filter((x) => x >= 0 && x < n);
+    opts = Array.from(new Set(opts));
+    const k = key(username);
+    if (p.quiz) {
+      if (p.votes[k] && p.votes[k].length) return socket.emit('action_error', 'В викторине ответ нельзя изменить');
+      if (opts.length !== 1) return;
+    } else if (!p.multiple && opts.length > 1) opts = opts.slice(0, 1);
+    if (!opts.length) delete p.votes[k]; else p.votes[k] = opts;
+    persist();
+    emitToConv(conv, 'message_updated', msg);
+  });
+  socket.on('poll_close', (data) => {
+    const username = me(socket);
+    if (!username || !data) return;
+    const conv = convMap.get(data.conversationId);
+    if (!conv || !conv.participants.some((p) => key(p) === key(username))) return;
+    const msg = conv.messages.find((m) => m.id === data.id);
+    if (!msg || msg.deleted || msg.type !== 'poll' || !msg.poll) return;
+    const own = key(msg.from) === key(username);
+    if (!own && !((conv.type === 'group' || conv.type === 'channel') && isConvAdmin(conv, username)) && !isMod(username)) return socket.emit('action_error', 'Закрыть опрос может автор или админ');
+    if (pollIsClosed(msg.poll)) return;
+    msg.poll.closed = true;
+    persist();
+    emitToConv(conv, 'message_updated', msg);
   });
 
   socket.on('star_message', (data) => {
@@ -2358,6 +2607,7 @@ checkInstance();
 
 const PORT = process.env.PORT || 10000;
 server.listen(PORT, '0.0.0.0', () => {
+  console.log(`💾 Данные: ${DATA_DIR} (история: ${HISTORY_KEEP} сообщений на чат, бэкапы: ${BACKUP_DIR})`);
   console.log(`🚀 Server started on port ${PORT}`);
   console.log(`   NMessenger © ${Array.from(OWNERS).join(', ')} — владельцы/модераторы: ${Array.from(OWNERS).map((o) => '@' + o).join(', ')}${AI.key ? ' · AI: ' + AI.model : ' · AI: встроенный корректор (AI_API_KEY не задан)'}`);
 });
