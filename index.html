@@ -620,6 +620,22 @@ body.resizing iframe,body.resizing video{pointer-events:none}
 .ai-btn{display:none;align-items:center;gap:4px;height:30px;padding:0 10px 0 8px;margin:0 2px 6px;border-radius:15px;font-size:12px;font-weight:700;letter-spacing:.02em;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 2px 10px rgba(47,124,246,.35);white-space:nowrap;animation:popIn .18s;flex-shrink:0}
 .ai-btn.show{display:inline-flex}
 .ai-btn.busy{opacity:.6;pointer-events:none}
+.ai-btn.idle{background:transparent;color:var(--accent);box-shadow:none;border:1px solid var(--border);animation:none}
+.ai-btn.idle svg{stroke:var(--accent)}
+.ai-pop .ai-sub{font-size:11px;color:var(--text-2);padding:8px 10px 2px;border-top:1px solid var(--border);margin-top:4px}
+.ai-pop .ai-sub:first-of-type{border-top:0;margin-top:0}
+.ai-pop{max-height:min(70vh,560px);overflow:auto}
+.ai-diff.plain{white-space:pre-wrap;line-height:1.45}
+.ai-diff.plain pre.code{white-space:pre-wrap;margin:6px 0}
+.ai-note{margin-top:8px;font-size:12px;color:var(--warn,#f59e0b)}
+.ai-dr-ic .ic,.ai-bot-ic .ic{color:var(--accent-2)}
+.lk-diag{display:flex;flex-direction:column;gap:9px;margin-bottom:8px}
+.lk-row{display:flex;justify-content:space-between;gap:12px;font-size:13px;flex-wrap:wrap;align-items:baseline}
+.lk-row span{color:var(--text-2)}
+.lk-row code{font-size:12px;word-break:break-all;background:var(--bg-3);padding:2px 6px;border-radius:6px}
+.lk-row .ok{color:#34d399}
+.lk-row .bad{color:var(--danger);text-align:right;max-width:70%;font-weight:500;line-height:1.4}
+.lk-warn{font-size:12px;color:var(--warn);background:rgba(245,166,35,.1);border-radius:8px;padding:8px 10px;line-height:1.45}
 .ai-btn svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ai-pop{position:absolute;right:56px;bottom:calc(100% + 8px);min-width:260px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:6px;z-index:30;animation:popIn .15s}
 .ai-pop .ai-title{font-size:11px;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;padding:6px 10px 4px}
@@ -1425,6 +1441,7 @@ function connect() {
   socket.on('call_accepted', (d) => Call.onAccepted(d));
   socket.on('call_rejected', (d) => Call.onRejected(d));
   socket.on('call_ended', (d) => Call.onEnded(d));
+  socket.on('call_unavailable', (d) => Call.onUnavailable(d));
   socket.on('webrtc_signal', (d) => Call.onSignal(d));
 }
 async function onAuthOk(d) {
@@ -2018,27 +2035,68 @@ function renderComposerState() {
   input.placeholder = c.type === 'channel' ? 'Опубликовать' : c.type === 'secret' ? 'Секретное сообщение' : isBotFatherChat() ? 'Команда, например /newbot' : botPeerOf(c) ? 'Сообщение или /команда' : 'Сообщение';
 }
 /* ---- AI-помощник в поле ввода ---- */
-const AI_ACTIONS = [['fix', 'Исправить ошибки', 'edit'], ['shorter', 'Сделать короче', 'min'], ['polite', 'Сделать вежливее', 'smile'], ['formal', 'Деловой стиль', 'type'], ['translate', 'Перевести RU ⇄ EN', 'at'], ['emoji', 'Добавить эмодзи', 'star']];
+const AI_ACTIONS = [['fix', 'Исправить ошибки', 'edit'], ['shorter', 'Сделать короче', 'min'], ['polite', 'Сделать вежливее', 'smile'], ['formal', 'Деловой стиль', 'type'], ['translate', 'Перевести RU ⇄ EN', 'at'], ['emoji', 'Добавить эмодзи', 'star'], ['expand', 'Дополнить и развернуть', 'max']];
+const AI_CHAT_ACTIONS = [['reply', 'Предложить ответ', 'reply'], ['summary', 'Кратко о чём чат', 'poll'], ['ask', 'Спросить нейросеть', 'chat']];
+const AI_NEEDS_CONTEXT = new Set(['reply', 'summary', 'ask']);
+function aiLabel(a) { return ((AI_ACTIONS.find((x) => x[0] === a) || AI_CHAT_ACTIONS.find((x) => x[0] === a)) || [])[1] || 'AI'; }
 function updateAIBtn() {
   const b = $('#btnAI'); if (!b) return;
   const v = input.value; const c = cur();
-  // кнопка видна всегда, когда есть текст (кроме секретных чатов и команд ботам)
-  b.classList.toggle('show', !!c && c.type !== 'secret' && v.trim().length >= 2 && !v.startsWith('/'));
+  // кнопка видна в любом обычном чате (кроме секретных — их содержимое не покидает устройство); без текста — «тихий» вид
+  const hasText = v.trim().length >= 2 && !v.startsWith('/');
+  b.classList.toggle('show', !!c && c.type !== 'secret' && (hasText || !!(S.ai && S.ai.llm)));
+  b.classList.toggle('idle', !hasText);
   if (!b.classList.contains('show')) $('#aiPop').classList.add('hidden');
 }
 function renderAIPop() {
-  const pop = $('#aiPop'); const avail = new Set((S.ai && S.ai.actions) || ['fix']);
-  pop.innerHTML = `<div class="ai-title">AI-помощник · ${S.ai && S.ai.llm ? esc(S.ai.model || 'нейросеть') : 'встроенный корректор'}</div>` + AI_ACTIONS.map(([a, l, ic]) => `<div class="ai-item ${avail.has(a) ? '' : 'dis'}" data-ai="${a}" title="${avail.has(a) ? l : 'Нужен ключ нейросети (AI_API_KEY в .env сервера)'}">${icon(ic)}<span>${l}</span>${avail.has(a) ? '' : '<small>нужен ключ</small>'}</div>`).join('');
+  const pop = $('#aiPop'); const avail = new Set((S.ai && S.ai.actions) || ['fix']); const llm = !!(S.ai && S.ai.llm);
+  const hasText = input.value.trim().length >= 2 && !input.value.startsWith('/');
+  const item = ([a, l, ic], dis, hint) => `<div class="ai-item ${dis ? 'dis' : ''}" data-ai="${a}" title="${dis ? hint : l}">${icon(ic)}<span>${l}</span>${dis ? `<small>${hint}</small>` : ''}</div>`;
+  pop.innerHTML = `<div class="ai-title">AI-помощник · ${llm ? esc(S.ai.model || 'нейросеть') : 'встроенный корректор'}</div>`
+    + `<div class="ai-sub">${hasText ? 'С текстом в поле' : 'Напишите текст в поле, чтобы его обработать'}</div>`
+    + AI_ACTIONS.map((x) => item(x, !avail.has(x[0]) || !hasText, !avail.has(x[0]) ? 'нужен ключ' : 'нет текста')).join('')
+    + `<div class="ai-sub">По этому чату</div>`
+    + AI_CHAT_ACTIONS.map((x) => item(x, !avail.has(x[0]), 'нужен ключ')).join('')
+    + (S.ai && S.ai.bot && !(cur() && cur().type === 'dm' && key(peerOf(cur()) || '') === key(S.ai.bot)) ? `<div class="ai-item" data-ai="open"><span class="ai-bot-ic">${icon('bot')}</span><span>Открыть чат с @${esc(S.ai.bot)}</span></div>` : '');
   pop.classList.remove('hidden');
 }
 $('#btnAI').addEventListener('click', () => { const pop = $('#aiPop'); if (pop.classList.contains('hidden')) renderAIPop(); else pop.classList.add('hidden'); });
-$('#aiPop').addEventListener('click', (e) => { const it = e.target.closest('[data-ai]'); if (!it) return; $('#aiPop').classList.add('hidden'); if (it.classList.contains('dis')) { toast('Нужен ключ нейросети: задайте AI_API_KEY в .env сервера', 'err'); return; } runAI(it.dataset.ai); });
-async function runAI(action) {
-  const text = input.value; if (!text.trim()) return;
+$('#aiPop').addEventListener('click', (e) => {
+  const it = e.target.closest('[data-ai]'); if (!it) return; $('#aiPop').classList.add('hidden');
+  if (it.dataset.ai === 'open') return openHandle(S.ai.bot || 'AI');
+  if (it.classList.contains('dis')) { toast(it.querySelector('small')?.textContent === 'нет текста' ? 'Сначала напишите текст в поле ввода' : 'Нужен ключ нейросети: задайте AI_API_KEY в .env сервера', 'err'); return; }
+  runAI(it.dataset.ai);
+});
+// контекст беседы для нейросети: последние сообщения текущего чата (секретные чаты сюда не попадают)
+function aiContext(c, limit = 30) {
+  if (!c || c.type === 'secret') return [];
+  const arr = S.msgs.get(c.id) || []; const out = [];
+  for (const m of arr) {
+    if (m.deleted || m.type === 'system' || m.type === 'call' || m.type === 'secret') continue;
+    let t = m.type === 'poll' && m.poll ? `[опрос] ${m.poll.question}` : m.type === 'image' ? `[фото] ${m.text && m.text !== 'Изображение' ? m.text : ''}` : m.type === 'file' && m.file ? `[файл: ${m.file.name}] ${m.text && m.text !== m.file.name ? m.text : ''}` : String(m.text || '');
+    t = t.trim(); if (!t) continue;
+    out.push({ from: displayOf(m.from).slice(0, 40), text: t.slice(0, 1500), me: isMe(m.from) });
+  }
+  return out.slice(-limit);
+}
+async function runAI(action, opts = {}) {
+  const c = cur(); if (!c) return;
+  const text = opts.text != null ? opts.text : input.value;
+  const withCtx = AI_NEEDS_CONTEXT.has(action);
+  if (!withCtx && !text.trim()) { toast('Сначала напишите текст в поле ввода'); return; }
+  if (action === 'ask' && !text.trim()) return openAIAsk();
+  const context = withCtx ? aiContext(c) : undefined;
+  if (action === 'summary' && !context.length) { toast('В этом чате пока нет сообщений'); return; }
+  if (action === 'reply' && !context.length && !text.trim()) { toast('Пока не на что отвечать — в чате нет сообщений'); return; }
   const b = $('#btnAI'); b.classList.add('busy');
-  try { const r = await api('/api/ai', { action, text }); showAIResult(action, text, r); }
-  catch (e) { toast(e.message || 'Ошибка AI', 'err'); }
+  try { const r = await api('/api/ai', { action, text, context }); showAIResult(action, text, r); }
+  catch (e) { toast(e.message || 'Ошибка AI', 'err', { ms: 7000 }); }
   finally { b.classList.remove('busy'); }
+}
+function openAIAsk() {
+  Modal.open(`${mdHead('Спросить нейросеть')}<div class="md-body"><textarea class="input" id="aiQ" rows="4" maxlength="2000" placeholder="Например: объясни простыми словами, что такое SFU"></textarea><div class="hint">Нейросеть видит последние сообщения этого чата и может на них опираться.</div></div><div class="md-foot"><button class="btn ghost" data-close>Отмена</button><button class="btn" id="aiQGo">Спросить</button></div>`);
+  const go = () => { const q = $('#aiQ').value.trim(); if (!q) return; Modal.close(); runAI('ask', { text: q }); };
+  $('#aiQGo').addEventListener('click', go); $('#aiQ').addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) go(); }); setTimeout(() => $('#aiQ').focus(), 50);
 }
 function wordDiff(a, b) {
   // токены: слова/числа и одиночные знаки; пробел перед токеном храним отдельно (для рендера берём пробелы из нового текста)
@@ -2057,10 +2115,14 @@ function wordDiff(a, b) {
   return out.replace(/<\/del>( ?)<del>/g, '$1').replace(/<\/ins>( ?)<ins>/g, '$1').replace(/^\s+/, '');
 }
 function showAIResult(action, orig, r) {
-  const same = (r.text || '').trim() === orig.trim(); const label = (AI_ACTIONS.find((x) => x[0] === action) || [])[1] || 'AI';
-  Modal.open(`${mdHead(label)}<div class="md-body">${same ? `<p class="md-text">Изменений не найдено — текст выглядит хорошо 👍</p>` : `<div class="ai-diff">${action === 'fix' || action === 'emoji' ? wordDiff(orig, r.text) : esc(r.text)}</div>`}<div class="ai-engine">${r.engine === 'llm' ? 'Нейросеть: ' + esc((S.ai && S.ai.model) || '') : 'Встроенный корректор: опечатки, пунктуация, регистр, частицы. Для полноценной нейросети задайте AI_API_KEY в .env сервера.'}</div></div><div class="md-foot"><button class="btn ghost" data-close>${same ? 'Ок' : 'Отмена'}</button>${same ? '' : `<button class="btn ghost" id="aiCopy">Копировать</button><button class="btn" id="aiApply">Заменить текст</button>`}</div>`);
-  const ap = $('#aiApply'); if (ap) ap.addEventListener('click', () => { input.value = r.text; Modal.close(); input.focus(); autoResize(); updateSendBtn(); });
-  const cp = $('#aiCopy'); if (cp) cp.addEventListener('click', () => copyText(r.text));
+  const res = String(r.text || ''); const label = aiLabel(action);
+  const plain = AI_NEEDS_CONTEXT.has(action); const same = !plain && res.trim() === orig.trim();
+  const body = same ? `<p class="md-text">Изменений не найдено — текст выглядит хорошо 👍</p>` : `<div class="ai-diff ${plain ? 'plain' : ''}">${action === 'fix' || action === 'emoji' ? wordDiff(orig, res) : plain ? renderText(res) : esc(res)}</div>`;
+  const eng = r.engine === 'llm' ? 'Нейросеть: ' + esc(r.model || (S.ai && S.ai.model) || '') : 'Встроенный корректор: опечатки, пунктуация, регистр, частицы.';
+  const applyLabel = plain ? (action === 'summary' || action === 'ask' ? 'Вставить в поле' : 'Использовать как ответ') : 'Заменить текст';
+  Modal.open(`${mdHead(label)}<div class="md-body">${body}${r.note ? `<div class="ai-note">${esc(r.note)}</div>` : ''}<div class="ai-engine">${eng}</div></div><div class="md-foot"><button class="btn ghost" data-close>${same ? 'Ок' : 'Отмена'}</button>${same ? '' : `<button class="btn ghost" id="aiCopy">Копировать</button><button class="btn" id="aiApply">${applyLabel}</button>`}</div>`);
+  const ap = $('#aiApply'); if (ap) ap.addEventListener('click', () => { input.value = res; Modal.close(); input.focus(); autoResize(); updateSendBtn(); updateAIBtn(); });
+  const cp = $('#aiCopy'); if (cp) cp.addEventListener('click', () => copyText(res));
 }
 /* ---- BotFather: команды ---- */
 const BF_CMDS = [['/newbot', 'создать нового бота'], ['/mybots', 'мои боты'], ['/token', 'показать API-ключ'], ['/revoke', 'выпустить новый ключ'], ['/setname', 'изменить имя бота'], ['/setabout', 'изменить описание'], ['/setuserpic', 'сменить аватар'], ['/deletebot', 'удалить бота'], ['/help', 'справка'], ['/cancel', 'отменить действие']];
@@ -2407,7 +2469,7 @@ function openFolderPick(convId) {
   $('#modal').onclick = (e) => { if (e.target.closest('[data-close]')) return; const it = e.target.closest('[data-f]'); if (!it) return; const f = S.folders.find((x) => x.id === it.dataset.f); if (f.chats.includes(convId)) f.chats = f.chats.filter((x) => x !== convId); else f.chats.push(convId); it.querySelector('.check').classList.toggle('on'); socket.emit('save_folders', S.folders); };
 }
 function openAddBot(convId) {
-  const bots = [...S.users.values()].filter((u) => u.isBot); const c = S.convs.get(convId);
+  const bots = [...S.users.values()].filter((u) => u.isBot && key(u.username) !== 'botfather').sort((a, b) => (key(a.username) === 'ai' ? -1 : key(b.username) === 'ai' ? 1 : 0)); const c = S.convs.get(convId);
   Modal.open(`${mdHead('Добавить бота')}<div class="md-body">${bots.length ? bots.map((b) => userPickItem(b, c.participants.some((p) => key(p) === key(b.username)))).join('') : `<div class="list-empty">Ботов пока нет.<br>Создайте своего через @BotFather (Меню → Боты).</div>`}</div>`, { sm: true });
   $('#modal').onclick = (e) => { const it = e.target.closest('[data-u]'); if (!it) return; socket.emit('add_bot', { conversationId: convId, bot: it.dataset.u }); toast('Бот добавлен', 'ok'); Modal.close(); };
 }
@@ -2598,6 +2660,7 @@ function renderDrawer() {
     <div class="dr-item" data-a="channel">${icon('megaphone')}Новый канал</div>
     <div class="dr-sep"></div>
     <div class="dr-item" data-a="folders">${icon('folder')}Папки</div>
+    ${S.ai && S.ai.bot ? `<div class="dr-item" data-a="ai"><span class="ai-dr-ic">${icon('bot')}</span>AI-помощник</div>` : ''}
     <div class="dr-item" data-a="bots">${icon('bot')}Боты · BotFather</div>
     <div class="dr-item" data-a="scan">${icon('grid')}Сканировать QR-код</div>
     <div class="dr-item" data-a="myqr">${icon('at')}Мой QR-код</div>
@@ -2620,6 +2683,7 @@ $('#drawerPanel').addEventListener('click', (e) => {
     case 'channel': openNewChannel(); break;
     case 'folders': Settings.open('folders'); break;
     case 'bots': openHandle('BotFather'); break;
+    case 'ai': openHandle((S.ai && S.ai.bot) || 'AI'); break;
     case 'scan': openScanner(); break;
     case 'myqr': openQRModal({ title: 'Мой QR-код', url: `${location.origin}/?start=${encodeURIComponent(S.me.username)}`, name: S.me.displayName, hint: 'Отсканировав код, собеседник сразу откроет чат с вами' }); break;
     case 'settings': Settings.open('profile'); break;
@@ -2696,7 +2760,7 @@ const Settings = {
       case 'calls':
         h = `<h4>Устройства</h4><div class="dev-form" id="devForm"><span class="spinner"></span></div>
         <h4>Соединение</h4>
-        ${S.livekit ? `<div class="row-item"><div class="rb"><div class="rt">Звонки через LiveKit</div><div class="rs">Включено по умолчанию: стабильнее за NAT и позволяет групповые звонки. Выключите, чтобы звонить напрямую (P2P)</div></div>${sw('useLK', S.useLK)}</div>` : `<p class="md-text">LiveKit не настроен на сервере — личные звонки идут напрямую (P2P), групповые недоступны. Добавьте LIVEKIT_URL, LIVEKIT_API_KEY и LIVEKIT_API_SECRET в .env.</p>`}`;
+        ${S.livekit ? `<div class="row-item"><div class="rb"><div class="rt">Звонки через LiveKit</div><div class="rs">Включено по умолчанию: стабильнее за NAT и позволяет групповые звонки. Выключите, чтобы звонить напрямую (P2P)</div></div>${sw('useLK', S.useLK)}</div><h4>Диагностика LiveKit</h4><div id="lkDiag"><span class="spinner"></span></div>` : `<p class="md-text">LiveKit не настроен на сервере — личные звонки идут напрямую (P2P), групповые недоступны. Добавьте LIVEKIT_URL, LIVEKIT_API_KEY и LIVEKIT_API_SECRET в .env.</p>`}`;
         break;
       case 'security':
         h = `<h4>Смена пароля</h4><div class="field"><label>Текущий пароль</label><input type="password" id="pwOld" autocomplete="current-password"></div><div class="field"><label>Новый пароль</label><input type="password" id="pwNew" autocomplete="new-password" minlength="6"></div><div class="field"><label>Повторите новый пароль</label><input type="password" id="pwNew2" autocomplete="new-password"></div><button class="btn" id="pwSave">Изменить пароль</button>
@@ -2728,9 +2792,10 @@ const Settings = {
         break;
       }
       case 'about':
-        h = `<div style="text-align:center;padding:10px 0 16px"><div class="logo" style="width:72px;height:72px"><svg><use href="#i-logo"/></svg></div><h3 style="margin-top:10px">NMessenger</h3><p class="md-text">Версия 3.1</p></div>
+        h = `<div style="text-align:center;padding:10px 0 16px"><div class="logo" style="width:72px;height:72px"><svg><use href="#i-logo"/></svg></div><h3 style="margin-top:10px">NMessenger</h3><p class="md-text">Версия 3.2</p></div>
         <div class="row-item"><div class="rb"><div class="rt">Чаты, группы, каналы</div><div class="rs">Ответы, реакции, редактирование, пересылка, избранное, папки</div></div></div>
         <div class="row-item"><div class="rb"><div class="rt">Звонки</div><div class="rs">Аудио/видео P2P через WebRTC, демонстрация экрана${S.livekit ? ', групповые звонки через LiveKit' : ''}</div></div></div>
+        <div class="row-item"><div class="rb"><div class="rt">AI-помощник</div><div class="rs">${S.ai && S.ai.llm ? 'Нейросеть ' + esc(S.ai.model || '') + ': правка и перевод текста, ответы по чату, бот @AI' : 'Встроенный корректор текста (нейросеть выключена на сервере)'}</div></div></div>
         <div class="row-item"><div class="rb"><div class="rt">Секретные чаты</div><div class="rs">Сквозное шифрование ECDH P-256 + AES-256-GCM в браузере</div></div></div>
         <div class="row-item"><div class="rb"><div class="rt">Bot API</div><div class="rs">HTTP API для ботов: sendMessage, me</div></div></div>
         <div class="row-item"><div class="rb"><div class="rt">Горячие клавиши</div><div class="rs">Ctrl+K — поиск · Esc — закрыть · ↑ — изменить последнее · Enter — отправить</div></div></div>
@@ -2787,8 +2852,23 @@ const Settings = {
       if (e.target.id === 'pfAbout') $('#pfAboutCnt').textContent = e.target.value.length + '/140';
     };
     if (this.tab === 'privacy') this.loadSessions();
-    if (this.tab === 'calls') devicePrefsHTML().then((html) => { const f = $('#devForm'); if (f) f.innerHTML = html; });
+    if (this.tab === 'calls') { devicePrefsHTML().then((html) => { const f = $('#devForm'); if (f) f.innerHTML = html; }); this.loadLKDiag(); }
     $$('input[type=range]', body).forEach(syncRange);
+  },
+  async loadLKDiag() {
+    const el = $('#lkDiag'); if (!el) return;
+    try {
+      const d = await api('/livekit-status?probe=1', null, 'GET'); const p = d.probe || {};
+      el.innerHTML = `<div class="lk-diag">
+        <div class="lk-row"><span>Адрес (LIVEKIT_URL)</span><code>${esc(d.url || '—')}</code></div>
+        <div class="lk-row"><span>Сервер NMessenger → LiveKit</span><b class="${p.reachable ? 'ok' : 'bad'}">${p.reachable ? (p.looksLikeLivekit ? 'доступен ✓' : `отвечает, но не похож на LiveKit (HTTP ${p.status})`) : 'недоступен: ' + esc(p.error || '')}</b></div>
+        ${(d.warnings || []).map((w) => `<div class="lk-warn">⚠ ${esc(w)}</div>`).join('')}
+        <div class="lk-row"><span>Этот браузер → LiveKit</span><b id="lkBrowser">не проверялось</b></div>
+        <div><button class="btn sm" id="lkTest">Проверить подключение из браузера</button></div>
+        <div class="hint">Проверка подключает вас к пустой тестовой комнате: сигнальный канал (WebSocket) и медиаканал (WebRTC/ICE). Если звонки обрываются — причина будет показана здесь.</div>
+      </div>`;
+      $('#lkTest').onclick = async () => { const b = $('#lkTest'); b.disabled = true; const o = $('#lkBrowser'); o.textContent = 'проверяю…'; o.className = ''; const r = await Call.selfTest(); if (o.isConnected) { o.textContent = r.ok ? `подключение OK за ${r.ms} мс ✓` : r.error; o.className = r.ok ? 'ok' : 'bad'; o.title = r.raw || ''; } b.disabled = false; };
+    } catch (e) { el.innerHTML = `<p class="md-text">Не удалось получить статус: ${esc(e.message)}</p>`; }
   },
   async loadSessions() {
     const el = $('#sessList'); if (!el) return;
@@ -2892,20 +2972,43 @@ const Call = {
   },
   reject() { const d = this.pending; if (!d) return; this.dismissIncoming(); socket.emit('call_reject', { to: d.from }); },
   onAccepted(d) {
-    const st = this.st; if (!st || st.dir !== 'out' || !isSame(d.from, st.peer)) return;
-    if (st.mode === 'livekit') return;
+    const st = this.st; if (!st || st.dir !== 'out') return;
+    if (st.mode === 'livekit') {
+      if (!st.invited.some((p) => isSame(p, d.from))) return;
+      // абонент принял — ждём его появления в комнате (не дольше 30 с)
+      if (st.phase === 'ringing') { clearTimeout(st.ringTimer); Snd.stopRing(); this.setStatus('Соединение…'); st.ringTimer = setTimeout(() => { if (this.st === st && st.phase === 'ringing') this.lkFarewell(st, 'Собеседник не смог подключиться к LiveKit', 'missed', 2000); }, 30000); }
+      return;
+    }
+    if (!isSame(d.from, st.peer)) return;
     clearTimeout(st.ringTimer); Snd.stopRing(); st.phase = 'connecting'; this.setStatus('Соединение…');
     this.createPeer();
   },
-  onRejected(d) { const st = this.st; if (!st || !isSame(d.from, st.peer)) return; if (st.mode === 'livekit') { this.setStatus('Отклонён'); setTimeout(() => { if (this.st === st && st.lk && st.lk.remoteParticipants.size === 0) this.cleanup(); }, 1200); return; } Snd.stopRing(); clearTimeout(st.ringTimer); this.setStatus(st.phase === 'ringing' ? 'Отклонён' : 'Занято'); if (st.dir === 'out') this.log('declined'); setTimeout(() => this.cleanup(), 1200); },
+  onRejected(d) {
+    const st = this.st; if (!st) return;
+    if (st.mode === 'livekit') {
+      if (!st.invited.some((p) => isSame(p, d.from))) return;
+      st.pending.delete(key(d.from));
+      const joined = st.lk ? st.lk.remoteParticipants.size : 0;
+      if (st.invited.length === 1) this.lkFarewell(st, 'Отклонён', 'declined');
+      else if (!st.pending.size && !joined) this.lkFarewell(st, 'Никто не ответил', 'missed');
+      return;
+    }
+    if (!isSame(d.from, st.peer)) return; Snd.stopRing(); clearTimeout(st.ringTimer); this.setStatus(st.phase === 'ringing' ? 'Отклонён' : 'Занято'); if (st.dir === 'out') this.log('declined'); setTimeout(() => this.cleanup(), 1200); },
+  onUnavailable(d) {
+    const st = this.st; if (!st || st.dir !== 'out') return;
+    const who = userOf(d.to); const name = who ? who.displayName : d.to;
+    if (st.mode === 'livekit') { if (!st.invited.some((p) => isSame(p, d.to))) return; st.pending.delete(key(d.to)); if (st.invited.length === 1 || (!st.pending.size && !(st.lk && st.lk.remoteParticipants.size))) this.lkFarewell(st, d.reason === 'blocked' ? 'Недоступен' : 'Не в сети', 'missed', 1500); else toast(`${name}: не в сети`); return; }
+    if (!isSame(d.to, st.peer)) return; this.setStatus('Не в сети'); Snd.stopRing(); clearTimeout(st.ringTimer); this.log('missed'); setTimeout(() => this.cleanup(), 1500);
+  },
   onEnded(d) {
     if (this.pending && isSame(d.from, this.pending.from)) { this.dismissIncoming(); return; }
-    const st = this.st; if (!st || !isSame(d.from, st.peer)) return; if (st.mode === 'livekit') return;
+    const st = this.st; if (!st || !isSame(d.from, st.peer)) return;
+    if (st.mode === 'livekit') { const joined = st.lk ? st.lk.remoteParticipants.size : 0; if (!joined) this.lkFarewell(st, 'Звонок завершён', st.dir === 'out' ? 'cancelled' : null, 900, 'end'); return; }
     this.setStatus('Звонок завершён'); if (st.dir === 'out') this.log(st.phase === 'active' ? 'answered' : 'cancelled'); Snd.end(); setTimeout(() => this.cleanup(), 900);
   },
   hangup() {
     const st = this.st; if (!st) return;
-    if (st.mode === 'livekit') { this.cleanup(); return; }
+    if (st.mode === 'livekit') { this.finishLK(st.phase === 'active' ? 'answered' : 'cancelled'); return; }
     socket.emit('call_end', { to: st.peer });
     if (st.dir === 'out') this.log(st.phase === 'active' ? 'answered' : 'cancelled');
     Snd.end(); this.cleanup();
@@ -3039,7 +3142,7 @@ const Call = {
   minimize(on) { const st = this.st; if (!st) return; st.minimized = on; this.el.screen.classList.toggle('hidden', on); this.el.mini.classList.toggle('hidden', !on); $('#miniName').textContent = this.el.name.textContent; },
   cleanup() {
     const st = this.st; if (!st) return; this.st = null;
-    Snd.stopRing(); clearTimeout(st.ringTimer); clearInterval(st.timer); clearInterval(st.stats);
+    Snd.stopRing(); clearTimeout(st.ringTimer); clearTimeout(st.connTimer); clearInterval(st.timer); clearInterval(st.stats);
     try { st.pc?.close(); } catch { }
     try { st.lk?.disconnect(); } catch { }
     st.local?.getTracks().forEach((t) => t.stop()); st.camTrack?.stop(); st.screen?.getTracks().forEach((t) => t.stop());
@@ -3056,32 +3159,101 @@ const Call = {
   },
   async startLK(room, peers, video, convId, title) {
     for (const p of peers) socket.emit('call_invite', { to: p, room, video, conversationId: convId, mode: 'livekit' });
-    await this.joinLK(room, video, convId, title, peers.length === 1 ? userOf(peers[0]) : null);
+    await this.joinLK(room, video, convId, title, peers.length === 1 ? userOf(peers[0]) : null, peers);
   },
-  async joinLK(room, video, convId, title, u) {
+  // Самопроверка: подключение к пустой тестовой комнате (сигнал + медиаканал), без микрофона/камеры
+  async selfTest() {
+    const t0 = Date.now(); let url = ''; let room = null;
+    if (!(await this.loadLK())) return { ok: false, error: 'Не удалось загрузить LiveKit SDK (/vendor/livekit-client.umd.js)' };
+    const LK = window.LivekitClient;
+    try {
+      const r = await api('/get-livekit-token', { roomName: 'nm-selftest-' + key(S.me.username), participantName: S.me.username });
+      url = r.url; room = new LK.Room(); let timer;
+      const timeout = new Promise((_, rej) => { timer = setTimeout(() => rej(new Error('nm_timeout')), 20000); });
+      try { await Promise.race([room.connect(url, r.token), timeout]); } finally { clearTimeout(timer); }
+      const ms = Date.now() - t0; await room.disconnect().catch(() => { }); room = null;
+      return { ok: true, ms, url };
+    } catch (e) { return { ok: false, error: this.lkErrorText(e, url), raw: String(e?.message || e), url }; }
+    finally { try { room?.disconnect(); } catch { } }
+  },
+  // Понятное описание ошибки подключения к LiveKit вместо технических сообщений SDK
+  lkErrorText(e, url) {
+    const LK = window.LivekitClient; const R = LK && LK.ConnectionErrorReason; const host = (() => { try { return new URL(url).host; } catch { return url || ''; } })();
+    const m = String(e?.message || '');
+    if (m === 'nm_timeout') return `Сервер LiveKit (${host}) не ответил за 30 с. Проверьте LIVEKIT_URL и что адрес доступен из браузера.`;
+    if (e?.name === 'NotAllowedError' || /permission|not allowed by the user/i.test(m)) return 'Нет доступа к микрофону/камере — разрешите его в браузере';
+    if (R && (e?.reason === R.NotAllowed || e?.status === 401)) return 'LiveKit отклонил токен: проверьте LIVEKIT_API_KEY и LIVEKIT_API_SECRET на сервере';
+    if (/pc connection|peerconnection|ice/i.test(m) || (R && e?.reason === R.Timeout && /pc/i.test(m))) return `Медиасоединение с LiveKit (${host}) не установилось: на сервере LiveKit закрыты порты RTC (UDP 50000–60000 / TCP 7881) или не задан внешний IP (rtc.use_external_ip / --node-ip). Для сетей с жёстким NAT нужен TURN.`;
+    if ((R && (e?.reason === R.ServerUnreachable || e?.reason === R.Timeout)) || /signal|websocket|could not establish|network|failed to fetch/i.test(m)) return `Не удалось подключиться к серверу LiveKit (${host}). Адрес должен быть доступен из браузера (не localhost и не внутренний IP) и начинаться с wss:// если сайт открыт по HTTPS.`;
+    return 'LiveKit: ' + (m || 'ошибка подключения');
+  },
+  async joinLK(room, video, convId, title, u, invited = null) {
     if (this.st) return;
-    const st = this.st = { mode: 'livekit', room, convId, video, dir: 'out', phase: 'connecting', muted: false, camOff: !video, sharing: false, peer: u?.username || null };
+    const st = this.st = { mode: 'livekit', room, convId, video, dir: invited ? 'out' : 'in', phase: 'connecting', muted: false, camOff: !video, sharing: false, peer: u?.username || null, invited: invited || [], pending: new Set((invited || []).map(key)), hadRemote: false };
     this.showScreen(title, u || { name: title, type: 'group' }, 'Подключение…');
-    if (!(await this.loadLK())) { toast('Не удалось загрузить LiveKit SDK', 'err'); this.cleanup(); return; }
+    if (!(await this.loadLK())) { toast('Не удалось загрузить LiveKit SDK', 'err'); this.finishLK(); return; }
     const LK = window.LivekitClient;
     try {
       const { token, url } = await api('/get-livekit-token', { roomName: room, participantName: S.me.username });
+      st.url = url; if (this.st !== st || st.ending) return;
+      const host = (() => { try { return new URL(url).host; } catch { return url; } })();
+      this.setStatus(`Подключение к ${esc(host)}…`);
       const pr = CallPrefs.get();
       const r = st.lk = new LK.Room({ adaptiveStream: true, dynacast: true, audioCaptureDefaults: { deviceId: pr.mic || undefined, echoCancellation: true, noiseSuppression: true, autoGainControl: true }, videoCaptureDefaults: { deviceId: pr.cam || undefined, resolution: LK.VideoPresets.h720.resolution }, audioOutput: pr.spk ? { deviceId: pr.spk } : undefined });
       const refresh = () => this.lkRefresh();
       r.on(LK.RoomEvent.TrackSubscribed, (track) => { if (track.kind === 'audio') { const el = track.attach(); $('#lkAudio').appendChild(el); } refresh(); });
       r.on(LK.RoomEvent.TrackUnsubscribed, (track) => { track.detach().forEach((el) => el.remove()); refresh(); });
-      r.on(LK.RoomEvent.ParticipantConnected, () => { Snd.connect(); refresh(); });
-      r.on(LK.RoomEvent.ParticipantDisconnected, refresh);
+      r.on(LK.RoomEvent.ParticipantConnected, (p) => { st.hadRemote = true; st.pending.delete(key(p.identity)); if (st.phase === 'ringing') this.lkActive(); Snd.connect(); refresh(); });
+      r.on(LK.RoomEvent.ParticipantDisconnected, () => { refresh(); if (this.st === st && st.hadRemote && st.lk.remoteParticipants.size === 0 && st.invited.length <= 1) this.lkFarewell(st, 'Собеседник завершил звонок', st.dir === 'out' ? 'answered' : null, 1000, 'end'); });
       r.on(LK.RoomEvent.LocalTrackPublished, refresh); r.on(LK.RoomEvent.LocalTrackUnpublished, refresh);
       r.on(LK.RoomEvent.TrackMuted, refresh); r.on(LK.RoomEvent.TrackUnmuted, refresh);
+      r.on(LK.RoomEvent.Reconnecting, () => { if (this.st === st) this.setStatus('Переподключение…'); });
+      r.on(LK.RoomEvent.Reconnected, () => { if (this.st === st && st.phase === 'active') this.setStatus(fmtDur((Date.now() - st.startedAt) / 1000)); });
       r.on(LK.RoomEvent.ActiveSpeakersChanged, (sp) => { const ids = new Set(sp.map((p) => p.identity)); $$('.call-tile', this.el.grid).forEach((t) => t.classList.toggle('speaking', ids.has(t.dataset.p))); });
-      r.on(LK.RoomEvent.Disconnected, () => { if (this.st === st) { toast('Звонок завершён'); this.cleanup(); } });
-      await r.connect(url, token);
-      await r.localParticipant.setMicrophoneEnabled(true);
+      r.on(LK.RoomEvent.Disconnected, (reason) => {
+        if (this.st !== st || st.ending) return;
+        const DR = LK.DisconnectReason || {}; let why = 'Звонок завершён';
+        if (reason === DR.DUPLICATE_IDENTITY) why = 'Вы подключились к этому звонку с другого устройства'; else if (reason === DR.ROOM_DELETED) why = 'Комната звонка закрыта'; else if (reason === DR.PARTICIPANT_REMOVED) why = 'Вас отключили от звонка'; else if (reason === DR.SIGNAL_CLOSE || reason === DR.STATE_MISMATCH || reason === DR.JOIN_FAILURE) why = 'Связь с сервером LiveKit потеряна';
+        toast(why, why === 'Звонок завершён' ? undefined : 'err'); this.finishLK(st.dir === 'out' ? (st.phase === 'active' ? 'answered' : 'cancelled') : undefined);
+      });
+      const timeout = new Promise((_, rej) => { st.connTimer = setTimeout(() => rej(new Error('nm_timeout')), 30000); });
+      await Promise.race([r.connect(url, token), timeout]); clearTimeout(st.connTimer);
+      if (this.st !== st || st.ending) return;
+      try { await r.localParticipant.setMicrophoneEnabled(true); } catch (e) { if (e?.name === 'NotAllowedError' || e?.name === 'NotFoundError') { toast(e.name === 'NotFoundError' ? 'Микрофон не найден' : 'Нет доступа к микрофону', 'err'); st.muted = true; } else throw e; }
       if (video) { try { await r.localParticipant.setCameraEnabled(true); } catch { st.camOff = true; } }
-      st.phase = 'active'; st.startedAt = Date.now(); this.el.screen.classList.add('active'); this.startTimer(); this.updateControls(); this.lkRefresh();
-    } catch (e) { toast('LiveKit: ' + (e.message || 'ошибка подключения'), 'err'); this.cleanup(); }
+      if (this.st !== st || st.ending) return;
+      if (st.dir === 'out' && st.invited.length && r.remoteParticipants.size === 0) {
+        st.phase = 'ringing'; this.setStatus('Вызов…'); Snd.startRing('out'); this.updateControls(); this.lkRefresh();
+        st.ringTimer = setTimeout(() => { if (this.st === st && st.phase === 'ringing') this.lkFarewell(st, 'Не отвечает', 'missed', 1500); }, 45000);
+      } else this.lkActive();
+    } catch (e) {
+      if (this.st !== st || st.ending) return; // отменили сами — это не ошибка
+      const msg = this.lkErrorText(e, st.url);
+      console.warn('LiveKit:', e); toast(msg, 'err', { ms: 12000 });
+      this.lkFarewell(st, 'Ошибка подключения', st.dir === 'out' ? 'cancelled' : null, 1500);
+    }
+  },
+  // плавное завершение LiveKit-звонка: показать причину, остановить таймер/гудки и закрыть через паузу
+  lkFarewell(st, text, status, delay = 1200, sound = null) {
+    if (!st || this.st !== st || st.ending) return;
+    st.ending = true; clearInterval(st.timer); clearTimeout(st.ringTimer); Snd.stopRing(); if (sound === 'end') Snd.end();
+    this.setStatus(text); if (status) this.log(status);
+    setTimeout(() => { if (this.st === st) this.finishLK(); }, delay);
+  },
+  lkActive() {
+    const st = this.st; if (!st || st.phase === 'active') return;
+    clearTimeout(st.ringTimer); Snd.stopRing();
+    st.phase = 'active'; st.startedAt = Date.now(); if (st.lk && st.lk.remoteParticipants.size) st.hadRemote = true;
+    this.el.screen.classList.add('active'); this.startTimer(); this.updateControls(); this.lkRefresh();
+  },
+  // Завершение LiveKit-звонка: уведомить приглашённых, записать в историю, отключиться
+  finishLK(status) {
+    const st = this.st; if (!st || st.mode !== 'livekit') return;
+    st.ending = true;
+    if (st.dir === 'out') { for (const p of st.invited) if (st.pending.has(key(p))) socket.emit('call_end', { to: p }); if (status) this.log(status); }
+    else if (st.peer && !st.hadRemote && st.lk && st.lk.remoteParticipants.size === 0) socket.emit('call_end', { to: st.peer });
+    if (st.phase === 'active') Snd.end();
+    this.cleanup();
   },
   lkRefresh() {
     const st = this.st; if (!st?.lk) return; const LK = window.LivekitClient; const r = st.lk;
@@ -3100,7 +3272,7 @@ const Call = {
     $$('video', grid).forEach((v) => { try { v._lkTrack?.detach(v); } catch { } });
     grid.innerHTML = ''; tiles.forEach((t) => grid.appendChild(t));
     const n = tiles.length; const cols = n <= 1 ? 1 : n <= 4 ? 2 : n <= 9 ? 3 : 4; grid.style.gridTemplateColumns = `repeat(${cols},1fr)`;
-    const others = parts.length - 1; if (st.phase !== 'active') this.setStatus(others ? `${others} в звонке` : 'Ожидание участников…');
+    const others = parts.length - 1; if (st.phase !== 'active') this.setStatus(others ? `${others} в звонке` : st.phase === 'ringing' ? 'Вызов…' : st.phase === 'connecting' ? this.el.status.innerHTML : 'Ожидание участников…');
   },
 };
 function isSame(a, b) { return key(a) === key(b); }

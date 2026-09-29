@@ -1,10 +1,11 @@
 {
   "name": "nmessenger",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "owner-key": "node tools/owner-key.js",
+    "ai-key": "node tools/mask-key.js",
     "build": "node tools/build.js",
     "bot:example": "python3 sdk/example_bot.py"
   },

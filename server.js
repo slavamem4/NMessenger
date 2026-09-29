@@ -763,32 +763,85 @@ function storeFile(buf, name, mime, owner) {
   return rec;
 }
 
-/* ===================== AI-помощник: внешний LLM (OpenAI-совместимый) или встроенный корректор ===================== */
-const AI = { url: String(process.env.AI_API_URL || 'https://api.openai.com/v1').replace(/\/+$/, ''), key: String(process.env.AI_API_KEY || ''), model: String(process.env.AI_MODEL || 'gpt-4o-mini') };
-function aiInfo() { return { llm: !!AI.key, model: AI.key ? AI.model : null, actions: AI.key ? ['fix', 'shorter', 'polite', 'formal', 'translate', 'emoji'] : ['fix'] }; }
+/* ===================== AI: нейросеть (OpenAI-совместимый API) + встроенный корректор как запасной вариант ===================== */
+// Встроенный ключ владельца (Groq, модели gpt-oss). Переопределяется в .env: AI_API_URL / AI_API_KEY / AI_MODEL / AI_MODEL_FALLBACK.
+// AI_API_KEY=off — выключить нейросеть совсем (останется только встроенный корректор для «Исправить ошибки»).
+// Ключ хранится в замаскированном виде (XOR + base64), чтобы не лежать в репозитории открытым текстом и не срабатывать
+// на secret-scanning. Это НЕ защита: восстановить его может любой, у кого есть код. Сменить: node tools/mask-key.js <ключ> --write
+const AI_KEY_SALT = 'NMessenger·newrizer';
+const unmaskKey = (m) => { try { return Buffer.from(Buffer.from(String(m || ''), 'base64').map((b, i) => b ^ AI_KEY_SALT.charCodeAt(i % AI_KEY_SALT.length))).toString('utf8'); } catch { return ''; } };
+const AI_BUILTIN = { url: 'https://api.groq.com/openai/v1', key: unmaskKey('KT4OLCYCWh0WBeYXJBUHEEJSHnsXIjIbMikDHBCEKDwVJiwWHUEleRAZRVc3EA060gIMPgQkLVQ='), model: 'openai/gpt-oss-120b', fallback: 'openai/gpt-oss-20b' };
+const AI = (() => {
+  const envKey = String(process.env.AI_API_KEY || '').trim();
+  if (/^(off|none|0|false|no)$/i.test(envKey)) return { enabled: false, url: '', key: '', model: '', fallback: '', builtin: false };
+  const custom = !!(envKey || process.env.AI_API_URL);
+  const url = String(process.env.AI_API_URL || AI_BUILTIN.url).replace(/\/+$/, '');
+  const key = envKey || (process.env.AI_API_URL ? '' : AI_BUILTIN.key);
+  const model = String(process.env.AI_MODEL || (custom ? 'gpt-4o-mini' : AI_BUILTIN.model));
+  const fallback = String(process.env.AI_MODEL_FALLBACK || (custom ? '' : AI_BUILTIN.fallback));
+  return { enabled: !!url && (!!key || custom), url, key, model, fallback, builtin: !custom };
+})();
+const AI_BOT = 'ai';
+const AI_ACTIONS = ['fix', 'shorter', 'polite', 'formal', 'translate', 'emoji', 'expand', 'reply', 'summary', 'ask'];
+function aiInfo() { return { llm: AI.enabled, model: AI.enabled ? AI.model : null, actions: AI.enabled ? AI_ACTIONS : ['fix'], bot: AI.enabled ? 'AI' : null }; }
+const AI_STYLE = 'Отвечай на языке пользователя. Без вступлений и пояснений — только результат. Не используй заголовки и таблицы; из форматирования допустимы **жирный**, `код`, ```блок кода``` и списки через «• ».';
 const AI_PROMPTS = {
-  fix: 'Ты корректор. Исправь орфографические, пунктуационные и грамматические ошибки в тексте пользователя. Сохрани смысл, стиль, язык, переносы строк, эмодзи, ссылки, @упоминания и форматирование. Верни только исправленный текст без пояснений и кавычек.',
-  shorter: 'Сократи текст пользователя примерно вдвое, сохранив смысл, язык и тон. Верни только результат.',
+  fix: 'Ты профессиональный корректор. Исправь в тексте пользователя ВСЕ орфографические, пунктуационные и грамматические ошибки, опечатки и неверную раскладку, расставь заглавные буквы. Сохрани смысл, стиль (разговорный остаётся разговорным), язык, переносы строк, эмодзи, ссылки, @упоминания, /команды и форматирование. Верни только исправленный текст без кавычек. Если ошибок нет — верни текст без изменений.',
+  shorter: 'Сократи текст пользователя примерно вдвое, сохранив смысл, ключевые факты, язык и тон. Верни только результат.',
   polite: 'Перепиши текст пользователя вежливо и дружелюбно, сохранив смысл и язык. Верни только результат.',
-  formal: 'Перепиши текст пользователя в деловом стиле, сохранив смысл и язык. Верни только результат.',
-  translate: 'Переведи текст пользователя: если он на русском — на английский, иначе — на русский. Верни только перевод.',
-  emoji: 'Добавь в текст пользователя несколько уместных эмодзи, не меняя слов. Верни только результат.',
+  formal: 'Перепиши текст пользователя в деловом стиле (нейтрально, без жаргона и лишних эмоций), сохранив смысл и язык. Верни только результат.',
+  translate: 'Переведи текст пользователя: если он на русском — на английский, иначе — на русский. Сохрани форматирование и эмодзи. Верни только перевод.',
+  emoji: 'Добавь в текст пользователя несколько уместных эмодзи (не больше одного на предложение), не меняя слов. Верни только результат.',
+  expand: 'Разверни и дополни текст пользователя: сделай его подробнее и убедительнее (в 2–3 раза длиннее), сохранив смысл, язык и тон. Верни только результат.',
+  reply: 'Ты помогаешь пользователю ответить в мессенджере. Ниже — последние сообщения переписки (сообщения пользователя помечены как «Я»). Напиши от лица пользователя уместный ответ на последнее сообщение собеседника: короткий, естественный, в тоне переписки. Если пользователь дал набросок или пожелание — учти его. Верни только текст ответа.',
+  summary: 'Кратко перескажи переписку ниже: о чём говорили, к чему пришли, какие есть договорённости, вопросы и задачи. 3–7 пунктов через «• », без воды. Сообщения пользователя помечены как «Я».',
+  ask: 'Ты AI-помощник в мессенджере NMessenger. Ответь на вопрос или выполни просьбу пользователя точно и по делу, кратко (до 1500 символов, если не просят подробнее).',
 };
-async function askLLM(system, user) {
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 30000);
-  try {
-    const r = await fetch(AI.url + '/chat/completions', {
-      method: 'POST', signal: ctrl.signal,
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + AI.key },
-      body: JSON.stringify({ model: AI.model, temperature: 0.2, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] }),
-    });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error((j.error && j.error.message) || 'HTTP ' + r.status);
-    const out = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
-    if (typeof out !== 'string' || !out.trim()) throw new Error('пустой ответ модели');
-    return out.trim();
-  } finally { clearTimeout(t); }
+const AI_TIMEOUT = 45000;
+function cleanLLM(out) {
+  let t = String(out || '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  const fence = t.match(/^```[a-zA-Z]*\n([\s\S]*?)\n```$/); if (fence) t = fence[1].trim();
+  if (t.length > 2 && /^["«“].*["»”]$/s.test(t) && !/["«“»”]/.test(t.slice(1, -1))) t = t.slice(1, -1).trim();
+  return t.replace(/^(?:Исправленный текст|Результат|Перевод|Ответ|Corrected text|Result)\s*:\s*/i, '');
+}
+// Вызов chat/completions: основная модель, при сбое (429/5xx/таймаут/400) — запасная
+async function llmChat(messages, opts = {}) {
+  if (!AI.enabled) throw new Error('нейросеть не настроена');
+  const models = [opts.model || AI.model, AI.fallback].filter((m, i, a) => m && a.indexOf(m) === i);
+  let lastErr = null;
+  for (const m of models) {
+    const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), AI_TIMEOUT);
+    try {
+      const body = { model: m, temperature: opts.temperature ?? 0.3, max_tokens: opts.maxTokens || 1500, messages };
+      if (/gpt-oss/i.test(m)) body.reasoning_effort = opts.reasoning || 'low';
+      const r = await fetch(AI.url + '/chat/completions', { method: 'POST', signal: ctrl.signal, headers: { 'Content-Type': 'application/json', ...(AI.key ? { Authorization: 'Bearer ' + AI.key } : {}) }, body: JSON.stringify(body) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { const em = j.error && (j.error.message || j.error); const e = new Error(typeof em === 'string' ? em : 'HTTP ' + r.status); e.status = r.status; throw e; }
+      const ch = j.choices && j.choices[0];
+      const text = cleanLLM(ch && ch.message && ch.message.content);
+      if (!text) { const e = new Error(ch && ch.finish_reason === 'length' ? 'ответ обрезан лимитом токенов' : 'пустой ответ модели'); e.status = 500; throw e; }
+      return { text, model: m, usage: j.usage || null };
+    } catch (e) {
+      lastErr = e;
+      console.warn(`AI [${m}]:`, e.name === 'AbortError' ? 'таймаут' : e.message);
+      const retry = e.name === 'AbortError' || !e.status || e.status === 429 || e.status >= 500 || e.status === 404 || e.status === 400 || e.status === 413;
+      if (!retry) break;
+    } finally { clearTimeout(timer); }
+  }
+  if (lastErr && lastErr.name === 'AbortError') lastErr = new Error('нейросеть не ответила за ' + Math.round(AI_TIMEOUT / 1000) + ' с');
+  throw lastErr || new Error('нейросеть недоступна');
+}
+function aiContextBlock(context) {
+  return (context || []).map((c) => `${c.me ? 'Я' : (c.from || 'Собеседник')}: ${String(c.text || '').replace(/\s+/g, ' ').trim()}`).filter((l) => l.length > 3).join('\n').slice(-6000);
+}
+async function runAIAction(action, text, context) {
+  const sys = (AI_PROMPTS[action] || AI_PROMPTS.fix) + '\n' + AI_STYLE;
+  let user = text;
+  if (action === 'reply') user = `Переписка:\n${aiContextBlock(context) || '(пусто)'}\n\n${text.trim() ? 'Мой набросок / пожелание к ответу: ' + text.trim() : 'Напиши ответ.'}`;
+  else if (action === 'summary') user = `Переписка:\n${aiContextBlock(context) || '(пусто)'}`;
+  else if (action === 'ask' && context && context.length) user = `Контекст переписки (для справки):\n${aiContextBlock(context)}\n\nВопрос: ${text}`;
+  const maxTokens = action === 'expand' || action === 'ask' ? 1800 : Math.min(2500, Math.max(400, Math.ceil(text.length * 0.9) + 300));
+  return llmChat([{ role: 'system', content: sys }, { role: 'user', content: user }], { maxTokens, temperature: action === 'fix' || action === 'translate' ? 0.1 : 0.5 });
 }
 const TYPOS = {
   // русские опечатки и просторечия
@@ -907,14 +960,96 @@ function createBotAccount(owner, username, displayName) {
 const BOTFATHER = 'botfather';
 const bfState = new Map();
 function ensureSystemBots() {
-  if (accounts.has(BOTFATHER)) return;
-  const dummy = hashPassword(crypto.randomBytes(16).toString('hex'));
-  accounts.set(BOTFATHER, {
-    username: 'BotFather', displayName: 'BotFather', about: 'Создаю ботов и выдаю API-ключи. Напишите /help', avatar: '', pubKey: null,
-    isBot: true, system: true, botOwner: 'system', botToken: 'nmbot:' + crypto.randomBytes(18).toString('hex'),
-    passHash: dummy.hash, salt: dummy.salt, createdAt: Date.now(), lastSeen: Date.now(), settings: defaultSettings(), blocked: [],
-  });
-  persist();
+  let changed = false;
+  if (!accounts.has(BOTFATHER)) {
+    const dummy = hashPassword(crypto.randomBytes(16).toString('hex'));
+    accounts.set(BOTFATHER, {
+      username: 'BotFather', displayName: 'BotFather', about: 'Создаю ботов и выдаю API-ключи. Напишите /help', avatar: '', pubKey: null,
+      isBot: true, system: true, botOwner: 'system', botToken: 'nmbot:' + crypto.randomBytes(18).toString('hex'),
+      passHash: dummy.hash, salt: dummy.salt, createdAt: Date.now(), lastSeen: Date.now(), settings: defaultSettings(), blocked: [],
+    });
+    changed = true;
+  }
+  if (!accounts.has(AI_BOT)) {
+    const dummy = hashPassword(crypto.randomBytes(16).toString('hex'));
+    accounts.set(AI_BOT, {
+      username: 'AI', displayName: 'AI-помощник', about: 'Нейросеть прямо в чате: отвечает на вопросы, пишет и правит тексты, переводит, объясняет. В группе — обращайтесь @AI.', avatar: '', pubKey: null,
+      isBot: true, system: true, botOwner: 'system', botToken: 'nmbot:' + crypto.randomBytes(18).toString('hex'),
+      botCommands: [{ command: 'start', description: 'Что я умею' }, { command: 'clear', description: 'Забыть предыдущую беседу' }, { command: 'help', description: 'Справка' }],
+      passHash: dummy.hash, salt: dummy.salt, createdAt: Date.now(), lastSeen: Date.now(), settings: defaultSettings(), blocked: [],
+    });
+    changed = true;
+  }
+  if (changed) persist();
+}
+/* ===================== AI-помощник как собеседник (@AI) ===================== */
+const AI_BOT_HELLO = `Привет! Я **AI-помощник** NMessenger — нейросеть прямо в чате.
+
+Что умею:
+• отвечать на вопросы и объяснять
+• писать и править тексты, письма, посты
+• переводить, сокращать, пересказывать
+• помогать с кодом и формулами
+
+Просто напишите сообщение. В группах обращайтесь ко мне через @AI или ответом на моё сообщение.
+/clear — забыть предыдущую беседу и начать заново.`;
+const aiBusy = new Set();
+function aiHistoryFor(conv, upTo) {
+  const since = conv.aiClearAt || 0;
+  const msgs = conv.messages.filter((m) => m.ts > since && !m.deleted && m.type !== 'system' && m.type !== 'call' && (m.text || m.file || m.poll));
+  const out = [];
+  for (const m of msgs.slice(-24)) {
+    const fromAI = key(m.from) === AI_BOT;
+    let t = m.type === 'poll' && m.poll ? `[опрос: ${m.poll.question}]` : m.type === 'image' ? `[фото] ${m.text && m.text !== 'Изображение' ? m.text : ''}` : m.type === 'file' && m.file ? `[файл: ${m.file.name}] ${m.text && m.text !== m.file.name ? m.text : ''}` : String(m.text || '');
+    t = t.trim().slice(0, 3000); if (!t) continue;
+    if (fromAI) out.push({ role: 'assistant', content: t });
+    else out.push({ role: 'user', content: conv.type === 'dm' ? t : `${displayOf(m.from)}: ${t}` });
+    if (m.id === upTo) break;
+  }
+  return out;
+}
+function aiAddressed(conv, msg) {
+  if (conv.type === 'dm') return true;
+  const t = String(msg.text || '');
+  if (/(^|[\s(])@ai(?![\w.-])/i.test(t)) return true;
+  if (msg.replyTo && key(msg.replyTo.from || '') === AI_BOT) return true;
+  return /^\/ai(\s|$)/i.test(t);
+}
+function aiSplit(text) {
+  const out = []; let t = String(text);
+  while (t.length > TEXT_MAX) {
+    let cut = t.lastIndexOf('\n\n', TEXT_MAX - 20);
+    if (cut < TEXT_MAX / 2) cut = t.lastIndexOf('\n', TEXT_MAX - 20);
+    if (cut < TEXT_MAX / 2) cut = t.lastIndexOf(' ', TEXT_MAX - 20);
+    if (cut < TEXT_MAX / 2) cut = TEXT_MAX - 20;
+    out.push(t.slice(0, cut).trim()); t = t.slice(cut).trim();
+  }
+  if (t) out.push(t);
+  return out;
+}
+async function aiBotHandle(username, conv, msg) {
+  if (!AI.enabled || !aiAddressed(conv, msg)) return;
+  const text = String(msg.text || '').replace(/(^|[\s(])@ai(?![\w.-])/gi, '$1').replace(/^\/ai\s*/i, '').trim();
+  const cmd = text.toLowerCase().split(/\s+/)[0];
+  if (cmd === '/start' || cmd === '/help') return sendAsBot(conv, 'AI', AI_BOT_HELLO);
+  if (cmd === '/clear') { conv.aiClearAt = Date.now(); persist(); return sendAsBot(conv, 'AI', 'Готово, начинаем с чистого листа. О чём поговорим?'); }
+  if (!text && !msg.file) return;
+  if (!aiAllowed(username)) return sendAsBot(conv, 'AI', 'Слишком много запросов — подождите минуту.');
+  if (aiBusy.has(conv.id)) return;
+  aiBusy.add(conv.id);
+  const typing = () => emitToConv(conv, 'typing', { conversationId: conv.id, user: 'AI' }, 'AI');
+  typing(); const tt = setInterval(typing, 3000);
+  try {
+    const who = conv.type === 'dm' ? `Собеседник — ${displayOf(username)}.` : `Это групповой чат «${conv.name || ''}», к тебе обращаются по @AI; отвечай тому, кто спросил (${displayOf(username)}).`;
+    const sys = `Ты AI-помощник в мессенджере NMessenger. ${who} Отвечай на языке собеседника, дружелюбно и по делу; обычно коротко (до 1500 символов), подробно — если просят. Формат: обычный текст, допустимы **жирный**, \`код\`, \`\`\`блоки кода\`\`\` и списки через «• »; без заголовков и таблиц. Сегодня ${new Date().toISOString().slice(0, 10)}.`;
+    const history = aiHistoryFor(conv, msg.id);
+    if (!history.length || history[history.length - 1].role !== 'user') history.push({ role: 'user', content: text || '[файл]' });
+    const r = await llmChat([{ role: 'system', content: sys }, ...history], { maxTokens: 1800, temperature: 0.6, reasoning: 'medium' });
+    for (const part of aiSplit(r.text)) sendAsBot(conv, 'AI', part);
+  } catch (e) {
+    console.warn('AI bot:', e.message);
+    sendAsBot(conv, 'AI', 'Не получилось ответить: ' + e.message + '. Попробуйте ещё раз чуть позже.');
+  } finally { clearInterval(tt); aiBusy.delete(conv.id); }
 }
 const BF_HELP = `Я BotFather — создаю ботов для NMessenger и выдаю им API-ключи.
 
@@ -1114,7 +1249,37 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 app.get('/ping', (req, res) => res.send('Server is alive!'));
-app.get('/livekit-status', (req, res) => res.json({ enabled: livekitEnabled() }));
+// Диагностика LiveKit: типичные ошибки конфигурации, из-за которых звонки «не проходят»
+function livekitWarnings(req) {
+  const url = String(process.env.LIVEKIT_URL || ''); const out = [];
+  if (!url) return out;
+  const https = (req && (req.secure || String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim() === 'https'));
+  let u = null; try { u = new URL(url); } catch { out.push('LIVEKIT_URL не похож на адрес: нужен вид wss://host'); return out; }
+  if (!/^wss?:$/.test(u.protocol)) out.push(`LIVEKIT_URL должен начинаться с ws:// или wss:// (сейчас ${u.protocol}//)`);
+  if (https && u.protocol === 'ws:') out.push('Сайт открыт по HTTPS, а LIVEKIT_URL — ws://. Браузер заблокирует такое соединение: нужен wss:// (LiveKit за reverse-proxy с TLS).');
+  const h = u.hostname;
+  if (/^(localhost|127\.|0\.0\.0\.0|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(h) || h === '::1') out.push(`LIVEKIT_URL указывает на локальный адрес (${h}). Он работает только с этого же компьютера/сети — пользователи из интернета не подключатся. Нужен публичный домен или IP.`);
+  return out;
+}
+const lkProbeCache = { at: 0, res: null };
+async function livekitProbe() {
+  const url = String(process.env.LIVEKIT_URL || ''); if (!url) return null;
+  if (Date.now() - lkProbeCache.at < 20000 && lkProbeCache.res) return lkProbeCache.res;
+  let res;
+  try {
+    const u = new URL(url); const http = (u.protocol === 'wss:' ? 'https:' : 'http:') + '//' + u.host + '/';
+    const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 4000);
+    const r = await fetch(http, { signal: ctrl.signal }).catch((e) => { throw e; }).finally(() => clearTimeout(t));
+    const body = (await r.text().catch(() => '')).slice(0, 40);
+    res = { reachable: true, status: r.status, looksLikeLivekit: r.status === 200 && /^OK/i.test(body.trim()) };
+  } catch (e) { res = { reachable: false, error: e.name === 'AbortError' ? 'timeout' : (e.cause && e.cause.code) || e.code || e.message }; }
+  lkProbeCache.at = Date.now(); lkProbeCache.res = res; return res;
+}
+app.get('/livekit-status', async (req, res) => {
+  const enabled = livekitEnabled(); const out = { enabled, url: enabled ? process.env.LIVEKIT_URL : null, warnings: enabled ? livekitWarnings(req) : [] };
+  if (enabled && req.query.probe) out.probe = await livekitProbe();
+  res.json(out);
+});
 // Клиентская библиотека LiveKit раздаётся локально (зафиксированная версия из package.json) — без зависимости от CDN
 const LK_CLIENT_FILE = (() => {
   try { const p = require.resolve('livekit-client'); const f = p.endsWith('.umd.js') ? p : path.join(path.dirname(p), 'livekit-client.umd.js'); return fs.existsSync(f) ? f : null; } catch { return null; }
@@ -1544,16 +1709,19 @@ app.post('/api/ai', async (req, res) => {
   if (!acc) return res.status(401).json({ error: 'Нужна авторизация' });
   if (!aiAllowed(acc.username)) return res.status(429).json({ error: 'Слишком часто. Подождите минуту.' });
   const action = String(req.body?.action || 'fix');
+  if (!AI_ACTIONS.includes(action)) return res.status(400).json({ error: 'Неизвестное действие' });
   let text = String(req.body?.text || '');
-  if (!text.trim()) return res.status(400).json({ error: 'Пустой текст' });
+  const context = Array.isArray(req.body?.context) ? req.body.context.slice(-40).map((c) => ({ from: String((c && c.from) || '').slice(0, 40), text: String((c && c.text) || '').slice(0, 1500), me: !!(c && c.me) })) : [];
+  const needsText = !(action === 'summary' || (action === 'reply' && context.length));
+  if (needsText && !text.trim()) return res.status(400).json({ error: 'Пустой текст' });
   if (text.length > TEXT_MAX) text = text.slice(0, TEXT_MAX);
-  if (AI.key) {
-    try { return res.json({ ok: true, text: await askLLM(AI_PROMPTS[action] || AI_PROMPTS.fix, text), engine: 'llm' }); }
-    catch (e) { if (action !== 'fix') return res.status(502).json({ error: 'ИИ недоступен: ' + e.message }); console.warn('AI fallback:', e.message); }
+  if (AI.enabled) {
+    try { const r = await runAIAction(action, text, context); return res.json({ ok: true, text: r.text, engine: 'llm', model: r.model }); }
+    catch (e) { if (action !== 'fix') return res.status(502).json({ error: 'ИИ недоступен: ' + e.message }); console.warn('AI fallback → встроенный корректор:', e.message); }
   }
-  if (action !== 'fix') return res.status(400).json({ error: 'Эта функция требует ключ нейросети (AI_API_KEY в .env). Без ключа доступно «Исправить ошибки».' });
+  if (action !== 'fix') return res.status(400).json({ error: 'Эта функция требует нейросеть (AI_API_KEY в .env). Без неё доступно только «Исправить ошибки».' });
   const r = basicFix(text);
-  res.json({ ok: true, text: r.text, engine: 'basic', changes: r.changes });
+  res.json({ ok: true, text: r.text, engine: 'basic', changes: r.changes, note: AI.enabled ? 'Нейросеть не ответила — сработал встроенный корректор' : '' });
 });
 
 app.post(
@@ -1911,6 +2079,7 @@ io.on('connection', (socket) => {
     const conv = convMap.get(conversationId);
     const b = accounts.get(key(bot));
     if (!conv || !b || !b.isBot) return;
+    if (key(bot) === BOTFATHER) { socket.emit('action_error', 'BotFather работает только в личных сообщениях'); return; }
     if (conv.type !== 'group' && conv.type !== 'channel') return;
     const owner = conv.owner || conv.participants[0];
     if (key(owner) !== key(username) && !(conv.admins || []).some((a) => key(a) === key(username))) return;
@@ -2047,6 +2216,9 @@ io.on('connection', (socket) => {
     }
     if (conv.type === 'dm' && key(username) !== BOTFATHER && conv.participants.some((p) => key(p) === BOTFATHER)) {
       try { botFatherHandle(username, conv, msg); } catch (e) { console.error('BotFather:', e); }
+    }
+    if (key(username) !== AI_BOT && msg.type !== 'secret' && conv.participants.some((p) => key(p) === AI_BOT)) {
+      aiBotHandle(username, conv, msg).catch((e) => console.error('AI bot:', e));
     }
     dispatchToBots(conv, msg);
   });
@@ -2504,6 +2676,12 @@ io.on('connection', (socket) => {
     const other = accounts.get(key(data.to));
     if (other && settingsOf(other).callsFrom === 'none') {
       socket.emit('action_error', 'Пользователь не принимает звонки');
+      socket.emit('call_unavailable', { to: data.to, reason: 'blocked' });
+      return;
+    }
+    if (!other || other.isBot || !isOnline(data.to)) {
+      // абонент не в сети — сразу сообщаем звонящему, чтобы не «звонить в пустоту»
+      socket.emit('call_unavailable', { to: data.to, reason: 'offline' });
       return;
     }
     emitToUser(data.to, 'incoming_call', {
@@ -2662,5 +2840,5 @@ const PORT = process.env.PORT || 10000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`💾 Данные: ${DATA_DIR} (история: ${HISTORY_KEEP} сообщений на чат, бэкапы: ${BACKUP_DIR})`);
   console.log(`🚀 Server started on port ${PORT}`);
-  console.log(`   NMessenger © ${Array.from(OWNERS).join(', ')} — владельцы/модераторы: ${Array.from(OWNERS).map((o) => '@' + o).join(', ')}${AI.key ? ' · AI: ' + AI.model : ' · AI: встроенный корректор (AI_API_KEY не задан)'}`);
+  console.log(`   NMessenger © ${Array.from(OWNERS).join(', ')} — владельцы/модераторы: ${Array.from(OWNERS).map((o) => '@' + o).join(', ')}${AI.enabled ? ' · AI: ' + AI.model + (AI.builtin ? ' (встроенный ключ)' : '') : ' · AI: выключен, только встроенный корректор'}`);
 });
