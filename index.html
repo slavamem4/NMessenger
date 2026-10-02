@@ -112,6 +112,35 @@ img{display:block}
 .pw-wrap .icon-btn{position:absolute;right:2px;top:50%;transform:translateY(-50%);width:36px;height:36px}
 .auth-error{color:var(--danger);font-size:13px;min-height:18px;margin:4px 0 10px}
 .auth-foot{margin-top:16px;font-size:12px;color:var(--text-3)}
+.code-input{font-family:ui-monospace,Menlo,Consolas,"Courier New",monospace;font-size:28px;letter-spacing:10px;text-align:center;font-weight:700;color:var(--accent);padding:12px 6px 12px 16px!important}
+.code-input::placeholder{color:var(--text-3);letter-spacing:6px;font-weight:400}
+.auth-link{background:none;border:0;color:var(--accent);font-size:13px;cursor:pointer;padding:6px 0;font-family:inherit}
+.auth-link:hover{text-decoration:underline}
+.auth-link:disabled{color:var(--text-3);cursor:default;text-decoration:none}
+.auth-mail-ic{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:center;margin:2px auto 12px;box-shadow:0 8px 20px rgba(59,130,246,.35)}
+.auth-mail-ic .ic{width:30px;height:30px;color:#fff}
+.auth-pane{margin-top:20px}
+.auth-pane h3{margin:0 0 6px;font-size:17px}
+.auth-pane .md-text{text-align:center;line-height:1.5;margin-bottom:12px}
+.auth-mail-ic.ph{background:linear-gradient(135deg,#10b981,#2f7cf6);box-shadow:0 8px 20px rgba(16,185,129,.3)}
+.grecaptcha-badge{visibility:hidden!important}
+.rc-note{font-size:11px;color:var(--text-3);text-align:center;line-height:1.4;margin-top:10px}
+.rc-note a{color:var(--text-3)}
+#twofaSel{flex:none;width:210px;max-width:45%}
+.choice-btn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;color:var(--text);cursor:pointer;font:inherit;margin-bottom:8px;transition:border-color .15s}
+.choice-btn:hover{border-color:var(--accent)}
+.choice-btn .ic{color:var(--accent);flex:none;width:22px;height:22px}
+.choice-btn .rb{flex:1;min-width:0}
+.choice-btn .rt{font-weight:600;font-size:14px}
+.choice-btn .rs{font-size:12px;color:var(--text-2);margin-top:2px}
+.auth-pane .field{text-align:left}
+.sb-hint{margin:6px 10px 2px;padding:10px 12px;border-radius:14px;background:linear-gradient(135deg,rgba(47,124,246,.16),rgba(124,92,255,.16));border:1px solid rgba(47,124,246,.3);display:flex;gap:10px;align-items:center;font-size:13px}
+.sb-hint>.ic{flex:none;color:var(--accent)}
+.sb-hint .rb{flex:1;min-width:0}
+.sb-hint .rt{font-weight:600}
+.sb-hint .rs{color:var(--text-2);font-size:12px;margin-top:2px;line-height:1.35}
+.sb-hint .btn.sm{padding:6px 10px;flex:none}
+.em-ok{color:var(--success);font-weight:700}
 
 /* ===== APP LAYOUT ===== */
 .app{display:flex;height:100%;width:100%;position:relative}
@@ -227,6 +256,30 @@ img{display:block}
 .msg.emo .b-meta .read{color:#9fdcff}
 .msg.emo .reactions{margin-left:6px}
 .ctx-reacts button .aemoji{margin:0}
+.emj{width:1.25em;height:1.25em;vertical-align:-.27em;display:inline-block;margin:0 .02em;object-fit:contain}
+.b-text.big .emj{width:1em;height:1em;vertical-align:-.12em}
+.aemoji-txt .emj,.aemoji-st .emj{width:1em;height:1em;vertical-align:-.1em}
+.estatus{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-left:4px;line-height:1}
+.estatus .aemoji{margin:0;vertical-align:middle}
+.estatus .emj{margin:0}
+.ct-name .estatus{font-size:18px}
+.chat-item .name .estatus{font-size:15px;margin-left:3px}
+.ip-cover{height:150px;background:var(--surface) center/cover no-repeat;border-radius:14px 14px 0 0;margin:-6px -6px 0;position:relative}
+.ip-cover.ph{background:linear-gradient(135deg,rgba(47,124,246,.35),rgba(124,92,255,.35))}
+.ip-hero.cov{padding-top:0;margin-top:-52px}
+.ip-hero.cov .avatar{border:4px solid var(--bg-2);box-sizing:content-box}
+.info-panel .ip-cover{border-radius:0;margin:0}
+.pf-cover{position:relative;height:130px;border-radius:14px;background:var(--surface) center/cover no-repeat;margin:0 0 10px;overflow:hidden;display:flex;align-items:flex-start;justify-content:flex-end;gap:6px;padding:8px}
+.pf-cover.ph{background:linear-gradient(135deg,rgba(47,124,246,.35),rgba(124,92,255,.35))}
+.pf-cover .btn{backdrop-filter:blur(6px);background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.2)}
+.pf-cover .btn:hover{background:rgba(0,0,0,.65)}
+.pf-status{display:flex;align-items:center;gap:10px}
+.pf-status .cur{width:44px;height:44px;border-radius:12px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:26px}
+.pf-status .cur .aemoji{margin:0}
+.ae-diag{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--text-2);padding:4px 0 2px}
+.ae-diag .aemoji{margin:0}
+.ae-diag b{color:var(--text)}
+.mod-ip{font-family:monospace;font-size:12px;background:var(--bg-3);padding:1px 6px;border-radius:6px}
 .aemoji-burst{position:fixed;z-index:80;pointer-events:none;animation:aeBurst 2.2s ease-out forwards}
 .aemoji-burst svg{display:block;width:100%!important;height:100%!important}
 @keyframes aeBurst{0%{transform:scale(.3);opacity:0}15%{transform:scale(1.15);opacity:1}30%{transform:scale(1)}75%{opacity:1;transform:scale(1) translateY(-8px)}100%{opacity:0;transform:scale(1.25) translateY(-34px)}}
@@ -582,6 +635,35 @@ select:focus{border-color:var(--accent)!important}
 .call-tile .tn{position:absolute;left:10px;bottom:8px;background:rgba(0,0,0,.5);padding:3px 9px;border-radius:9px;font-size:12px;display:flex;align-items:center;gap:5px}
 .call-tile .tn .ic{width:13px;height:13px}
 .call-tile.speaking{outline:3px solid var(--success)}
+.call-tile .tx{position:absolute;top:8px;right:8px;width:32px;height:32px;border:0;border-radius:9px;background:rgba(0,0,0,.5);color:#fff;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;cursor:pointer;z-index:2;padding:0}
+.call-tile .tx .ic{width:16px;height:16px}
+.call-tile:hover .tx,.call-tile.main .tx{opacity:1}
+@media (hover:none){.call-tile .tx{opacity:.85}}
+.call-tile .vol{position:absolute;right:10px;bottom:8px;background:rgba(0,0,0,.5);padding:3px 8px;border-radius:9px;font-size:11px;display:flex;align-items:center;gap:4px;z-index:2}
+.call-tile .vol .ic{width:12px;height:12px}
+.call-grid.focus{grid-template-columns:1fr!important;grid-template-rows:minmax(0,1fr) 104px;grid-auto-rows:auto}
+.call-grid.focus.solo{grid-template-rows:minmax(0,1fr)}
+.call-grid.focus>.call-tile.main{min-height:0}
+.call-grid.focus>.strip{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 0;scrollbar-width:thin;min-width:0}
+.call-grid.focus>.strip:empty{display:none}
+.call-grid.focus>.strip .call-tile{flex:0 0 160px;min-height:0;height:96px;border-radius:12px}
+.call-grid.focus>.strip .call-tile .avatar{width:48px;height:48px;font-size:18px}
+.call-grid.focus>.strip .call-tile .tn{font-size:11px;padding:2px 7px;left:6px;bottom:6px;max-width:calc(100% - 12px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.call-grid.focus>.strip .call-tile .vol{right:6px;bottom:6px}
+.call-tile.main video{object-fit:contain;background:#000}
+.call-tile:fullscreen{border-radius:0;background:#000}
+.call-tile:fullscreen video{object-fit:contain}
+.tile-menu{position:fixed;z-index:6;background:rgba(20,24,36,.97);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:6px;min-width:250px;box-shadow:0 12px 40px rgba(0,0,0,.5);color:#fff;animation:pop .12s;backdrop-filter:blur(10px)}
+.tile-menu .tm-head{padding:8px 12px 6px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+.tile-menu .tm-head .avatar{width:28px;height:28px;font-size:12px}
+.tile-menu .tm-vol{padding:4px 12px 2px}
+.tile-menu .tm-vol .lbl{display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.7);margin-bottom:2px}
+.tile-menu input[type=range]{width:100%}
+.tile-menu .tm-hint{font-size:11px;color:rgba(255,255,255,.5);padding:0 12px 8px;line-height:1.35}
+.tile-menu .ctx-item{color:#fff}
+.tile-menu .ctx-item:hover{background:rgba(255,255,255,.1)}
+.tile-menu .ctx-item .ic{color:rgba(255,255,255,.75)}
+.tile-menu .ctx-sep{border-top:1px solid rgba(255,255,255,.1);margin:4px 0}
 .incoming{position:fixed;top:18px;right:18px;z-index:85;width:360px;max-width:calc(100% - 36px);background:var(--bg-3);border-radius:20px;box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:14px;animation:slideDown .25s;border:1px solid var(--border)}
 .incoming .top{display:flex;align-items:center;gap:12px}
 .incoming .avatar{width:56px;height:56px;font-size:20px;animation:pulse 1.6s infinite}
@@ -597,10 +679,10 @@ select:focus{border-color:var(--accent)!important}
 
 /* ===== TOASTS ===== */
 .toasts{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:max-content;max-width:calc(100% - 32px)}
-.toast{background:var(--bg-3);color:var(--text);padding:11px 18px;border-radius:14px;box-shadow:var(--shadow);border:1px solid var(--border);animation:pop .2s;pointer-events:auto;max-width:420px;font-size:14px;display:flex;align-items:center;gap:10px;text-align:center}
+.toast{background:var(--bg-3);color:var(--text);padding:11px 18px;border-radius:14px;box-shadow:var(--shadow);border:1px solid var(--border);animation:pop .2s;pointer-events:none;max-width:420px;font-size:14px;display:flex;align-items:center;gap:10px;text-align:center}
 .toast.err{border-color:var(--danger);color:var(--danger)}
 .toast.ok{border-color:var(--success)}
-.toast .btn{padding:4px 10px;font-size:13px;border-radius:8px}
+.toast .btn{padding:4px 10px;font-size:13px;border-radius:8px;pointer-events:auto}
 
 /* ===== NEW MENU ===== */
 .new-menu{position:absolute;right:18px;bottom:84px;z-index:4;background:var(--bg-3);border-radius:14px;padding:6px;box-shadow:var(--shadow);border:1px solid var(--border);min-width:220px;animation:pop .12s}
@@ -636,6 +718,11 @@ body.resizing iframe,body.resizing video{pointer-events:none}
 .lk-row .ok{color:#34d399}
 .lk-row .bad{color:var(--danger);text-align:right;max-width:70%;font-weight:500;line-height:1.4}
 .lk-warn{font-size:12px;color:var(--warn);background:rgba(245,166,35,.1);border-radius:8px;padding:8px 10px;line-height:1.45}
+.lk-row .warn{color:var(--warn);text-align:right}
+.lk-phases{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--text-2);background:var(--bg-3);border-radius:8px;padding:8px 10px;margin-bottom:8px}
+.lk-phases b{color:var(--text);font-weight:600}
+.lk-phases b.bad{color:var(--danger)}
+.lk-good{font-size:12px;color:#34d399;background:rgba(52,211,153,.08);border-radius:8px;padding:8px 10px;line-height:1.45}
 .ai-btn svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ai-pop{position:absolute;right:56px;bottom:calc(100% + 8px);min-width:260px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:6px;z-index:30;animation:popIn .15s}
 .ai-pop .ai-title{font-size:11px;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;padding:6px 10px 4px}
@@ -804,6 +891,8 @@ body.resizing iframe,body.resizing video{pointer-events:none}
   <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
   <symbol id="i-block" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></symbol>
   <symbol id="i-key" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></symbol>
+  <symbol id="i-smartphone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
   <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></symbol>
   <symbol id="i-volume" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></symbol>
@@ -846,7 +935,53 @@ body.resizing iframe,body.resizing video{pointer-events:none}
       <div class="field"><label>Пароль</label><div class="pw-wrap"><input name="password" type="password" placeholder="••••••••" autocomplete="current-password" required maxlength="72"><button type="button" class="icon-btn pw-toggle"><svg class="ic sm"><use href="#i-eye"/></svg></button></div></div>
       <div class="auth-error" id="authError"></div>
       <button class="btn block" type="submit" id="loginBtn">Войти</button>
+      <div style="text-align:center;margin-top:6px"><button type="button" class="auth-link" id="forgotBtn">Забыли пароль?</button></div>
     </form>
+    <div id="tfaPane" class="hidden auth-pane">
+      <div class="auth-mail-ic" id="tfaIc"><svg class="ic"><use href="#i-mail"/></svg></div>
+      <h3>Подтвердите вход</h3>
+      <p class="md-text" id="tfaText">Мы отправили 6-значный код на <b id="tfaMail"></b>. Введите его, чтобы войти.</p>
+      <div id="tfaRc" class="rc-box"></div>
+      <div class="field"><input id="tfaCode" class="code-input" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="6" placeholder="••••••"></div>
+      <div class="auth-error" id="tfaErr"></div>
+      <button class="btn block" id="tfaOk">Войти</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><button type="button" class="auth-link" id="tfaBack">← Назад</button><button type="button" class="auth-link" id="tfaResend">Отправить ещё раз</button></div>
+      <div class="rc-note hidden" id="tfaNote">Защищено reCAPTCHA — действуют <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Политика конфиденциальности</a> и <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Условия использования</a> Google</div>
+    </div>
+    <div id="recoverPane" class="hidden auth-pane">
+      <div class="auth-mail-ic" id="rcIc"><svg class="ic"><use href="#i-mail"/></svg></div>
+      <h3>Восстановление пароля</h3>
+      <div id="rcStep1">
+        <p class="md-text">Введите логин — пришлём код на привязанную почту или телефон.</p>
+        <div class="field"><label>Логин</label><input id="rcUser" maxlength="24" autocomplete="username" placeholder="например, ivan"></div>
+        <div class="auth-error" id="rcErr1"></div>
+        <button class="btn block" id="rcSend">Далее</button>
+      </div>
+      <div id="rcMethod" class="hidden">
+        <p class="md-text">Куда отправить код?</p>
+        <button type="button" class="choice-btn" id="rcViaMail"><svg class="ic"><use href="#i-mail"/></svg><div class="rb"><div class="rt">На почту</div><div class="rs" id="rcMethodMail"></div></div></button>
+        <button type="button" class="choice-btn" id="rcViaSms"><svg class="ic"><use href="#i-smartphone"/></svg><div class="rb"><div class="rt">По SMS</div><div class="rs" id="rcMethodSms"></div></div></button>
+        <div class="auth-error" id="rcErr3"></div>
+      </div>
+      <div id="rcPhoneStep" class="hidden">
+        <p class="md-text">Введите номер, привязанный к аккаунту (<b id="rcPhoneMasked"></b>), — на него придёт SMS с кодом.</p>
+        <div class="field"><label>Номер телефона</label><input id="rcPhone" type="tel" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="+7 999 123-45-67"></div>
+        <div id="rcRc" class="rc-box"></div>
+        <div class="auth-error" id="rcErr4"></div>
+        <button class="btn block" id="rcPhoneGo">Отправить SMS</button>
+        <div class="rc-note">Защищено reCAPTCHA — действуют <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Политика конфиденциальности</a> и <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Условия использования</a> Google</div>
+      </div>
+      <div id="rcStep2" class="hidden">
+        <p class="md-text" id="rcText">Код отправлен на <b id="rcMail"></b>. Введите его и придумайте новый пароль.</p>
+        <div class="field"><input id="rcCode" class="code-input" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="6" placeholder="••••••"></div>
+        <div class="field"><label>Новый пароль</label><div class="pw-wrap"><input id="rcPw" type="password" placeholder="минимум 6 символов" minlength="6" maxlength="72" autocomplete="new-password"><button type="button" class="icon-btn pw-toggle"><svg class="ic sm"><use href="#i-eye"/></svg></button></div></div>
+        <div class="field"><label>Повторите пароль</label><input id="rcPw2" type="password" maxlength="72" autocomplete="new-password"></div>
+        <div class="auth-error" id="rcErr2"></div>
+        <button class="btn block" id="rcDone">Сменить пароль и войти</button>
+        <div style="text-align:right;margin-top:4px"><button type="button" class="auth-link" id="rcResend">Отправить ещё раз</button></div>
+      </div>
+      <div style="text-align:left;margin-top:6px"><button type="button" class="auth-link" id="rcBack">← Вернуться ко входу</button></div>
+    </div>
     <form id="registerForm" class="hidden" autocomplete="on">
       <div class="field"><label>Имя</label><input name="displayName" placeholder="Как вас называть" maxlength="32" autocomplete="name"></div>
       <div class="field"><label>Логин</label><input name="username" placeholder="латиница, цифры, . _ -" autocomplete="username" required maxlength="24"><span class="hint">2–24 символа. По нему вас найдут: @логин</span></div>
@@ -872,6 +1007,7 @@ body.resizing iframe,body.resizing video{pointer-events:none}
     </header>
     <div class="conn-status hidden" id="connStatus">Подключение…</div>
     <nav class="folders" id="folders"></nav>
+    <div id="sbHint" class="sb-hint hidden"></div>
     <div class="chat-list" id="chatList"></div>
     <div class="chat-list hidden" id="searchResults"></div>
     <button class="fab" id="btnNew" title="Написать"><svg class="ic"><use href="#i-edit"/></svg></button>
@@ -973,6 +1109,7 @@ body.resizing iframe,body.resizing video{pointer-events:none}
   <div class="call-bg" id="callBg"></div>
   <video class="call-remote" id="remoteVideo" autoplay playsinline></video>
   <div class="call-grid hidden" id="callGrid"></div>
+  <div class="tile-menu hidden" id="tileMenu"></div>
   <div class="call-top">
     <button class="icon-btn" id="callMinimize" title="Свернуть"><svg class="ic"><use href="#i-min"/></svg></button>
     <span class="enc" id="callEnc"><svg class="ic"><use href="#i-lock"/></svg>Защищённое соединение</span>
@@ -1010,6 +1147,7 @@ body.resizing iframe,body.resizing video{pointer-events:none}
 <input type="file" id="fileInputImg" accept="image/*,video/*" multiple hidden>
 <input type="file" id="restoreInput" accept="application/json,.json" hidden>
 <input type="file" id="avatarInput" accept="image/*" hidden>
+<input type="file" id="coverInput" accept="image/*" hidden>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
@@ -1113,7 +1251,7 @@ function renderText(raw, q) {
   });
   t = t.replace(/(^|[\s(>])@([\p{L}\p{N}._-]{2,24})/gu, '$1<a class="mention" data-handle="$2">@$2</a>');
   if (q) { const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?![^<]*>)', 'gi'); t = t.replace(re, '<mark>$1</mark>'); }
-  return t;
+  return emojify(t);
 }
 // одна «эмодзи-последовательность»: пиктограмма с тоном кожи/VS16 и ZWJ-цепочками, флаг (пара региональных индикаторов) или keycap
 const EMOJI_SEQ = '\\p{Extended_Pictographic}(?:\\uFE0F|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:\\uFE0F|\\p{Emoji_Modifier})?)*|\\p{Regional_Indicator}{2}|[#*0-9]\\uFE0F?\\u20E3';
@@ -1124,13 +1262,52 @@ function isEmojiOnly(s) {
   const n = (t.match(EMOJI_SEQ_RE) || []).length;
   return n > 0 && n <= 3;
 }
+/* ---------- статичные картинки эмодзи (Noto Emoji) для систем, где шрифт рисует квадратики ---------- */
+const Emo = (() => {
+  const cache = new Map(); let ctx, tofu; const W = 26;
+  const sid = (g) => Array.from(g).map((c) => c.codePointAt(0).toString(16)).filter((h) => h !== 'fe0f').map((h) => h.padStart(4, '0')).join('_');
+  function init() {
+    ctx = null;
+    try {
+      const c = document.createElement('canvas'); c.width = c.height = W; const x = c.getContext('2d', { willReadFrequently: true });
+      x.font = '20px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla","EmojiOne Color","Android Emoji",sans-serif'; x.textBaseline = 'top'; ctx = x; tofu = sig('\u{10FFFE}');
+    } catch { ctx = null; }
+  }
+  function sig(g) {
+    ctx.clearRect(0, 0, W, W); ctx.fillStyle = '#000'; ctx.fillText(g, 0, 0);
+    const d = ctx.getImageData(0, 0, W, W).data; let any = 0, col = 0, h = 0;
+    for (let i = 0; i < d.length; i += 4) { const a = d[i + 3]; if (!a) continue; any++; if (d[i] !== d[i + 1] || d[i + 1] !== d[i + 2]) col++; h = (h * 31 + (i >> 2) * a) | 0; }
+    return { any, col, h };
+  }
+  // Поддерживает ли системный шрифт эмодзи (цветной глиф, не «тофу», ZWJ-цепочка слиплась в один знак)
+  function supported(g) {
+    if (cache.has(g)) return cache.get(g);
+    if (ctx === undefined) init();
+    let ok = true;
+    if (ctx) {
+      try {
+        const x = sig(g); ok = x.any > 0 && x.col > 0 && x.h !== tofu.h;
+        if (ok && g.includes('\u200d')) ok = ctx.measureText(g).width < ctx.measureText(g.split('\u200d')[0]).width * 1.4;
+      } catch { ok = true; }
+    }
+    cache.set(g, ok); return ok;
+  }
+  const img = (g, cls = '') => `<img class="emj${cls ? ' ' + cls : ''}" src="/emoji/s/${sid(g)}.svg" alt="${g}" draggable="false" loading="lazy">`;
+  const ONE = new RegExp('^(?:' + EMOJI_SEQ + ')$', 'u');
+  // Эмодзи, которые шрифт не умеет → картинка. Текст уже экранирован (HTML), внутрь тегов не лезем
+  const IN_HTML = new RegExp('(' + EMOJI_SEQ + ')(?![^<]*>)', 'gu');
+  const fix = (html) => (html ? String(html).replace(IN_HTML, (g) => (supported(g) ? g : img(g))) : html);
+  const forced = (html) => (html ? String(html).replace(IN_HTML, (g) => img(g)) : html);
+  return { supported, img, fix, forced, sid, isOne: (t) => ONE.test(String(t || '')), stats: () => { let bad = 0; for (const v of cache.values()) if (!v) bad++; return { checked: cache.size, missing: bad }; } };
+})();
+const emojify = (html) => Emo.fix(html);
 /* ---------- анимированные эмодзи (Google Noto Animated Emoji, CC BY 4.0) ---------- */
 const ANIM_EMOJI_IDS = '1f600 1f603 1f604 1f601 1f606 1f605 1f602 1f923 1f62d 1f609 1f617 1f619 1f61a 1f618 1f970 1f60d 1f929 1f973 1fae0 1f643 1f642 1f972 1f979 1f60a 263a_fe0f 1f60c 1f642_200d_2195_fe0f 1f642_200d_2194_fe0f 1f60f 1f924 1f60b 1f61b 1f61d 1f61c 1f92a 1faea 1f614 1f97a 1f62c 1f611 1f610 1f636 1f636_200d_1f32b_fe0f 1fae5 1f910 1fae1 1f914 1f92b 1fae2 1f92d 1f971 1f917 1fae3 1f631 1f928 1f9d0 1f612 1f644 1f62e_200d_1f4a8 1f624 1f620 1f621 1f92c 1f61e 1f613 1f61f 1f625 1f622 2639_fe0f 1f641 1fae4 1f615 1f630 1f628 1f627 1f626 1f62e 1f62f 1f632 1f633 1f92f 1f616 1f623 1f629 1f62b 1f635 1f635_200d_1f4ab 1fae8 1f974 1f975 1f976 1f922 1f92e 1fae9 1f634 1f62a 1f927 1f912 1f915 1f637 1f925 1f607 1f920 1f911 1f913 1f60e 1f978 1f921 1f4a9 1f608 1f47f 1f47b 1f480 1f916 1f479 2603_fe0f 26c4 1f47d 1f47e 1f31a 1f31d 1f31e 1f31b 1f31c 1f63a 1f638 1f639 1f63b 1f63c 1f63d 1f640 1f63f 1f63e 1f648 1f649 1f64a 2b50 1f31f 2728 26a1 1f4a5 1faef 1f573_fe0f 1f525 1f4af 1f389 1f38a 2764_fe0f 1f9e1 1f49b 1f49a 1fa75 1f499 1f49c 1f90e 1f5a4 1fa76 1f90d 1fa77 1f498 1f49d 1f496 1f497 1f493 1f49e 1f495 1f48c 1f49f 2665_fe0f 2763_fe0f 2764_fe0f_200d_1fa79 1f494 2764_fe0f_200d_1f525 1f48b 1fac2 1f5e3_fe0f 1f463 1fac6 1f9e0 1fac0 1fa78 1f9a0 1f9b4 1f440 1f441_fe0f 1fae6 1f443 1f443_1f3fb 1f443_1f3fc 1f443_1f3fd 1f443_1f3fe 1f443_1f3ff 1f442 1f442_1f3fb 1f442_1f3fc 1f442_1f3fd 1f442_1f3fe 1f442_1f3ff 1f9bb 1f9bb_1f3fb 1f9bb_1f3fc 1f9bb_1f3fd 1f9bb_1f3fe 1f9bb_1f3ff 1f9b6 1f9b6_1f3fb 1f9b6_1f3fc 1f9b6_1f3fd 1f9b6_1f3fe 1f9b6_1f3ff 1f9b5 1f9b5_1f3fb 1f9b5_1f3fc 1f9b5_1f3fd 1f9b5_1f3fe 1f9b5_1f3ff 1f9bf 1f9be 1f4aa 1f4aa_1f3fb 1f4aa_1f3fc 1f4aa_1f3fd 1f4aa_1f3fe 1f4aa_1f3ff 1f44f 1f44f_1f3fb 1f44f_1f3fc 1f44f_1f3fd 1f44f_1f3fe 1f44f_1f3ff 1f44d 1f44d_1f3fb 1f44d_1f3fc 1f44d_1f3fd 1f44d_1f3fe 1f44d_1f3ff 1f44e 1f44e_1f3fb 1f44e_1f3fc 1f44e_1f3fd 1f44e_1f3fe 1f44e_1f3ff 1faf6 1faf6_1f3fb 1faf6_1f3fc 1faf6_1f3fd 1faf6_1f3fe 1faf6_1f3ff 1f64c 1f64c_1f3fb 1f64c_1f3fc 1f64c_1f3fd 1f64c_1f3fe 1f64c_1f3ff 1f450 1f450_1f3fb 1f450_1f3fc 1f450_1f3fd 1f450_1f3fe 1f450_1f3ff 1f932 1f932_1f3fb 1f932_1f3fc 1f932_1f3fd 1f932_1f3fe 1f932_1f3ff 1f91c 1f91c_1f3fb 1f91c_1f3fc 1f91c_1f3fd 1f91c_1f3fe 1f91c_1f3ff 1f91b 1f91b_1f3fb 1f91b_1f3fc 1f91b_1f3fd 1f91b_1f3fe 1f91b_1f3ff 270a 270a_1f3fb 270a_1f3fc 270a_1f3fd 270a_1f3fe 270a_1f3ff 1f44a 1f44a_1f3fb 1f44a_1f3fc 1f44a_1f3fd 1f44a_1f3fe 1f44a_1f3ff 1faf3 1faf3_1f3fb 1faf3_1f3fc 1faf3_1f3fd 1faf3_1f3fe 1faf3_1f3ff 1faf4 1faf4_1f3fb 1faf4_1f3fc 1faf4_1f3fd 1faf4_1f3fe 1faf4_1f3ff 1faf1 1faf1_1f3fb 1faf1_1f3fc 1faf1_1f3fd 1faf1_1f3fe 1faf1_1f3ff 1faf2 1faf2_1f3fb 1faf2_1f3fc 1faf2_1f3fd 1faf2_1f3fe 1faf2_1f3ff 1faf8 1faf8_1f3fb 1faf8_1f3fc 1faf8_1f3fd 1faf8_1f3fe 1faf8_1f3ff 1faf7 1faf7_1f3fb 1faf7_1f3fc 1faf7_1f3fd 1faf7_1f3fe 1faf7_1f3ff 1f44b 1f44b_1f3fb 1f44b_1f3fc 1f44b_1f3fd 1f44b_1f3fe 1f44b_1f3ff 1f91a 1f91a_1f3fb 1f91a_1f3fc 1f91a_1f3fd 1f91a_1f3fe 1f91a_1f3ff 1f590_fe0f 1f590_1f3fb 1f590_1f3fc 1f590_1f3fd 1f590_1f3fe 1f590_1f3ff 270b 270b_1f3fb 270b_1f3fc 270b_1f3fd 270b_1f3fe 270b_1f3ff 1f596 1f596_1f3fb 1f596_1f3fc 1f596_1f3fd 1f596_1f3fe 1f596_1f3ff 1f91f 1f91f_1f3fb 1f91f_1f3fc 1f91f_1f3fd 1f91f_1f3fe 1f91f_1f3ff 1f918 1f918_1f3fb 1f918_1f3fc 1f918_1f3fd 1f918_1f3fe 1f918_1f3ff 270c_fe0f 270c_1f3fb 270c_1f3fc 270c_1f3fd 270c_1f3fe 270c_1f3ff 1f91e 1f91e_1f3fb 1f91e_1f3fc 1f91e_1f3fd 1f91e_1f3fe 1f91e_1f3ff 1faf0 1faf0_1f3fb 1faf0_1f3fc 1faf0_1f3fd 1faf0_1f3fe 1faf0_1f3ff 1f919 1f919_1f3fb 1f919_1f3fc 1f919_1f3fd 1f919_1f3fe 1f919_1f3ff 1f90c 1f90c_1f3fb 1f90c_1f3fc 1f90c_1f3fd 1f90c_1f3fe 1f90c_1f3ff 1f90f 1f90f_1f3fb 1f90f_1f3fc 1f90f_1f3fd 1f90f_1f3fe 1f90f_1f3ff 1f44c 1f44c_1f3fb 1f44c_1f3fc 1f44c_1f3fd 1f44c_1f3fe 1f44c_1f3ff 1faf5 1faf5_1f3fb 1faf5_1f3fc 1faf5_1f3fd 1faf5_1f3fe 1faf5_1f3ff 1f449 1f449_1f3fb 1f449_1f3fc 1f449_1f3fd 1f449_1f3fe 1f449_1f3ff 1f448 1f448_1f3fb 1f448_1f3fc 1f448_1f3fd 1f448_1f3fe 1f448_1f3ff 261d_fe0f 261d_1f3fb 261d_1f3fc 261d_1f3fd 261d_1f3fe 261d_1f3ff 1f446 1f446_1f3fb 1f446_1f3fc 1f446_1f3fd 1f446_1f3fe 1f446_1f3ff 1f447 1f447_1f3fb 1f447_1f3fc 1f447_1f3fd 1f447_1f3fe 1f447_1f3ff 1f595 1f595_1f3fb 1f595_1f3fc 1f595_1f3fd 1f595_1f3fe 1f595_1f3ff 270d_fe0f 270d_1f3fb 270d_1f3fc 270d_1f3fd 270d_1f3fe 270d_1f3ff 1f933 1f933_1f3fb 1f933_1f3fc 1f933_1f3fd 1f933_1f3fe 1f933_1f3ff 1f64f 1f64f_1f3fb 1f64f_1f3fc 1f64f_1f3fd 1f64f_1f3fe 1f64f_1f3ff 1f485 1f485_1f3fb 1f485_1f3fc 1f485_1f3fd 1f485_1f3fe 1f485_1f3ff 1f91d 1f91d_1f3fb 1faf1_1f3fb_200d_1faf2_1f3fc 1faf1_1f3fb_200d_1faf2_1f3fd 1faf1_1f3fb_200d_1faf2_1f3fe 1faf1_1f3fb_200d_1faf2_1f3ff 1faf1_1f3fc_200d_1faf2_1f3fb 1f91d_1f3fc 1faf1_1f3fc_200d_1faf2_1f3fd 1faf1_1f3fc_200d_1faf2_1f3fe 1faf1_1f3fc_200d_1faf2_1f3ff 1faf1_1f3fd_200d_1faf2_1f3fb 1faf1_1f3fd_200d_1faf2_1f3fc 1f91d_1f3fd 1faf1_1f3fd_200d_1faf2_1f3fe 1faf1_1f3fd_200d_1faf2_1f3ff 1faf1_1f3fe_200d_1faf2_1f3fb 1faf1_1f3fe_200d_1faf2_1f3fc 1faf1_1f3fe_200d_1faf2_1f3fd 1f91d_1f3fe 1faf1_1f3fe_200d_1faf2_1f3ff 1faf1_1f3ff_200d_1faf2_1f3fb 1faf1_1f3ff_200d_1faf2_1f3fc 1faf1_1f3ff_200d_1faf2_1f3fd 1faf1_1f3ff_200d_1faf2_1f3fe 1f91d_1f3ff 1fa82 1fac8 1f483 1f483_1f3fb 1f483_1f3fc 1f483_1f3fd 1f483_1f3fe 1f483_1f3ff 1f490 1f339 1f940 1f337 1fab7 1f338 1fabb 1f33c 1f342 1f341 1f344 1f33f 1f331 1f343 1f340 1f335 1fabe 1f332 1faa8 1f6d8 1f30b 1f3de_fe0f 1f305 1f304 1f30a 1f32c_fe0f 2744_fe0f 1f300 1f32a_fe0f 1f308 1f4a7 2601_fe0f 1f327_fe0f 1f329_fe0f 26c5 1fa90 1f30d 1f30e 1f30f 1f30c 2604_fe0f 1f981 1f43a 1f43b 1f43c 1f98a 1f42e 1f984 1f98e 1f409 1f996 1f995 1f422 1f40a 1f40d 1f438 1f407 1f400 1f429 1f415 1f9ae 1f415_200d_1f9ba 1f416 1f40e 1facf 1f402 1f410 1f9a5 1f998 1f405 1f412 1f98d 1f9a7 1f43f_fe0f 1f99d 1f994 1f9a6 1f987 1f426 1f426_200d_2b1b 1f413 1f423 1f424 1f425 1f985 1f989 1f54a_fe0f 1fabf 1f9a9 1f99a 1f426_200d_1f525 1f427 1f9ad 1f988 1facd 1f42c 1f433 1f41f 1f421 1f99e 1f980 1f419 1fabc 1fae7 1f982 1f577_fe0f 1f40c 1f41c 1f997 1f99f 1fab3 1fab0 1f41d 1f41e 1f98b 1f41b 1fab1 1f43e 1f353 1f352 1f34e 1f345 1f349 1f34a 1f955 1f96d 1f34d 1f33d 1f34b 1f348 1f350 1fadb 1f96c 1fad1 1f95d 1f951 1f966 1f952 1fad0 1f347 1fadc 1f954 1f9c5 1fada 1f9c4 1fad8 1f35e 1f95e 1f373 1f9c0 1f953 1f357 1f354 1f32d 1f968 1f355 1f32e 1f32f 1f35d 1f957 1f35c 1f362 1f361 1f368 1f366 1f967 1f369 1f36a 1f9c2 1f37f 1f9cb 1f9c3 1f37c 1f375 2615 1fad6 1f9c9 1f37b 1f942 1f37e 1f377 1fad7 1f379 1f962 1f37d_fe0f 1f6d1 1f6a7 1f6a8 26fd 1f6df 2693 1f6a6 1f6b2 1f3cd_fe0f 1f697 1f69a 1f69c 1f3ce_fe0f 1f695 1f68c 1f682 26f5 1f6f6 1f6f8 1f680 2708_fe0f 1f6eb 1f6ec 1f3a2 1f3a1 1f3a0 1f5ff 1f3da_fe0f 1f3e0 1f3d5_fe0f 1f307 1f388 1f382 1f381 1f386 1fa94 1fa85 1faa9 1f947 1f948 1f949 1f3c6 26bd 26be 1f94e 1f3c0 1f3c9 1f3be 1f3f8 1f94d 1f3cf 1f3d1 1f3d2 1f3bf 26f8_fe0f 1f6fc 1fa70 1f6f9 26f3 1f3af 1f94f 1fa83 1fa81 1f3a3 1f94b 1f3b1 1f3d3 1f3b3 265f_fe0f 1f3b2 1f3b0 1fa84 1f4f7 1f4f8 1fadf 1f3b7 1f3ba 1fa8a 1f3b8 1fa95 1f3bb 1fa89 1f941 1fa87 1f4fa 1f39e_fe0f 1f3ac 1f3ad 1f39f_fe0f 1f4df 1f50c 1f50b 1faab 1f4bf 1f4bb 1f5a8_fe0f 1fa8e 1fa99 1f48e 1f4b8 2696_fe0f 1f6d2 1f4a1 1f9f9 1f9e6 1f393 1f451 1f48d 1faad 2602_fe0f 1f460 1f45f 1f321_fe0f 1fa7a 1f6e0_fe0f 1fa8f 2699_fe0f 26d3_fe0f_200d_1f4a5 26d3_fe0f 1f587_fe0f 2702_fe0f 270f_fe0f 1f4da 1f4ca 1f4c8 1f4c9 1f5d1_fe0f 1f4e6 1f5f3_fe0f 23f0 231b 23f3 1f6ce_fe0f 1f514 1f4e3 1f50e 1f52e 1f4a3 1faa4 1f512 2660_fe0f 2648 2649 264a 264b 264c 264d 264e 264f 2650 2651 2652 2653 26ce 1f5ef_fe0f 1f4ac 2757 2753 2049_fe0f 203c_fe0f 274c 1f198 2668_fe0f 1f4f4 2622_fe0f 2623_fe0f 26a0_fe0f 2705 1f195 1f193 1f199 1f197 1f192 1f6ae 262e_fe0f 262f_fe0f 267e_fe0f 1f3b6 2795 a9_fe0f ae_fe0f 2122_fe0f 1f3c1 1f6a9 1f3f4 1f3f3_fe0f';
 const AnimEmoji = (() => {
   const IDS = new Set(ANIM_EMOJI_IDS.split(' '));
   const GRAPHEME = new RegExp(EMOJI_SEQ + '|\\s+|.', 'gsu');
   let on = localStorage.getItem('nm_anim_emoji') !== '0';
-  let lib = null, libP = null, broken = false;
+  let lib = null, libP = null, broken = false, lastErr = '', loaded = 0, failed = 0;
   const cache = new Map(); // id → Promise<string|null> (JSON анимации текстом; парсится на каждый экземпляр)
   const live = new Set();
   const vis = 'IntersectionObserver' in window ? new IntersectionObserver((ents) => { for (const e of ents) { const a = e.target._anim; if (!a) continue; if (e.isIntersecting) a.play(); else a.pause(); } }) : null;
@@ -1149,7 +1326,7 @@ const AnimEmoji = (() => {
     const n = emo.length; if (!n || n > 3) return null;
     const px = size || (n === 1 ? 128 : n === 2 ? 96 : 76);
     let anim = 0;
-    const html = emo.map((g) => { const id = idOf(g); if (!id) return `<span class="aemoji-st" style="font-size:${Math.round(px * 0.78)}px">${esc(g)}</span>`; anim++; return `<span class="aemoji" data-eid="${id}" style="width:${px}px;height:${px}px;font-size:${Math.round(px * 0.78)}px"><span class="aemoji-txt">${esc(g)}</span></span>`; }).join('');
+    const html = emo.map((g) => { const id = idOf(g); if (!id) return `<span class="aemoji-st" style="font-size:${Math.round(px * 0.78)}px">${emojify(esc(g))}</span>`; anim++; return `<span class="aemoji" data-eid="${id}" style="width:${px}px;height:${px}px;font-size:${Math.round(px * 0.78)}px"><span class="aemoji-txt">${emojify(esc(g))}</span></span>`; }).join('');
     return anim ? { html, n, px, all: anim === n } : null;
   }
   function loadLib() {
@@ -1158,14 +1335,14 @@ const AnimEmoji = (() => {
     libP = new Promise((resolve) => {
       if (window.lottie) { lib = window.lottie; return resolve(lib); }
       const sc = document.createElement('script'); sc.src = '/vendor/lottie.js';
-      sc.onload = () => { lib = window.lottie || null; if (!lib) broken = true; resolve(lib); };
-      sc.onerror = () => { broken = true; resolve(null); };
+      sc.onload = () => { lib = window.lottie || null; if (!lib) { broken = true; lastErr = 'lottie.js загрузился, но библиотека не найдена'; } resolve(lib); };
+      sc.onerror = () => { broken = true; lastErr = 'не удалось загрузить /vendor/lottie.js'; resolve(null); };
       document.head.appendChild(sc);
     });
     return libP;
   }
   function getData(id) {
-    if (!cache.has(id)) cache.set(id, fetch('/emoji/' + id + '.json').then((r) => (r.ok ? r.text() : null)).catch(() => null));
+    if (!cache.has(id)) cache.set(id, fetch('/emoji/' + id + '.json').then((r) => { if (r.ok) { loaded++; return r.text(); } failed++; lastErr = 'анимация ' + id + ': HTTP ' + r.status; return null; }).catch((e) => { failed++; lastErr = 'анимация ' + id + ': ' + (e && e.message || 'сеть'); return null; }));
     return cache.get(id);
   }
   function drop(it) { try { it.anim.destroy(); } catch { } if (vis) vis.unobserve(it.el); it.el._anim = null; live.delete(it); }
@@ -1184,10 +1361,11 @@ const AnimEmoji = (() => {
         try {
           const anim = L.loadAnimation({ container: holder, renderer: 'svg', loop: true, autoplay: true, animationData: data, rendererSettings: { preserveAspectRatio: 'xMidYMid meet', progressiveLoad: false } });
           el._anim = anim; el.classList.add('on'); live.add({ el, anim }); if (vis) vis.observe(el);
-        } catch { holder.remove(); }
+        } catch (e) { holder.remove(); lastErr = 'lottie: ' + (e && e.message || 'ошибка'); }
       });
     }
   }
+  function diag() { return { server: !!S.animEmoji, enabled: on, lib: !!lib, broken, lastErr, loaded, failed, active: live.size, reducedMotion: !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) }; }
   // Эффект реакции: эмодзи один раз проигрывается поверх сообщения и растворяется (как в Telegram)
   function burst(target, emoji, size = 84) {
     if (!ok() || !target) return; const id = idOf(emoji); if (!id) return;
@@ -1203,7 +1381,7 @@ const AnimEmoji = (() => {
     }));
   }
   function setEnabled(v) { on = !!v; localStorage.setItem('nm_anim_emoji', on ? '1' : '0'); if (!on) for (const it of [...live]) drop(it); }
-  return { render, mount, gc, burst, setEnabled, idOf, enabled: () => on, active: () => live.size };
+  return { render, mount, gc, burst, setEnabled, idOf, diag, enabled: () => on, active: () => live.size };
 })();
 function bigTextHTML(text, q, meta, transform) {
   const big = isEmojiOnly(text);
@@ -1239,6 +1417,13 @@ const isMe = (u) => key(u) === meKey();
 const userOf = (u) => S.users.get(key(u)) || null;
 const VCHECK = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
 function vbadge(u, cls = '') { const x = typeof u === 'string' ? userOf(u) : u; return x && x.verified ? `<span class="vbadge ${cls}" title="${x.owner ? 'Владелец мессенджера' : 'Верифицированный аккаунт'}">${VCHECK}</span>` : ''; }
+// эмодзи-статус рядом с именем (как Telegram Premium): anim — живой (Lottie), иначе статичный/картинка
+function statusHTML(u, size = 18, anim = false) {
+  const x = typeof u === 'string' ? userOf(u) : u; if (!x || !x.emojiStatus || x.deleted) return '';
+  const inner = (anim && AnimEmoji.render(x.emojiStatus, size)?.html) || emojify(esc(x.emojiStatus));
+  return `<span class="estatus" title="Эмодзи-статус" style="font-size:${Math.round(size * 0.9)}px">${inner}</span>`;
+}
+function coverHTML(u) { return u && u.banner ? `<div class="ip-cover" style="background-image:url('${esc(u.banner)}')" data-view="${esc(u.banner)}" data-name="cover.jpg"></div>` : ''; }
 const displayOf = (u) => { if (!u) return ''; if (u === 'system') return 'Система'; const x = userOf(u); return x ? x.displayName || x.username : u; };
 const dmIdOf = (a, b) => { const [x, y] = [key(a), key(b)].sort(); return `dm:${x}:${y}`; };
 const secretIdOf = (a, b) => { const [x, y] = [key(a), key(b)].sort(); return `secret:${x}:${y}`; };
@@ -1265,7 +1450,7 @@ function saveDrafts() { try { localStorage.setItem('nm_drafts', JSON.stringify(S
 async function api(path, body, method = 'POST') {
   const r = await fetch(path, { method, headers: { 'Content-Type': 'application/json', ...(S.token ? { Authorization: 'Bearer ' + S.token } : {}) }, body: body ? JSON.stringify(body) : undefined });
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) { const e = new Error(j.error || 'Ошибка сервера'); if (j.needOwnerKey) e.needOwnerKey = true; throw e; }
+  if (!r.ok) { const e = new Error(j.error || 'Ошибка сервера'); if (j.needOwnerKey) e.needOwnerKey = true; e.data = j; e.status = r.status; throw e; }
   return j;
 }
 function upload(file, name, onProgress) {
@@ -1374,22 +1559,220 @@ const msgText = (m) => (m.type === 'secret' ? (typeof m._plain === 'string' ? m.
 /* ---------- auth screen ---------- */
 function showAuth(err) {
   $('#app').classList.add('hidden'); $('#auth').classList.remove('hidden');
+  authView('login');
   if (err) $('#authError').textContent = err;
 }
+/* панели экрана входа: login | register | qr | tfa (код при входе) | recover (восстановление пароля) */
+function authView(name) {
+  const tabs = ['login', 'register', 'qr'].includes(name);
+  $('#authTabs').classList.toggle('hidden', !tabs);
+  $('#loginForm').classList.toggle('hidden', name !== 'login');
+  $('#registerForm').classList.toggle('hidden', name !== 'register');
+  $('#qrPane').classList.toggle('hidden', name !== 'qr');
+  $('#tfaPane').classList.toggle('hidden', name !== 'tfa');
+  $('#recoverPane').classList.toggle('hidden', name !== 'recover');
+  if (tabs) $$('#authTabs button').forEach((x) => x.classList.toggle('active', x.dataset.tab === name));
+  try { if (name === 'qr') QRLogin.start(); else QRLogin.stop(); } catch { }
+  ['authError', 'regError', 'tfaErr', 'rcErr1', 'rcErr2'].forEach((id) => { const el = $('#' + id); if (el) el.textContent = ''; });
+}
+function countdown(btn, secs, label) {
+  if (!btn) return; clearInterval(btn._cd); let n = Math.max(0, Math.round(secs || 0));
+  const tick = () => { if (n <= 0) { btn.disabled = false; btn.textContent = label; clearInterval(btn._cd); return; } btn.disabled = true; btn.textContent = label + ' (' + n + ')'; n--; };
+  tick(); btn._cd = setInterval(tick, 1000);
+}
+const codeOf = (el) => ((el && el.value) || '').replace(/\D/g, '').slice(0, 6);
+/* ===== Телефон: Firebase Phone Auth в браузере (SMS отправляет Firebase, серверу уходит только ID-токен) ===== */
+const RC_NOTE = 'Защищено reCAPTCHA — действуют <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Политика конфиденциальности</a> и <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Условия использования</a> Google';
+function normPhoneClient(p) { let v = String(p || '').replace(/[\s\-().]/g, ''); if (/^8\d{10}$/.test(v)) v = '+7' + v.slice(1); if (/^\d{8,15}$/.test(v)) v = '+' + v; return /^\+[1-9]\d{7,14}$/.test(v) ? v : ''; }
+function maskPhoneClient(p) { p = String(p || ''); return p ? p.slice(0, 4) + '•'.repeat(Math.max(2, p.length - 6)) + p.slice(-2) : ''; }
+const Phone = {
+  cfg: null, mods: null, auth: null, rc: null, conf: null, phone: '', seq: 0, FB_VER: '12.19.0',
+  async config() { if (this.cfg) return this.cfg; try { this.cfg = await api('/api/phone/config', null, 'GET'); } catch { this.cfg = { enabled: false }; } return this.cfg; },
+  async init() {
+    const cfg = await this.config();
+    if (!cfg.enabled) throw new Error('Подтверждение по SMS не настроено на сервере');
+    if (cfg.mock) return cfg;
+    if (!this.mods) {
+      let app, auth;
+      try { [app, auth] = await Promise.all([import(`https://www.gstatic.com/firebasejs/${this.FB_VER}/firebase-app.js`), import(`https://www.gstatic.com/firebasejs/${this.FB_VER}/firebase-auth.js`)]); }
+      catch { throw new Error('Не удалось загрузить Firebase (нет доступа к gstatic.com?). Проверьте интернет и блокировщики'); }
+      const fbApp = app.getApps().length ? app.getApp() : app.initializeApp(cfg.firebase);
+      this.auth = auth.getAuth(fbApp); this.auth.languageCode = 'ru'; this.mods = { app, auth };
+    }
+    return cfg;
+  },
+  _resetRc(container) { if (this.rc) { try { this.rc.clear(); } catch { } this.rc = null; } if (container) container.innerHTML = ''; },
+  /* отправить SMS на номер в формате E.164; container — элемент, куда Firebase положит невидимую reCAPTCHA */
+  async send(phone, container) {
+    const cfg = await this.init(); this.phone = phone;
+    if (cfg.mock) { this.conf = { mock: true, phone }; return { mock: true }; }
+    if (!container) throw new Error('Нет контейнера для reCAPTCHA');
+    const { auth } = this.mods;
+    try { await auth.signOut(this.auth); } catch { }
+    this._resetRc(container);
+    const holder = document.createElement('div'); container.appendChild(holder);
+    const seq = ++this.seq;
+    try {
+      this.rc = new auth.RecaptchaVerifier(this.auth, holder, { size: 'invisible' });
+      // если пользователь закрыл окно reCAPTCHA, обещание Firebase может висеть вечно — ограничиваем ожидание
+      const conf = await Promise.race([auth.signInWithPhoneNumber(this.auth, phone, this.rc), new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('timeout'), { code: 'nm/recaptcha-timeout' })), 120000))]);
+      if (seq !== this.seq) throw Object.assign(new Error('superseded'), { code: 'nm/superseded' });
+      this.conf = conf;
+      return { ok: true };
+    } catch (e) { if (seq !== this.seq) throw Object.assign(new Error('Запрос отменён — отправлен новый'), { code: 'nm/superseded' }); console.warn('Firebase SMS', e); this._resetRc(container); throw new Error(this.errText(e)); }
+  },
+  /* проверить код → ID-токен Firebase для сервера */
+  async confirm(code) {
+    if (!this.conf) throw new Error('Сначала запросите SMS');
+    if (this.conf.mock) return 'mock:' + this.conf.phone + ':' + Math.floor(Date.now() / 1000) + ':' + code;
+    try { const cred = await this.conf.confirm(code); const tok = await cred.user.getIdToken(true); try { await this.mods.auth.signOut(this.auth); } catch { } return tok; }
+    catch (e) { console.warn('Firebase confirm', e); throw new Error(this.errText(e)); }
+  },
+  errText(e) {
+    const c = (e && e.code) || ''; const m = (e && e.message) || String(e || '');
+    if (c === 'nm/recaptcha-timeout') return 'Проверка reCAPTCHA не завершена — нажмите «Отправить» ещё раз и пройдите проверку';
+    if (/billing-not-enabled/.test(c)) return 'В проекте Firebase не включён план Blaze — Google не отправляет SMS без биллинга. Владельцу сервера: Firebase Console → Upgrade → Blaze';
+    if (/operation-not-allowed/.test(c)) return /region/i.test(m) ? 'SMS в эту страну запрещены политикой проекта Firebase. Владельцу: Authentication → Settings → SMS region policy' : 'В Firebase не включён вход по телефону. Владельцу: Authentication → Sign-in method → Phone';
+    if (/unauthorized-domain|captcha-check-failed|invalid-app-credential|missing-app-credential|unauthorized-continue-uri/.test(c)) return 'reCAPTCHA не прошла: домен сайта должен быть в Firebase → Authentication → Settings → Authorized domains. Обновите страницу и попробуйте снова';
+    if (/invalid-phone-number|missing-phone-number/.test(c)) return 'Неверный номер. Нужен международный формат: +7 999 123-45-67';
+    if (/too-many-requests|quota-exceeded/.test(c)) return 'Слишком много запросов SMS с этого устройства или номера — попробуйте позже';
+    if (/invalid-verification-code/.test(c)) return 'Неверный код из SMS';
+    if (/code-expired|session-expired/.test(c)) return 'Код устарел — запросите SMS ещё раз';
+    if (/network-request-failed/.test(c)) return 'Нет связи с серверами Google (сеть или блокировка). Проверьте интернет';
+    if (/web-storage-unsupported/.test(c)) return 'Браузер блокирует хранилище (приватный режим?) — Firebase не может работать';
+    if (/user-disabled/.test(c)) return 'Этот номер заблокирован в Firebase';
+    if (/app-not-authorized|invalid-api-key|app-deleted/.test(c)) return 'Приложение не авторизовано в Firebase — проверьте FIREBASE_API_KEY / APP_ID на сервере';
+    return (m.replace(/^Firebase:\s*/i, '').replace(/\s*\(auth\/[\w-]+\)\.?$/, '') || 'Ошибка Firebase') + (c ? ' [' + c + ']' : '');
+  },
+};
+/* второй шаг входа — код из письма или из SMS (Firebase) */
+const Auth2FA = {
+  ticket: null, method: 'email', phone: '', shown: '',
+  show(j) {
+    this.ticket = j.ticket; this.method = j.method === 'sms' ? 'sms' : 'email'; this.phone = j.phone || '';
+    this.shown = this.method === 'sms' ? (j.phoneMasked || maskPhoneClient(this.phone)) : (j.email || 'вашу почту');
+    authView('tfa'); $('#tfaCode').value = '';
+    const ic = $('#tfaIc'); ic.classList.toggle('ph', this.method === 'sms'); ic.innerHTML = `<svg class="ic"><use href="#i-${this.method === 'sms' ? 'smartphone' : 'mail'}"/></svg>`;
+    $('#tfaNote').classList.toggle('hidden', this.method !== 'sms');
+    if (this.method === 'sms') { this._text('Отправляем SMS с кодом на <b id="tfaMail"></b>…'); this.sendSms(false); }
+    else { this._text('Мы отправили 6-значный код на <b id="tfaMail"></b>. Введите его, чтобы войти.'); countdown($('#tfaResend'), j.retryIn || 45, 'Отправить ещё раз'); }
+    setTimeout(() => $('#tfaCode').focus(), 50);
+  },
+  _text(html) { $('#tfaText').innerHTML = html; $('#tfaMail').textContent = this.shown; },
+  async sendSms(again) {
+    const err = $('#tfaErr'); err.textContent = ''; const rs = $('#tfaResend'); countdown(rs, 60, 'Отправить ещё раз');
+    try { await Phone.send(this.phone, $('#tfaRc')); this._text('Код отправлен в SMS на <b id="tfaMail"></b>. Введите его, чтобы войти.'); if (again) toast('SMS отправлено повторно', 'ok'); }
+    catch (e) { if (e.code === 'nm/superseded') return; err.textContent = e.message; this._text('Не удалось отправить SMS на <b id="tfaMail"></b>.'); clearInterval(rs._cd); rs.disabled = false; rs.textContent = 'Попробовать ещё раз'; }
+  },
+  async submit() {
+    const code = codeOf($('#tfaCode')); const err = $('#tfaErr');
+    if (code.length !== 6) { err.textContent = this.method === 'sms' ? 'Введите 6 цифр из SMS' : 'Введите 6 цифр из письма'; $('#tfaCode').focus(); return; }
+    const btn = $('#tfaOk'); if (btn.disabled) return; btn.disabled = true; err.textContent = '';
+    try {
+      const body = { ticket: this.ticket };
+      if (this.method === 'sms') body.idToken = await Phone.confirm(code); else body.code = code;
+      const j = await api('/api/login/2fa', body); onLoggedIn(j);
+    }
+    catch (e) { err.textContent = e.message; $('#tfaCode').select(); if (e.data && e.data.dead) setTimeout(() => { authView('login'); $('#authError').textContent = 'Код больше не действует — войдите заново'; }, 1800); }
+    finally { btn.disabled = false; }
+  },
+  async resend() {
+    if (this.method === 'sms') return this.sendSms(true);
+    const err = $('#tfaErr'); err.textContent = '';
+    try { const j = await api('/api/login/2fa/resend', { ticket: this.ticket }); countdown($('#tfaResend'), j.retryIn || 45, 'Отправить ещё раз'); toast('Код отправлен повторно', 'ok'); }
+    catch (e) { err.textContent = e.message; if (e.data && e.data.retryIn) countdown($('#tfaResend'), e.data.retryIn, 'Отправить ещё раз'); if (e.data && e.data.dead) setTimeout(() => authView('login'), 1500); }
+  },
+};
+/* восстановление пароля — по почте или по SMS */
+const Recover = {
+  ticket: null, user: '', mode: 'email', opts: null, phone: '',
+  _step(name) { ['rcStep1', 'rcMethod', 'rcPhoneStep', 'rcStep2'].forEach((id) => $('#' + id).classList.toggle('hidden', id !== name)); ['rcErr1', 'rcErr2', 'rcErr3', 'rcErr4'].forEach((id) => { $('#' + id).textContent = ''; }); },
+  _icon(sms) { const ic = $('#rcIc'); ic.classList.toggle('ph', !!sms); ic.innerHTML = `<svg class="ic"><use href="#i-${sms ? 'smartphone' : 'mail'}"/></svg>`; },
+  open() { authView('recover'); this._step('rcStep1'); this._icon(false); this.mode = 'email'; this.opts = null; ['rcCode', 'rcPw', 'rcPw2', 'rcPhone'].forEach((id) => { $('#' + id).value = ''; }); $('#rcUser').value = ($('#loginForm').username.value || '').trim(); setTimeout(() => $('#rcUser').focus(), 50); },
+  send(resend) { return resend ? this.resend() : this.start(); },
+  async start() { // шаг 1: логин → какие способы доступны
+    const u = $('#rcUser').value.trim(); if (!u) { $('#rcUser').focus(); return; }
+    const err = $('#rcErr1'); err.textContent = ''; const btn = $('#rcSend'); btn.disabled = true;
+    try {
+      const o = await api('/api/recover/options', { username: u }); this.user = u; this.opts = o;
+      if (o.email && o.phone) { $('#rcMethodMail').textContent = o.email; $('#rcMethodSms').textContent = o.phone; this._step('rcMethod'); }
+      else if (o.phone) this.phoneStep(); else await this.sendMail(false);
+    } catch (e) { err.textContent = e.message; } finally { btn.disabled = false; }
+  },
+  phoneStep() { this.mode = 'sms'; this._icon(true); $('#rcPhoneMasked').textContent = this.opts.phone; this._step('rcPhoneStep'); $('#rcPhone').value = ''; setTimeout(() => $('#rcPhone').focus(), 50); },
+  async sendSms(again) {
+    const err = again ? $('#rcErr2') : $('#rcErr4'); err.textContent = '';
+    const btn = again ? $('#rcResend') : $('#rcPhoneGo');
+    if (!again) {
+      const p = normPhoneClient($('#rcPhone').value); if (!p) { err.textContent = 'Введите номер в международном формате, например +7 999 123-45-67'; $('#rcPhone').focus(); return; }
+      btn.disabled = true;
+      try { const j = await api('/api/recover/phone-check', { username: this.user, phone: p }); this.phone = j.phone; } catch (e) { err.textContent = e.message; btn.disabled = false; return; }
+    }
+    btn.disabled = true;
+    try {
+      await Phone.send(this.phone, $('#rcRc'));
+      this.ticket = null; this.mode = 'sms';
+      $('#rcText').innerHTML = 'Код отправлен в SMS на <b id="rcMail"></b>. Введите его и придумайте новый пароль.'; $('#rcMail').textContent = this.opts.phone;
+      this._step('rcStep2'); countdown($('#rcResend'), 60, 'Отправить ещё раз');
+      if (again) toast('SMS отправлено повторно', 'ok'); else { $('#rcCode').value = ''; setTimeout(() => $('#rcCode').focus(), 50); }
+    } catch (e) { if (e.code === 'nm/superseded') return; err.textContent = e.message; if (again) { clearInterval(btn._cd); btn.textContent = 'Отправить ещё раз'; } }
+    finally { btn.disabled = false; }
+  },
+  async sendMail(resend) {
+    const u = this.user || $('#rcUser').value.trim(); if (!u) { $('#rcUser').focus(); return; }
+    const err = resend ? $('#rcErr2') : $('#rcMethod').classList.contains('hidden') ? $('#rcErr1') : $('#rcErr3'); err.textContent = '';
+    const btn = resend ? $('#rcResend') : $('#rcSend'); btn.disabled = true;
+    try {
+      const j = await api('/api/recover/start', { username: u });
+      this.ticket = j.ticket; this.user = u; this.mode = 'email'; this._icon(false);
+      $('#rcText').innerHTML = 'Код отправлен на <b id="rcMail"></b>. Введите его и придумайте новый пароль.'; $('#rcMail').textContent = j.email;
+      this._step('rcStep2');
+      countdown($('#rcResend'), j.retryIn || 45, 'Отправить ещё раз');
+      if (resend) toast('Код отправлен повторно', 'ok'); else { $('#rcCode').value = ''; setTimeout(() => $('#rcCode').focus(), 50); }
+    } catch (e) { err.textContent = e.message; if (resend && e.data && e.data.retryIn) countdown($('#rcResend'), e.data.retryIn, 'Отправить ещё раз'); else if (resend) btn.disabled = false; }
+    finally { if (!resend) btn.disabled = false; }
+  },
+  resend() { return this.mode === 'sms' ? this.sendSms(true) : this.sendMail(true); },
+  async finish() {
+    const code = codeOf($('#rcCode')); const pw = $('#rcPw').value, pw2 = $('#rcPw2').value; const err = $('#rcErr2'); err.textContent = '';
+    if (code.length !== 6) { err.textContent = this.mode === 'sms' ? 'Введите 6 цифр из SMS' : 'Введите 6 цифр из письма'; $('#rcCode').focus(); return; }
+    if (pw.length < 6) { err.textContent = 'Пароль: минимум 6 символов'; $('#rcPw').focus(); return; }
+    if (pw !== pw2) { err.textContent = 'Пароли не совпадают'; $('#rcPw2').focus(); return; }
+    const btn = $('#rcDone'); btn.disabled = true;
+    try {
+      const body = { username: this.user, password: pw };
+      if (this.mode === 'sms') body.idToken = await Phone.confirm(code); else { body.ticket = this.ticket; body.code = code; }
+      const j = await api('/api/recover/finish', body); toast('Пароль изменён, старые сессии закрыты', 'ok'); onLoggedIn(j);
+    }
+    catch (e) { err.textContent = e.message; if (e.data && e.data.dead) this._step('rcStep1'); }
+    finally { btn.disabled = false; }
+  },
+};
+$('#forgotBtn').addEventListener('click', () => Recover.open());
+$('#tfaOk').addEventListener('click', () => Auth2FA.submit());
+$('#tfaBack').addEventListener('click', () => authView('login'));
+$('#tfaResend').addEventListener('click', () => Auth2FA.resend());
+$('#tfaCode').addEventListener('input', () => { if (codeOf($('#tfaCode')).length === 6) Auth2FA.submit(); });
+$('#tfaCode').addEventListener('keydown', (e) => { if (e.key === 'Enter') Auth2FA.submit(); });
+$('#rcSend').addEventListener('click', () => Recover.start());
+$('#rcUser').addEventListener('keydown', (e) => { if (e.key === 'Enter') Recover.start(); });
+$('#rcResend').addEventListener('click', () => Recover.resend());
+$('#rcViaMail').addEventListener('click', () => Recover.sendMail(false));
+$('#rcViaSms').addEventListener('click', () => Recover.phoneStep());
+$('#rcPhoneGo').addEventListener('click', () => Recover.sendSms(false));
+$('#rcPhone').addEventListener('keydown', (e) => { if (e.key === 'Enter') Recover.sendSms(false); });
+$('#rcDone').addEventListener('click', () => Recover.finish());
+$('#rcPw2').addEventListener('keydown', (e) => { if (e.key === 'Enter') Recover.finish(); });
+$('#rcBack').addEventListener('click', () => authView('login'));
 function logoutLocal() { S.token = ''; localStorage.removeItem('nm_token'); if (socket) { socket.disconnect(); socket = null; } S.ready = false; }
 $('#authTabs').addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b) return;
-  $$('#authTabs button').forEach((x) => x.classList.toggle('active', x === b));
-  $('#loginForm').classList.toggle('hidden', b.dataset.tab !== 'login');
-  $('#registerForm').classList.toggle('hidden', b.dataset.tab !== 'register');
-  $('#qrPane').classList.toggle('hidden', b.dataset.tab !== 'qr');
-  if (b.dataset.tab === 'qr') QRLogin.start(); else QRLogin.stop();
-  $('#authError').textContent = ''; $('#regError').textContent = '';
+  authView(b.dataset.tab);
 });
 $$('.pw-toggle').forEach((b) => b.addEventListener('click', () => { const i = b.parentElement.querySelector('input'); i.type = i.type === 'password' ? 'text' : 'password'; b.innerHTML = icon(i.type === 'password' ? 'eye' : 'eye-off', 'sm'); }));
 $('#loginForm').addEventListener('submit', async (e) => {
   e.preventDefault(); const f = e.target; const btn = $('#loginBtn'); btn.disabled = true; $('#authError').textContent = '';
-  try { const j = await api('/api/login', { username: f.username.value.trim(), password: f.password.value }); onLoggedIn(j); }
+  try { const j = await api('/api/login', { username: f.username.value.trim(), password: f.password.value }); if (j.need2fa) { Auth2FA.show(j); return; } onLoggedIn(j); }
   catch (err) { $('#authError').textContent = err.message; } finally { btn.disabled = false; }
 });
 $('#registerForm').addEventListener('submit', async (e) => {
@@ -1414,12 +1797,18 @@ function connect() {
   socket.on('connect_error', () => setConn(false));
   socket.on('auth_ok', onAuthOk);
   socket.on('auth_error', (msg) => { logoutLocal(); showAuth(msg); });
-  socket.on('users_update', (list) => { S.users = new Map(list.map((u) => [key(u.username), u])); if (S.me) { const m = userOf(S.me.username); if (m) { const wasMod = S.isMod; S.me = { ...S.me, ...m }; S.isMod = !!m.verified; S.isOwner = !!m.owner; if (wasMod !== S.isMod) { toast(S.isMod ? 'Вам выдана галочка верификации — доступна модерация' : 'Галочка верификации снята'); renderDrawer(); } } } renderChatList(); renderHeader(); renderInfoIfOpen(); });
+  socket.on('users_update', (list) => { S.users = new Map(list.map((u) => [key(u.username), u])); if (S.me) { const m = userOf(S.me.username); if (m) { const wasMod = S.isMod; S.me = { ...S.me, ...m }; S.isMod = !!m.verified; S.isOwner = !!m.owner; if (wasMod !== S.isMod) { toast(S.isMod ? 'Вам выдана галочка верификации — доступна модерация' : 'Галочка верификации снята'); renderDrawer(); } } } renderChatList(); renderHeader(); renderInfoIfOpen(); if (cur()) renderComposerState(); });
   socket.on('pubkeys_update', (pk) => { S.pubKeys = pk || {}; S.e2e.shared.clear(); const c = cur(); if (c && c.type === 'secret') { reDecrypt(c.id); renderComposerState(); } });
   socket.on('conversation_upsert', (c) => { const prev = S.convs.get(c.id); S.convs.set(c.id, c); renderChatList(); renderFolders(); if (S.current === c.id) { renderHeader(); renderComposerState(); if (!prev || JSON.stringify(prev.readAt) !== JSON.stringify(c.readAt)) refreshTicks(); } updateTitle(); renderInfoIfOpen(); });
   socket.on('conversation_removed', (d) => { const id = typeof d === 'string' ? d : d && d.id; if (!id) return; const c = S.convs.get(id); S.convs.delete(id); S.msgs.delete(id); if (S.current === id) closeChat(); renderChatList(); renderFolders(); updateTitle(); if (d && d.reason === 'moderation' && c) toast(`${c.type === 'channel' ? 'Канал' : 'Группа'} «${c.name}» удалён(а) модерацией`); });
   socket.on('mod_list_ok', (d) => { S.modData = d; if (Modal.isOpen() && Settings.tab === 'mod') Settings.render(); });
-  socket.on('mod_ok', (d) => { const t = { ban: 'Пользователь заблокирован в мессенджере', unban: 'Пользователь разблокирован', verify: 'Галочка выдана', unverify: 'Галочка снята', delete_conversation: 'Чат удалён' }; toast(t[d.type] || 'Готово', 'ok'); if (S.isMod) socket.emit('mod_list'); });
+  socket.on('email_code_sent', (d) => EmailFlow.onSent(d));
+  socket.on('email_error', (d) => EmailFlow.onError(d));
+  socket.on('email_ok', (d) => EmailFlow.onOk(d));
+  socket.on('phone_error', (d) => PhoneFlow.onError(d));
+  socket.on('phone_ok', (d) => PhoneFlow.onOk(d));
+  socket.on('account_deleted', () => { toast('Аккаунт удалён. До встречи!', 'ok'); setTimeout(() => { logoutLocal(); showAuth('Аккаунт удалён'); }, 400); });
+  socket.on('mod_ok', (d) => { const t = { ban: 'Пользователь заблокирован в мессенджере', unban: 'Пользователь разблокирован', verify: 'Галочка выдана', unverify: 'Галочка снята', delete_conversation: 'Чат удалён', ban_ip: 'IP-адрес ' + (d.ip || '') + ' заблокирован', unban_ip: 'IP-адрес ' + (d.ip || '') + ' разблокирован', delete_account: 'Аккаунт @' + (d.user || '') + ' удалён' }; toast(t[d.type] || 'Готово', 'ok'); if (S.isMod) socket.emit('mod_list'); });
   socket.on('history', onHistory);
   socket.on('history_more', onHistoryMore);
   socket.on('force_reload', () => { toast('Данные сервера обновлены — перезагрузка…'); setTimeout(() => location.reload(), 1200); });
@@ -1450,9 +1839,9 @@ async function onAuthOk(d) {
   S.convs = new Map(d.conversations.map((c) => [c.id, c]));
   S.livekit = !!d.livekit; S.settings = d.settings || {}; S.blocked = new Set((d.blocked || []).map(key));
   S.pubKeys = d.pubKeys || {}; S.textMax = d.textMax || 4000; S.folders = d.folders || []; S.bots = d.bots || [];
-  S.ai = d.ai || { llm: false, actions: ['fix'] }; S.isMod = !!d.isMod; S.isOwner = !!d.isOwner; S.animEmoji = !!d.animEmoji;
+  S.ai = d.ai || { llm: false, actions: ['fix'] }; S.isMod = !!d.isMod; S.isOwner = !!d.isOwner; S.animEmoji = !!d.animEmoji; S.mail = !!d.mail; S.phone = !!d.phone;
   S.ready = true;
-  applySettings(); renderDrawer(); renderFolders(); renderChatList(); updateTitle();
+  applySettings(); renderDrawer(); renderFolders(); renderChatList(); updateTitle(); renderSbHint();
   await E2E.init().catch((e) => console.warn('E2E init', e));
   if (S.current) { if (S.convs.has(S.current)) { socket.emit('get_history', S.current); renderHeader(); renderComposerState(); } else closeChat(); }
   const p = new URLSearchParams(location.search); const start = p.get('start');
@@ -1603,7 +1992,7 @@ function sortedConvs(all = false) {
 function lastPreview(c) {
   const tu = typingUsers(c.id);
   if (tu.length) return `<span class="typing">${c.type === 'dm' || c.type === 'secret' ? 'печатает' : esc(displayOf(tu[0])) + ' печатает'}<span class="typing-dots"><i></i><i></i><i></i></span></span>`;
-  const d = S.drafts[c.id]; if (d && S.current !== c.id) return `<span class="draft">Черновик:</span> ${esc(d)}`;
+  const d = S.drafts[c.id]; if (d && S.current !== c.id) return `<span class="draft">Черновик:</span> ${emojify(esc(d))}`;
   const lm = c.lastMessage; if (!lm) return '<span class="dim">Нет сообщений</span>';
   let text = lm.text || '';
   if (/^📎 Голосовое сообщение/.test(text)) text = '🎤 Голосовое сообщение';
@@ -1622,7 +2011,7 @@ function chatItemHTML(c, extraCls = '') {
   return `<div class="chat-item ${S.current === c.id ? 'active' : ''} ${extraCls}" data-id="${esc(c.id)}">
     ${avatarHTML(av, 54)}
     <div class="body">
-      <div class="row"><div class="name">${typeIc}<span style="overflow:hidden;text-overflow:ellipsis">${esc(convTitle(c))}</span>${c.type === 'dm' || c.type === 'secret' ? vbadge(peerOf(c), 'sm') : ''}${c.muted ? icon('bell-off', 'mute-ic') : ''}</div><div class="time">${status}${lm ? fmtListTime(lm.ts) : ''}</div></div>
+      <div class="row"><div class="name">${typeIc}<span style="overflow:hidden;text-overflow:ellipsis">${esc(convTitle(c))}</span>${c.type === 'dm' || c.type === 'secret' ? statusHTML(peerOf(c), 15) + vbadge(peerOf(c), 'sm') : ''}${c.muted ? icon('bell-off', 'mute-ic') : ''}</div><div class="time">${status}${lm ? fmtListTime(lm.ts) : ''}</div></div>
       <div class="row"><div class="sub">${lastPreview(c)}</div>${right}</div>
     </div></div>`;
 }
@@ -1652,7 +2041,7 @@ function renderSearchResults() {
   const convs = [...S.convs.values()].filter((c) => key(convTitle(c)).includes(qh) || key(c.handle || '').includes(qh) || key(peerOf(c) || '').includes(qh));
   if (convs.length) h += `<div class="list-title">Чаты</div>` + convs.slice(0, 20).map((c) => chatItemHTML(c)).join('');
   const inConv = new Set(convs.filter((c) => c.type === 'dm').map((c) => key(peerOf(c))));
-  const users = [...S.users.values()].filter((u) => !isMe(u.username) && !inConv.has(key(u.username)) && (key(u.username).includes(qh) || key(u.displayName).includes(qh)));
+  const users = [...S.users.values()].filter((u) => !isMe(u.username) && !u.deleted && !inConv.has(key(u.username)) && (key(u.username).includes(qh) || key(u.displayName).includes(qh)));
   if (users.length) h += `<div class="list-title">Люди и боты</div>` + users.slice(0, 20).map((u) => `<div class="chat-item" data-user="${esc(u.username)}">${avatarHTML({ ...u, name: u.displayName, online: u.online && !u.isBot }, 54)}<div class="body"><div class="row"><div class="name">${u.isBot ? icon('bot') : ''}<span>${esc(u.displayName)}</span>${vbadge(u, 'sm')}</div></div><div class="row"><div class="sub">@${esc(u.username)} · ${fmtLastSeen(u)}</div></div></div></div>`).join('');
   if (qh.length >= 2 && !S.users.has(qh)) h += `<div class="list-title">По имени</div><div class="chat-item" data-handle="${esc(qh)}"><div class="avatar" style="width:54px;height:54px;background:var(--surface);color:var(--accent)">${icon('at')}</div><div class="body"><div class="row"><div class="name">Открыть @${esc(qh)}</div></div><div class="row"><div class="sub">Канал, группа или пользователь</div></div></div></div>`;
   if (qh.length >= 2) {
@@ -1721,9 +2110,13 @@ function headerStatus(c) {
 }
 function renderHeader() {
   const c = cur(); if (!c) return;
-  const st = headerStatus(c);
-  $('#chatTitle').innerHTML = `${avatarHTML(convAvatarObj(c), 42)}<div class="ct-text"><div class="ct-name">${c.type === 'secret' ? icon('lock') : ''}<span style="overflow:hidden;text-overflow:ellipsis">${esc(convTitle(c))}</span>${c.type === 'dm' || c.type === 'secret' ? vbadge(peerOf(c)) : ''}${c.muted ? icon('bell-off', 'sm') : ''}</div><div class="ct-status ${/typing/.test(st) ? 'typing' : /online/.test(st) ? 'online' : ''}">${st}</div></div>`;
-  const canCall = c.type === 'dm' && !userOf(peerOf(c))?.isBot || c.type === 'group';
+  const st = headerStatus(c); const el = $('#chatTitle');
+  const stCls = `ct-status ${/typing/.test(st) ? 'typing' : /online/.test(st) ? 'online' : ''}`;
+  const head = `${avatarHTML(convAvatarObj(c), 42)}<div class="ct-text"><div class="ct-name">${c.type === 'secret' ? icon('lock') : ''}<span style="overflow:hidden;text-overflow:ellipsis">${esc(convTitle(c))}</span>${c.type === 'dm' || c.type === 'secret' ? statusHTML(peerOf(c), 20, true) + vbadge(peerOf(c)) : ''}${c.muted ? icon('bell-off', 'sm') : ''}</div>`;
+  // имя/аватар/статус-эмодзи перерисовываем только при изменении — иначе анимированный статус дёргался бы при каждом «печатает…»
+  if (el.dataset.head === c.id + head) { const sEl = el.querySelector('.ct-status'); if (sEl) { sEl.className = stCls; sEl.innerHTML = st; } }
+  else { el.dataset.head = c.id + head; el.innerHTML = `${head}<div class="${stCls}">${st}</div></div>`; AnimEmoji.mount(el); }
+  const canCall = (c.type === 'dm' && !userOf(peerOf(c))?.isBot && !userOf(peerOf(c))?.deleted) || c.type === 'group';
   $('#btnCall').classList.toggle('hidden', !canCall); $('#btnVideo').classList.toggle('hidden', !canCall);
 }
 $('#chatTitle').addEventListener('click', () => toggleInfo(true));
@@ -1750,7 +2143,7 @@ function replyPreview(r, convId) {
 }
 function reactionsHTML(m) {
   const r = m.reactions || {}; const keys = Object.keys(r); if (!keys.length) return '';
-  return `<div class="reactions">${keys.map((e) => `<span class="react ${r[e].some(isMe) ? 'mine' : ''}" data-emoji="${esc(e)}" title="${esc(r[e].map(displayOf).join(', '))}">${esc(e)} ${r[e].length}</span>`).join('')}</div>`;
+  return `<div class="reactions">${keys.map((e) => `<span class="react ${r[e].some(isMe) ? 'mine' : ''}" data-emoji="${esc(e)}" title="${esc(r[e].map(displayOf).join(', '))}">${emojify(esc(e))} ${r[e].length}</span>`).join('')}</div>`;
 }
 function fileBody(m) {
   const f = m.file; const mime = f.mime || '';
@@ -2024,6 +2417,7 @@ function renderComposerState() {
   const notice = $('#composerNotice'), comp = $('#composer');
   let msg = '';
   if (c.type === 'channel' && !c.canPost) msg = `Только администраторы могут писать в канал <button data-n="mute">${c.muted ? 'Включить уведомления' : 'Выключить уведомления'}</button>`;
+  else if ((c.type === 'dm' || c.type === 'secret') && userOf(peerOf(c))?.deleted) msg = `${icon('user', 'sm')} Собеседник удалил аккаунт — писать ему больше нельзя`;
   else if ((c.type === 'dm' || c.type === 'secret') && S.blocked.has(key(peerOf(c)))) msg = `Вы заблокировали пользователя <button data-n="unblock">Разблокировать</button>`;
   else if (c.type === 'secret' && !S.pubKeys[key(peerOf(c))]) msg = `${icon('lock', 'sm')} Собеседник ещё не заходил в NMessenger — ключ шифрования появится после его входа`;
   notice.innerHTML = msg; notice.classList.toggle('hidden', !msg); comp.classList.toggle('hidden', !!msg);
@@ -2225,7 +2619,7 @@ function hideCtx() { ctxEl.classList.add('hidden'); ctxEl.innerHTML = ''; ctxEl.
 function closeAllPopups() { hideCtx(); $('#emojiPicker').classList.add('hidden'); $('#newMenu').classList.add('hidden'); $('#cmdPop').classList.add('hidden'); $('#aiPop').classList.add('hidden'); $('#attPop').classList.add('hidden'); $('#callSettings').classList.add('hidden'); }
 document.addEventListener('pointerdown', (e) => {
   if (!ctxEl.contains(e.target)) hideCtx();
-  if (!$('#emojiPicker').contains(e.target) && !e.target.closest('#btnEmoji')) $('#emojiPicker').classList.add('hidden');
+  if (!$('#emojiPicker').contains(e.target) && !e.target.closest('#btnEmoji') && !e.target.closest('[data-pick-emoji]')) { $('#emojiPicker').classList.add('hidden'); if (epPick) { epPick = null; $('#emojiPicker').style.zIndex = ''; } }
   if (!$('#newMenu').contains(e.target) && !e.target.closest('#btnNew')) $('#newMenu').classList.add('hidden');
   if (!$('#cmdPop').contains(e.target) && !e.target.closest('#btnCmds') && e.target !== input) $('#cmdPop').classList.add('hidden');
   if (!$('#aiPop').contains(e.target) && !e.target.closest('#btnAI')) $('#aiPop').classList.add('hidden');
@@ -2238,7 +2632,7 @@ function msgContextMenu(m, x, y, reactOnly = false) {
   const c = cur(); if (!c) return; const mine = isMe(m.from); const text = msgText(m);
   const canReact = c.type !== 'fav';
   let h = '';
-  if (canReact) h += `<div class="ctx-reacts">${QUICK.map((e) => `<button data-r="${e}" title="${e}">${AnimEmoji.render(e, 30)?.html || e}</button>`).join('')}</div><div class="ctx-sep"></div>`;
+  if (canReact) h += `<div class="ctx-reacts">${QUICK.map((e) => `<button data-r="${e}" title="${e}">${AnimEmoji.render(e, 30)?.html || emojify(e)}</button>`).join('')}</div><div class="ctx-sep"></div>`;
   if (!reactOnly) {
     const items = [];
     if (m.type !== 'call') items.push(['reply', 'reply', 'Ответить']);
@@ -2327,20 +2721,28 @@ function renderEmojiPicker(q = '') {
   const ep = $('#emojiPicker');
   const tabs = `<div class="ep-tabs"><button data-c="recent" class="${epCat === 'recent' ? 'active' : ''}" title="Недавние">🕘</button>${Object.keys(EMOJI).map((k) => `<button data-c="${k}" class="${epCat === k ? 'active' : ''}" title="${EMOJI[k].split('|')[0]}">${k}</button>`).join('')}</div>`;
   let grid = '';
-  if (q) { const all = Object.values(EMOJI).flatMap((v) => v.split('|')[1].split(' ')); grid = all.slice(0, 200).map((e) => `<button>${e}</button>`).join(''); }
-  else if (epCat === 'recent') { const r = recentEmoji(); grid = `<div class="ep-title">Недавние</div>` + (r.length ? r.map((e) => `<button>${e}</button>`).join('') : '<div class="ep-title" style="font-weight:400">Пока пусто</div>'); }
-  else { const [title, list] = EMOJI[epCat].split('|'); grid = `<div class="ep-title">${title}</div>` + list.split(' ').map((e) => `<button>${e}</button>`).join(''); }
-  ep.innerHTML = tabs + `<div class="ep-grid">${grid}</div>`;
+  const btn = (e) => `<button data-e="${e}">${emojify(e)}</button>`;
+  if (q) { const all = Object.values(EMOJI).flatMap((v) => v.split('|')[1].split(' ')); grid = all.slice(0, 200).map(btn).join(''); }
+  else if (epCat === 'recent') { const r = recentEmoji(); grid = `<div class="ep-title">Недавние</div>` + (r.length ? r.map(btn).join('') : '<div class="ep-title" style="font-weight:400">Пока пусто</div>'); }
+  else { const [title, list] = EMOJI[epCat].split('|'); grid = `<div class="ep-title">${title}</div>` + list.split(' ').map(btn).join(''); }
+  ep.innerHTML = (epPick ? `<div class="ep-title" style="padding:10px 12px 0">${esc(epPick.title || 'Выберите эмодзи')}</div>` : '') + tabs + `<div class="ep-grid">${grid}</div>`;
+}
+let epPick = null; // режим выбора одного эмодзи (эмодзи-статус): { title, cb }
+function pickEmoji(anchor, title, cb) {
+  const ep = $('#emojiPicker'); epPick = { title, cb }; renderEmojiPicker(); ep.classList.remove('hidden'); ep.style.zIndex = '96';
+  const r = anchor.getBoundingClientRect(); ep.style.left = clamp(r.left, 8, window.innerWidth - 358) + 'px';
+  ep.style.top = (r.bottom + 408 < window.innerHeight ? r.bottom + 6 : Math.max(8, r.top - 8 - ep.offsetHeight)) + 'px';
 }
 $('#btnEmoji').addEventListener('click', (e) => {
-  const ep = $('#emojiPicker'); if (!ep.classList.contains('hidden')) { ep.classList.add('hidden'); return; }
+  const ep = $('#emojiPicker'); epPick = null; ep.style.zIndex = ''; if (!ep.classList.contains('hidden')) { ep.classList.add('hidden'); return; }
   renderEmojiPicker(); ep.classList.remove('hidden');
   const r = e.currentTarget.getBoundingClientRect(); ep.style.left = clamp(r.right - 350, 8, window.innerWidth - 358) + 'px'; ep.style.top = Math.max(8, r.top - 8 - ep.offsetHeight) + 'px';
 });
 $('#emojiPicker').addEventListener('click', (e) => {
   const tab = e.target.closest('[data-c]'); if (tab) { epCat = tab.dataset.c; renderEmojiPicker(); return; }
   const b = e.target.closest('.ep-grid button'); if (!b) return;
-  const em = b.textContent; pushRecent(em);
+  const em = b.dataset.e || b.textContent; pushRecent(em);
+  if (epPick) { const cb = epPick.cb; epPick = null; $('#emojiPicker').classList.add('hidden'); $('#emojiPicker').style.zIndex = ''; cb(em); return; }
   const s = input.selectionStart ?? input.value.length; input.value = input.value.slice(0, s) + em + input.value.slice(input.selectionEnd ?? s); input.focus(); input.setSelectionRange(s + em.length, s + em.length); autoResize(); updateSendBtn();
 });
 
@@ -2384,7 +2786,7 @@ function openImagePreview(files) {
   });
 }
 function userPickItem(u, checked = null) { return `<div class="pick-item" data-u="${esc(u.username)}">${avatarHTML({ ...u, name: u.displayName, online: u.online && !u.isBot }, 42)}<div class="pb"><div class="pn">${esc(u.displayName)}${vbadge(u, 'sm')}${u.isBot ? icon('bot', 'sm') : ''}</div><div class="ps ${u.online && !u.isBot ? 'online' : ''}">@${esc(u.username)} · ${fmtLastSeen(u)}</div></div>${checked === null ? '' : `<span class="check ${checked ? 'on' : ''}">${icon('check')}</span>`}</div>`; }
-function usersSorted(filter = () => true) { return [...S.users.values()].filter((u) => !isMe(u.username) && filter(u)).sort((a, b) => (b.online - a.online) || a.displayName.localeCompare(b.displayName, 'ru')); }
+function usersSorted(filter = () => true) { return [...S.users.values()].filter((u) => !isMe(u.username) && !u.deleted && filter(u)).sort((a, b) => (b.online - a.online) || a.displayName.localeCompare(b.displayName, 'ru')); }
 function openNewChat() {
   const render = (q = '') => usersSorted((u) => !q || key(u.username).includes(q) || key(u.displayName).includes(q)).map((u) => userPickItem(u)).join('') || `<div class="list-empty">Никого не найдено</div>`;
   Modal.open(`${mdHead('Новое сообщение')}<div class="md-body"><div class="field"><input id="ncQ" maxlength="64" placeholder="Поиск по имени или @логину"></div><div class="pick-list" id="ncList">${render()}</div></div>`);
@@ -2444,19 +2846,24 @@ function openBotToken(b) {
 function openProfile(username) {
   const u = userOf(username); if (!u) { toast('Пользователь не найден', 'err'); return; }
   if (isMe(username)) { Settings.open('profile'); return; }
+  if (u.deleted) { Modal.open(`${mdHead('Профиль')}<div class="md-body"><div class="ip-hero" style="padding-top:6px">${avatarHTML({ username: u.username, name: 'Удалённый аккаунт' }, 110)}<h3>Удалённый аккаунт</h3><div class="st">Пользователь удалил свой аккаунт</div></div><div class="row-item">${icon('at')}<div class="rb"><div class="rt">@${esc(u.username)}</div><div class="rs">Имя пользователя (больше недоступно)</div></div></div></div>`, { sm: true }); return; }
   const blocked = S.blocked.has(key(username));
-  Modal.open(`${mdHead('Профиль')}<div class="md-body"><div class="ip-hero" style="padding-top:6px">${avatarHTML({ ...u, name: u.displayName, online: u.online && !u.isBot }, 110)}<h3>${esc(u.displayName)}${vbadge(u, 'lg')}${u.isBot ? icon('bot', 'sm') : ''}</h3><div class="st ${u.online && !u.isBot ? 'online' : ''}">${fmtLastSeen(u)}</div></div>
+  Modal.open(`${mdHead('Профиль')}<div class="md-body">${coverHTML(u)}<div class="ip-hero ${u.banner ? 'cov' : ''}" style="${u.banner ? '' : 'padding-top:6px'}">${avatarHTML({ ...u, name: u.displayName, online: u.online && !u.isBot }, 110)}<h3>${esc(u.displayName)}${statusHTML(u, 22, true)}${vbadge(u, 'lg')}${u.isBot ? icon('bot', 'sm') : ''}</h3><div class="st ${u.online && !u.isBot ? 'online' : ''}">${fmtLastSeen(u)}</div></div>
   <div class="ip-actions"><button class="ip-act" data-a="msg">${icon('chat')}Написать</button>${u.isBot ? '' : `<button class="ip-act" data-a="call">${icon('phone')}Звонок</button><button class="ip-act" data-a="video">${icon('video')}Видео</button><button class="ip-act" data-a="secret">${icon('lock')}Секретный</button>`}</div>
   <div class="row-item" data-copy="@${esc(u.username)}" style="cursor:pointer">${icon('at')}<div class="rb"><div class="rt">@${esc(u.username)}</div><div class="rs">Имя пользователя</div></div>${icon('copy', 'sm')}</div>
   ${u.about ? `<div class="row-item">${icon('info')}<div class="rb"><div class="rt" style="white-space:pre-wrap">${esc(u.about)}</div><div class="rs">О себе</div></div></div>` : ''}
   <div class="row-item" data-a="${blocked ? 'unblock' : 'block'}" style="cursor:pointer;color:var(--danger)">${icon('block')}<div class="rb"><div class="rt">${blocked ? 'Разблокировать' : 'Заблокировать'}</div></div></div>
   <div class="row-item" data-a="report" style="cursor:pointer;color:var(--danger)">${icon('flag')}<div class="rb"><div class="rt">Пожаловаться</div></div></div>${modRowsHTML(u).replace(/ip-row/g, 'row-item').replace(/<div class="row-item/g, '<div style="cursor:pointer" class="row-item')}</div>`);
+  AnimEmoji.mount($('#modal'));
   $('#modal').onclick = (e) => {
     const cp = e.target.closest('[data-copy]'); if (cp) { copyText(cp.dataset.copy); return; }
+    const v = e.target.closest('[data-view]'); if (v) { openLightbox(v.dataset.view, v.dataset.name); return; }
     const a = e.target.closest('[data-a]'); if (!a) return; const act = a.dataset.a;
     if (act === 'report') { openReport({ target: u.username }); return; }
     Modal.close();
     if (act === 'modban') { modBan(u); return; }
+    if (act === 'modip') { modBanIp(u); return; }
+    if (act === 'moddel') { modDeleteAccount(u); return; }
     if (act === 'modverify') { socket.emit('mod_set_verified', { user: u.username, verified: !u.verified }); return; }
     if (act === 'msg') openDM(u.username); else if (act === 'secret') openSecret(u.username);
     else if (act === 'call' || act === 'video') Call.start(u.username, act === 'video');
@@ -2486,7 +2893,7 @@ function renderInfo() {
   let h = `<div class="ip-head"><span>${c.type === 'dm' ? 'Профиль' : c.type === 'group' ? 'О группе' : c.type === 'channel' ? 'О канале' : c.type === 'secret' ? 'Секретный чат' : 'Избранное'}</span><span class="grow"></span>${c.type !== 'fav' && c.type !== 'secret' ? `<button class="icon-btn" data-a="menu" title="Ещё">${icon('more-v')}</button>` : ''}<button class="icon-btn" data-a="close">${icon('x')}</button></div>`;
   if (c.type === 'dm' || c.type === 'secret') {
     const u = userOf(peerOf(c)) || { username: peerOf(c), displayName: peerOf(c) }; const blocked = S.blocked.has(key(u.username));
-    h += `<div class="ip-hero">${avatarHTML({ ...u, name: u.displayName, online: u.online && !u.isBot }, 110)}<h3>${esc(u.displayName)}${vbadge(u, 'lg')}${u.isBot ? icon('bot', 'sm') : ''}${c.type === 'secret' ? icon('lock', 'sm') : ''}</h3><div class="st ${u.online && !u.isBot ? 'online' : ''}">${fmtLastSeen(u)}</div></div>`;
+    h += `${coverHTML(u)}<div class="ip-hero ${u.banner ? 'cov' : ''}">${avatarHTML({ ...u, name: u.displayName, online: u.online && !u.isBot }, 110)}<h3>${esc(u.displayName)}${statusHTML(u, 22, true)}${vbadge(u, 'lg')}${u.isBot ? icon('bot', 'sm') : ''}${c.type === 'secret' ? icon('lock', 'sm') : ''}</h3><div class="st ${u.online && !u.isBot ? 'online' : ''}">${u.deleted ? 'Аккаунт удалён' : fmtLastSeen(u)}</div></div>`;
     h += `<div class="ip-actions">${u.isBot ? '' : `<button class="ip-act" data-a="call">${icon('phone')}Звонок</button><button class="ip-act" data-a="video">${icon('video')}Видео</button>`}${c.type === 'dm' && !u.isBot ? `<button class="ip-act" data-a="secret">${icon('lock')}Секретный</button>` : ''}${c.type === 'secret' ? `<button class="ip-act" data-a="dm">${icon('chat')}Обычный</button>` : ''}<button class="ip-act" data-a="search">${icon('search')}Поиск</button><button class="ip-act" data-a="qr">${icon('grid')}QR-код</button></div>`;
     h += `<div class="ip-sec"><div class="ip-row" data-copy="@${esc(u.username)}">${icon('at')}<div class="rb"><div class="rt">@${esc(u.username)}</div><div class="rs">Имя пользователя</div></div></div>${u.about ? `<div class="ip-row">${icon('info')}<div class="rb"><div class="rt" style="white-space:pre-wrap">${esc(u.about)}</div><div class="rs">О себе</div></div></div>` : ''}${notif}${c.type === 'secret' ? `<div class="ip-row">${icon('shield')}<div class="rb"><div class="rt">Сквозное шифрование</div><div class="rs">ECDH P-256 + AES-256-GCM. Ключи хранятся только на устройствах.</div></div></div>` : ''}${u.isBot ? idRow : ''}</div>`;
     h += mediaSec;
@@ -2508,8 +2915,32 @@ function modRowsHTML(u) {
   if (!S.isMod || !u || isMe(u.username) || u.owner) return '';
   let h = '';
   if (!u.isBot) h += `<div class="ip-row danger" data-a="modban">${icon('shield')}<div class="rb"><div class="rt">${u.banned ? 'Разблокировать в мессенджере' : 'Заблокировать в мессенджере'}</div><div class="rs">${u.banned ? 'Снять бан, выданный модерацией' : 'Бан: выход из всех сессий, вход запрещён'}</div></div></div>`;
+  if (!u.isBot) { const mu = modUserOf(u.username); h += `<div class="ip-row danger" data-a="modip">${icon('block')}<div class="rb"><div class="rt">${mu && mu.ipBanned ? 'Снять бан по IP' : 'Заблокировать по IP'}</div><div class="rs">${mu && mu.lastIp ? 'Последний IP: ' + esc(mu.lastIp) : 'IP станет известен после входа пользователя'}</div></div></div>`; }
   if (S.isOwner && !u.isBot) h += `<div class="ip-row" data-a="modverify">${icon('check2')}<div class="rb"><div class="rt">${u.verified ? 'Снять галочку' : 'Выдать галочку'}</div><div class="rs">${u.verified ? 'Пользователь потеряет права модератора' : 'Верификация даёт права модератора'}</div></div></div>`;
+  if (S.isOwner && !u.isBot) h += `<div class="ip-row danger" data-a="moddel">${icon('trash')}<div class="rb"><div class="rt">Удалить аккаунт</div><div class="rs">Безвозвратно: выход из чатов, удаление ботов и сессий</div></div></div>`;
   return h;
+}
+function modUserOf(username) { return ((S.modData && S.modData.users) || []).find((x) => key(x.username) === key(username)) || null; }
+function modBanIp(u) {
+  const x = typeof u === 'string' ? userOf(u) : u; if (!x) return;
+  const go = () => {
+    const mu = modUserOf(x.username);
+    if (!mu || !mu.lastIp) { toast('IP пользователя пока неизвестен — он появится после его следующего входа', 'err'); return; }
+    if (mu.ipBanned) { socket.emit('mod_ban_ip', { ip: mu.lastIp, ban: false }); return; }
+    modBanIpAddr(mu.lastIp, x.displayName);
+  };
+  if (S.modData) go(); else { socket.emit('mod_list'); setTimeout(go, 600); }
+}
+function modBanIpAddr(ip, who) {
+  promptModal(`Заблокировать IP ${ip}?`, { label: 'Причина (увидят все, кто заходит с этого адреса)', placeholder: 'Например: спам, обход бана', okLabel: 'Далее', maxlength: 120 }).then((r) => {
+    if (r === null || r === undefined) return;
+    Modal.push(`${mdHead('Заблокировать и аккаунты?')}<div class="md-body md-text">С адреса ${esc(ip)} вход и регистрация станут невозможны${who ? ' (сейчас его использует ' + esc(who) + ')' : ''}. Заблокировать также все аккаунты, заходившие с него последний раз?</div><div class="md-foot"><button class="btn ghost" data-close>Отмена</button><button class="btn soft" data-ipb="0">Только IP</button><button class="btn danger" data-ipb="1">Да, и аккаунты</button></div>`);
+    $('#modal').onclick = (e) => { const b = e.target.closest('[data-ipb]'); if (!b) return; Modal.close(); socket.emit('mod_ban_ip', { ip, reason: r, banUsers: b.dataset.ipb === '1' }); };
+  });
+}
+function modDeleteAccount(u) {
+  const x = typeof u === 'string' ? userOf(u) : u; if (!x) return;
+  confirmModal(`Удалить аккаунт ${x.displayName}?`, 'Пользователь выйдет из всех групп и каналов, его боты, избранное и секретные чаты будут удалены, сессии закрыты. Переписки у собеседников останутся с пометкой «Удалённый аккаунт». Имя @' + x.username + ' останется занятым. Отменить нельзя.', 'Удалить навсегда').then((ok) => ok && socket.emit('mod_delete_account', { user: x.username }));
 }
 async function downloadBackup(withFiles) {
   toast('Готовим копию…');
@@ -2712,8 +3143,10 @@ const Settings = {
     let h = '';
     switch (this.tab) {
       case 'profile':
-        h = `<div class="avatar-edit" id="avEdit">${avatarHTML({ ...S.me, name: S.me.displayName }, 96)}<div class="cam">${icon('camera')}</div></div>
+        h = `<div class="pf-cover ${S.me.banner ? '' : 'ph'}" style="${S.me.banner ? `background-image:url('${esc(S.me.banner)}')` : ''}"><button class="btn sm" id="pfCover">${icon('camera', 'sm')}${S.me.banner ? 'Сменить обложку' : 'Загрузить обложку'}</button>${S.me.banner ? `<button class="btn sm" id="pfCoverDel">Удалить</button>` : ''}</div>
+        <div class="avatar-edit" id="avEdit" style="margin-top:-58px">${avatarHTML({ ...S.me, name: S.me.displayName }, 96)}<div class="cam">${icon('camera')}</div></div>
         <div class="field"><label>Имя</label><input id="pfName" value="${esc(S.me.displayName)}" maxlength="32"></div>
+        <div class="field"><label>Эмодзи-статус</label><div class="pf-status"><div class="cur" id="pfStatusCur">${S.me.emojiStatus ? (AnimEmoji.render(S.me.emojiStatus, 30)?.html || emojify(esc(S.me.emojiStatus))) : '<span style="color:var(--text-3);font-size:13px">нет</span>'}</div><button class="btn sm soft" id="pfStatusPick" data-pick-emoji>${S.me.emojiStatus ? 'Сменить' : 'Выбрать'}</button>${S.me.emojiStatus ? '<button class="btn sm ghost" id="pfStatusDel">Убрать</button>' : ''}</div><span class="hint">Показывается рядом с вашим именем в чатах и профиле</span></div>
         <div class="field"><label>О себе</label><textarea id="pfAbout" maxlength="140" placeholder="Пара слов о себе">${esc(S.me.about || '')}</textarea><span class="hint" id="pfAboutCnt">${(S.me.about || '').length}/140</span></div>
         <div class="field"><label>Имя пользователя</label><div class="token-box"><span class="grow">@${esc(S.me.username)}</span><button class="icon-btn" data-copy="@${esc(S.me.username)}">${icon('copy', 'sm')}</button></div><span class="hint">Ссылка на вас: ${esc(location.origin)}/?start=${esc(S.me.username)}</span></div>
         <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn soft" id="pfQR">${icon('grid', 'sm')}Мой QR-код</button><span class="grow"></span>${S.me.avatar ? `<button class="btn ghost" id="pfAvDel">Удалить фото</button>` : ''}<button class="btn" id="pfSave">Сохранить</button></div>`;
@@ -2743,6 +3176,7 @@ const Settings = {
         <div class="row-item"><div class="rb"><div class="rt">Отправлять по Enter</div><div class="rs">Выключено — отправка по Ctrl+Enter, Enter — новая строка</div></div>${sw('enterToSend', s.enterToSend !== false)}</div>
         <h4>Эмодзи</h4>
         <div class="row-item"><div class="rb"><div class="rt">Анимированные эмодзи</div><div class="rs">${S.animEmoji ? 'Сообщения из одних эмодзи (до трёх) оживают, как в Telegram' : 'Отключено на сервере (ANIMATED_EMOJI=0)'}</div></div>${S.animEmoji ? sw('animEmoji', AnimEmoji.enabled()) : ''}</div>
+        ${(() => { const d = AnimEmoji.diag(); const es = Emo.stats(); const st = !d.server ? 'выключено на сервере' : !d.enabled ? 'выключено в настройках' : d.broken ? 'ошибка загрузки проигрывателя' : d.lib ? 'работает' : 'проигрыватель загрузится при первом эмодзи'; return `<div class="ae-diag" id="aeDiag"><span>Проверка: ${d.server && d.enabled ? (AnimEmoji.render('😀', 34)?.html || '😀') : '😀'}</span><span>состояние: <b>${st}</b></span><span>анимаций загружено: <b>${d.loaded}</b>${d.failed ? ', ошибок: <b>' + d.failed + '</b>' : ''}</span><span>активно сейчас: <b>${d.active}</b></span>${d.reducedMotion ? '<span>в системе включено «уменьшение движения»</span>' : ''}${es.missing ? '<span>эмодзи без шрифта (показаны картинками): <b>' + es.missing + '</b></span>' : ''}${d.lastErr ? '<span style="color:var(--danger)">последняя ошибка: ' + esc(d.lastErr) + '</span>' : ''}<button class="btn sm ghost" id="aeTest">Обновить</button></div>`; })()}
         <h4>Форматирование</h4><p class="md-text">**жирный**, __курсив__, ~~зачёркнутый~~, \`код\`, \`\`\`блок кода\`\`\`, ||спойлер||, @упоминание</p>`;
         break;
       }
@@ -2763,14 +3197,15 @@ const Settings = {
         ${S.livekit ? `<div class="row-item"><div class="rb"><div class="rt">Звонки через LiveKit</div><div class="rs">Включено по умолчанию: стабильнее за NAT и позволяет групповые звонки. Выключите, чтобы звонить напрямую (P2P)</div></div>${sw('useLK', S.useLK)}</div><h4>Диагностика LiveKit</h4><div id="lkDiag"><span class="spinner"></span></div>` : `<p class="md-text">LiveKit не настроен на сервере — личные звонки идут напрямую (P2P), групповые недоступны. Добавьте LIVEKIT_URL, LIVEKIT_API_KEY и LIVEKIT_API_SECRET в .env.</p>`}`;
         break;
       case 'security':
-        h = `<h4>Смена пароля</h4><div class="field"><label>Текущий пароль</label><input type="password" id="pwOld" autocomplete="current-password"></div><div class="field"><label>Новый пароль</label><input type="password" id="pwNew" autocomplete="new-password" minlength="6"></div><div class="field"><label>Повторите новый пароль</label><input type="password" id="pwNew2" autocomplete="new-password"></div><button class="btn" id="pwSave">Изменить пароль</button>
+        h = `<h4>Почта</h4>${EmailFlow.sectionHTML(sw)}<h4>Телефон</h4>${PhoneFlow.sectionHTML()}<h4>Подтверждение входа</h4>${twofaHTML()}<h4>Смена пароля</h4><div class="field"><label>Текущий пароль</label><input type="password" id="pwOld" autocomplete="current-password"></div><div class="field"><label>Новый пароль</label><input type="password" id="pwNew" autocomplete="new-password" minlength="6"></div><div class="field"><label>Повторите новый пароль</label><input type="password" id="pwNew2" autocomplete="new-password"></div><button class="btn" id="pwSave">Изменить пароль</button>
         <h4>Шифрование</h4><p class="md-text">Ключ секретных чатов создан на этом устройстве и хранится в браузере. При входе с другого устройства создаётся новый ключ — старые секретные сообщения там не расшифруются.</p>
-        <h4>Вход по QR-коду</h4><p class="md-text" style="line-height:1.5">На новом устройстве откройте вкладку «QR-код» на экране входа, а здесь — Меню → «Сканировать QR-код». Активные сессии можно завершить во вкладке «Приватность».</p>`;
+        <h4>Вход по QR-коду</h4><p class="md-text" style="line-height:1.5">На новом устройстве откройте вкладку «QR-код» на экране входа, а здесь — Меню → «Сканировать QR-код». Активные сессии можно завершить во вкладке «Приватность».</p>
+        <h4 style="color:var(--danger)">Удаление аккаунта</h4><p class="md-text">${S.isOwner ? 'Аккаунт владельца сервера удалить нельзя.' : 'Аккаунт, боты, избранное и секретные чаты будут удалены без возможности восстановления. Переписки у собеседников останутся с пометкой «Удалённый аккаунт».'}</p>${S.isOwner ? '' : '<button class="btn danger" id="accDelete">Удалить аккаунт</button>'}`;
         break;
       case 'mod': {
         const d = S.modData; const q = (S.modQ || '').toLowerCase(); const sect = S.modSect || 'reports';
         h = `<h4>Модерация${vbadge(S.me)}</h4><p class="md-text" style="margin-top:0">Верифицированные аккаунты могут блокировать пользователей, удалять группы, каналы и любые сообщения.${S.isOwner ? ' Вы владелец: можете выдавать и снимать галочку.' : ''}</p>
-        <div class="mod-tabs">${[['reports', `Жалобы${d ? ' · ' + d.reports.length : ''}`], ['users', `Пользователи${d ? ' · ' + d.users.filter((u) => !u.isBot && !isMe(u.username)).length : ''}`], ['chats', `Группы и каналы${d ? ' · ' + d.convs.length : ''}`]].map(([k, l]) => `<button data-msect="${k}" class="${sect === k ? 'active' : ''}">${l}</button>`).join('')}</div>
+        <div class="mod-tabs">${[['reports', `Жалобы${d ? ' · ' + d.reports.length : ''}`], ['users', `Пользователи${d ? ' · ' + d.users.filter((u) => !u.isBot && !isMe(u.username)).length : ''}`], ['chats', `Группы и каналы${d ? ' · ' + d.convs.length : ''}`], ['ips', `IP-баны${d && d.bannedIps ? ' · ' + d.bannedIps.length : ''}`]].map(([k, l]) => `<button data-msect="${k}" class="${sect === k ? 'active' : ''}">${l}</button>`).join('')}</div>
         ${sect !== 'reports' ? `<div class="field"><input id="modQ" placeholder="Поиск…" value="${esc(S.modQ || '')}" maxlength="48"></div>` : ''}`;
         if (S.isOwner && d && d.stats) {
           const st = d.stats; const mb = (n) => (n / 1048576).toFixed(1) + ' МБ';
@@ -2784,7 +3219,11 @@ const Settings = {
           h += d.reports.length ? d.reports.map((r) => `<div class="mod-row"><div class="rb"><div class="rt">${esc(r.fromName)} → ${r.target ? esc(r.targetName) + ' (@' + esc(r.target) + ')' : 'чат'}<span class="mtag">${esc(r.reason)}</span></div><div class="rs">${r.text ? esc(r.text) + ' · ' : ''}${fmtFull(r.ts)}${r.conversationId ? ' · ' + esc(r.conversationId) : ''}</div></div><div class="mod-actions">${r.target && userOf(r.target) && !userOf(r.target).owner ? `<button class="btn sm ${userOf(r.target).banned ? 'ghost' : 'danger'}" data-mban="${esc(r.target)}">${userOf(r.target).banned ? 'Разбан' : 'Бан'}</button>` : ''}${r.conversationId ? `<button class="btn sm ghost" data-mopen="${esc(r.conversationId)}">Открыть</button>` : ''}<button class="btn sm ghost" data-mdismiss="${esc(r.id)}">Скрыть</button></div></div>`).join('') : `<p class="md-text">Жалоб нет 🎉</p>`;
         } else if (sect === 'users') {
           const list = d.users.filter((u) => !u.isBot && !isMe(u.username) && (!q || key(u.username).includes(q) || (u.displayName || '').toLowerCase().includes(q)));
-          h += list.slice(0, 200).map((u) => `<div class="mod-row">${avatarHTML({ ...u, name: u.displayName }, 40)}<div class="rb"><div class="rt">${esc(u.displayName)}${vbadge(u, 'sm')}${u.owner ? '<span class="mtag own">владелец</span>' : ''}${u.banned ? '<span class="mtag ban">бан</span>' : ''}</div><div class="rs">@${esc(u.username)} · ${u.online ? 'в сети' : fmtLastSeen(u)}${u.banReason ? ' · причина: ' + esc(u.banReason) : ''}</div></div><div class="mod-actions">${u.owner ? '' : `<button class="btn sm ${u.banned ? 'ghost' : 'danger'}" data-mban="${esc(u.username)}">${u.banned ? 'Разбан' : 'Бан'}</button>${S.isOwner ? `<button class="btn sm ghost" data-mver="${esc(u.username)}">${u.verified ? 'Снять галочку' : 'Галочка'}</button>` : ''}`}<button class="btn sm ghost" data-mprof="${esc(u.username)}">Профиль</button></div></div>`).join('') || `<p class="md-text">Никого не найдено</p>`;
+          h += list.slice(0, 200).map((u) => `<div class="mod-row">${avatarHTML({ ...u, name: u.displayName }, 40)}<div class="rb"><div class="rt">${esc(u.displayName)}${vbadge(u, 'sm')}${u.owner ? '<span class="mtag own">владелец</span>' : ''}${u.banned ? '<span class="mtag ban">бан</span>' : ''}</div><div class="rs">@${esc(u.username)} · ${u.online ? 'в сети' : fmtLastSeen(u)}${u.banReason ? ' · причина: ' + esc(u.banReason) : ''}${u.lastIp ? ' · <span class="mod-ip" title="Последний IP-адрес">' + esc(u.lastIp) + '</span>' + (u.ipBanned ? '<span class="mtag ban">IP-бан</span>' : '') : ''}</div></div><div class="mod-actions">${u.owner ? '' : `<button class="btn sm ${u.banned ? 'ghost' : 'danger'}" data-mban="${esc(u.username)}">${u.banned ? 'Разбан' : 'Бан'}</button>${u.lastIp ? `<button class="btn sm ${u.ipBanned ? 'ghost' : 'danger'}" data-mip="${esc(u.username)}" title="${u.ipBanned ? 'Снять бан по IP' : 'Заблокировать IP ' + esc(u.lastIp)}">${u.ipBanned ? 'Снять IP' : 'IP'}</button>` : ''}${S.isOwner ? `<button class="btn sm ghost" data-mver="${esc(u.username)}">${u.verified ? 'Снять галочку' : 'Галочка'}</button><button class="btn sm ghost" data-mdelacc="${esc(u.username)}" title="Удалить аккаунт">${icon('trash', 'sm')}</button>` : ''}`}<button class="btn sm ghost" data-mprof="${esc(u.username)}">Профиль</button></div></div>`).join('') || `<p class="md-text">Никого не найдено</p>`;
+        } else if (sect === 'ips') {
+          const list = (d.bannedIps || []).filter((b) => !q || b.ip.includes(q) || (b.reason || '').toLowerCase().includes(q) || b.users.some((x) => x.toLowerCase().includes(q)));
+          h += `<div style="display:flex;gap:8px;align-items:center;margin:4px 0 8px"><input id="ipBanInput" placeholder="IP-адрес, например 203.0.113.5" maxlength="64" style="flex:1;min-width:0"><button class="btn danger" id="ipBanBtn" style="flex:none">Заблокировать</button></div><p class="md-text" style="margin-top:0">С заблокированного адреса нельзя войти, зарегистрироваться и подключиться. Владелец сервера под бан по IP не попадает. За reverse proxy реальный адрес берётся из X-Forwarded-For (см. TRUST_PROXY в .env).</p>`;
+          h += list.length ? list.map((b) => `<div class="mod-row"><div class="avatar" style="width:40px;height:40px;background:var(--surface);color:var(--danger)">${icon('block')}</div><div class="rb"><div class="rt"><span class="mod-ip">${esc(b.ip)}</span>${b.reason ? '<span class="mtag ban">' + esc(b.reason) + '</span>' : ''}</div><div class="rs">${b.by ? 'заблокировал @' + esc(b.by) + ' · ' : ''}${b.ts ? fmtFull(b.ts) : ''}${b.users.length ? ' · аккаунты: ' + b.users.map((x) => '@' + esc(x)).join(', ') : ''}</div></div><div class="mod-actions"><button class="btn sm ghost" data-munip="${esc(b.ip)}">Разбанить</button></div></div>`).join('') : `<p class="md-text" style="margin-top:14px;color:var(--text-3)">Заблокированных IP-адресов нет.</p>`;
         } else {
           const list = d.convs.filter((c) => !q || (c.name || '').toLowerCase().includes(q) || (c.handle || '').toLowerCase().includes(q) || c.id.includes(q));
           h += list.slice(0, 200).map((c) => `<div class="mod-row">${avatarHTML({ name: c.name, type: c.type, username: c.id }, 40)}<div class="rb"><div class="rt">${esc(c.name)}<span class="mtag">${c.type === 'channel' ? 'канал' : 'группа'}</span></div><div class="rs">${c.handle ? '@' + esc(c.handle) + ' · ' : ''}${plural(c.members, 'участник', 'участника', 'участников')} · ${c.messages} сообщ. · владелец @${esc(c.owner || '?')}</div></div><div class="mod-actions"><button class="btn sm ghost" data-mjoin="${esc(c.handle || c.id)}" ${c.handle ? '' : 'disabled title="У чата нет публичной ссылки"'}>Открыть</button><button class="btn sm danger" data-mdel="${esc(c.id)}" data-mname="${esc(c.name)}" data-mtype="${c.type}">Удалить</button></div></div>`).join('') || `<p class="md-text">Ничего не найдено</p>`;
@@ -2792,7 +3231,7 @@ const Settings = {
         break;
       }
       case 'about':
-        h = `<div style="text-align:center;padding:10px 0 16px"><div class="logo" style="width:72px;height:72px"><svg><use href="#i-logo"/></svg></div><h3 style="margin-top:10px">NMessenger</h3><p class="md-text">Версия 3.2</p></div>
+        h = `<div style="text-align:center;padding:10px 0 16px"><div class="logo" style="width:72px;height:72px"><svg><use href="#i-logo"/></svg></div><h3 style="margin-top:10px">NMessenger</h3><p class="md-text">Версия 3.5</p></div>
         <div class="row-item"><div class="rb"><div class="rt">Чаты, группы, каналы</div><div class="rs">Ответы, реакции, редактирование, пересылка, избранное, папки</div></div></div>
         <div class="row-item"><div class="rb"><div class="rt">Звонки</div><div class="rs">Аудио/видео P2P через WebRTC, демонстрация экрана${S.livekit ? ', групповые звонки через LiveKit' : ''}</div></div></div>
         <div class="row-item"><div class="rb"><div class="rt">AI-помощник</div><div class="rs">${S.ai && S.ai.llm ? 'Нейросеть ' + esc(S.ai.model || '') + ': правка и перевод текста, ответы по чату, бот @AI' : 'Встроенный корректор текста (нейросеть выключена на сервере)'}</div></div></div>
@@ -2803,6 +3242,7 @@ const Settings = {
         break;
     }
     body.innerHTML = h;
+    AnimEmoji.mount(body);
     this.bind();
   },
   bind() {
@@ -2816,6 +3256,20 @@ const Settings = {
       const sw = t.closest('[data-sw]'); if (sw) { const k = sw.dataset.sw; const on = !sw.classList.contains('on'); sw.classList.toggle('on', on); if (k === 'useLK') { S.useLK = on; localStorage.setItem('nm_uselk', on ? '1' : '0'); } else if (k === 'animEmoji') { AnimEmoji.setEnabled(on); if (cur()) renderMessages({ keepScroll: true }); } else emit({ [k]: on }); return; }
       const tp = t.closest('[data-theme-pick]'); if (tp) { emit({ theme: tp.dataset.themePick }); return; }
       if (t.closest('#avEdit')) { $('#avatarInput').click(); return; }
+      if (t.closest('#pfCover')) { $('#coverInput').click(); return; }
+      if (t.closest('#pfCoverDel')) { socket.emit('update_profile', { banner: '' }); S.me.banner = ''; setTimeout(() => this.render(), 300); return; }
+      if (t.closest('#pfStatusPick')) { pickEmoji(t.closest('#pfStatusPick'), 'Эмодзи-статус', (em) => { socket.emit('update_profile', { emojiStatus: em }); S.me.emojiStatus = em; setTimeout(() => { if (Settings.tab === 'profile') this.render(); }, 250); }); return; }
+      if (t.closest('#pfStatusDel')) { socket.emit('update_profile', { emojiStatus: '' }); S.me.emojiStatus = ''; setTimeout(() => this.render(), 250); return; }
+      if (t.closest('#accDelete')) { deleteMyAccount(); return; }
+      if (t.closest('#emBind') || t.closest('#emChange')) { EmailFlow.bind(); return; }
+      if (t.closest('#emUnbind')) { EmailFlow.unbind(); return; }
+      if (t.closest('#phBind') || t.closest('#phChange')) { PhoneFlow.bind(); return; }
+      if (t.closest('#phUnbind')) { PhoneFlow.unbind(); return; }
+      if (t.closest('#aeTest')) { this.render(); return; }
+      const mip = t.closest('[data-mip]'); if (mip) { modBanIp(mip.dataset.mip); return; }
+      const mun = t.closest('[data-munip]'); if (mun) { socket.emit('mod_ban_ip', { ip: mun.dataset.munip, ban: false }); return; }
+      const mda = t.closest('[data-mdelacc]'); if (mda) { modDeleteAccount(mda.dataset.mdelacc); return; }
+      if (t.closest('#ipBanBtn')) { const v = ($('#ipBanInput').value || '').trim(); if (!/^[0-9a-f.:]{3,64}$/i.test(v)) { toast('Введите IP-адрес, например 203.0.113.5', 'err'); return; } modBanIpAddr(v, ''); return; }
       const ms = t.closest('[data-msect]'); if (ms) { S.modSect = ms.dataset.msect; this.render(); return; }
       const bk = t.closest('[data-backup]'); if (bk) { downloadBackup(bk.dataset.backup === '1'); return; }
       if (t.closest('#restoreBtn')) { confirmModal('Восстановить данные из копии?', 'Текущие аккаунты, чаты и файлы будут заменены содержимым файла копии. Перед этим сервер сам сделает автокопию текущего состояния.', 'Выбрать файл').then((ok) => { if (ok) { Settings.open('mod'); $('#restoreInput').click(); } }); return; }
@@ -2846,7 +3300,7 @@ const Settings = {
       if (t.closest('#bCreate')) { const u = $('#bUser').value.trim(), n = $('#bName').value.trim(); if (!u) { toast('Укажите логин бота', 'err'); return; } socket.emit('create_bot', { username: u, displayName: n || u }); $('#bUser').value = ''; $('#bName').value = ''; return; }
       if (t.closest('#pwSave')) { const o = $('#pwOld').value, n = $('#pwNew').value, n2 = $('#pwNew2').value; if (n.length < 6) { toast('Новый пароль — минимум 6 символов', 'err'); return; } if (n !== n2) { toast('Пароли не совпадают', 'err'); return; } socket.emit('change_password', { oldPassword: o, newPassword: n }); return; }
     };
-    body.onchange = (e) => { const s = e.target.closest('[data-sel]'); if (s) emit({ [s.dataset.sel]: s.value }); };
+    body.onchange = (e) => { if (e.target.id === 'twofaSel') { setTwofa(e.target.value); return; } const s = e.target.closest('[data-sel]'); if (s) emit({ [s.dataset.sel]: s.value }); };
     body.oninput = (e) => {
       const r = e.target.closest('[data-range]'); if (r) { syncRange(r); const k = r.dataset.range; const v = Number(r.value); if (k === 'fontSize') { $('#fsVal').textContent = v; S.settings.fontSize = v; document.documentElement.style.setProperty('--fs', v + 'px'); } else S.settings[k] = v; clearTimeout(this._rt); this._rt = setTimeout(() => socket.emit('update_settings', { [k]: v }), 400); }
       if (e.target.id === 'pfAbout') $('#pfAboutCnt').textContent = e.target.value.length + '/140';
@@ -2864,10 +3318,24 @@ const Settings = {
         <div class="lk-row"><span>Сервер NMessenger → LiveKit</span><b class="${p.reachable ? 'ok' : 'bad'}">${p.reachable ? (p.looksLikeLivekit ? 'доступен ✓' : `отвечает, но не похож на LiveKit (HTTP ${p.status})`) : 'недоступен: ' + esc(p.error || '')}</b></div>
         ${(d.warnings || []).map((w) => `<div class="lk-warn">⚠ ${esc(w)}</div>`).join('')}
         <div class="lk-row"><span>Этот браузер → LiveKit</span><b id="lkBrowser">не проверялось</b></div>
+        <div id="lkResult"></div>
         <div><button class="btn sm" id="lkTest">Проверить подключение из браузера</button></div>
-        <div class="hint">Проверка подключает вас к пустой тестовой комнате: сигнальный канал (WebSocket) и медиаканал (WebRTC/ICE). Если звонки обрываются — причина будет показана здесь.</div>
+        <div class="hint">Проверка подключает вас к пустой тестовой комнате и замеряет этапы: токен → сигнальный канал (WebSocket) → медиаканал (WebRTC/ICE), а также каким путём пошло медиа (UDP / TCP / TURN). Нормальное подключение — до 1–2 с и по UDP.</div>
       </div>`;
-      $('#lkTest').onclick = async () => { const b = $('#lkTest'); b.disabled = true; const o = $('#lkBrowser'); o.textContent = 'проверяю…'; o.className = ''; const r = await Call.selfTest(); if (o.isConnected) { o.textContent = r.ok ? `подключение OK за ${r.ms} мс ✓` : r.error; o.className = r.ok ? 'ok' : 'bad'; o.title = r.raw || ''; } b.disabled = false; };
+      $('#lkTest').onclick = async () => {
+        const b = $('#lkTest'); b.disabled = true; const o = $('#lkBrowser'); const res = $('#lkResult'); o.textContent = 'проверяю…'; o.className = ''; res.innerHTML = '';
+        const r = await Call.selfTest(); if (!o.isConnected) return;
+        const sec = (v) => v >= 1000 ? (v / 1000).toFixed(1) + ' с' : v + ' мс';
+        if (r.ok) {
+          const slow = r.ms > 3000 || (r.issues && r.issues.length);
+          o.textContent = `подключение OK за ${sec(r.ms)}${slow ? ' — но есть проблемы' : ' ✓'}`; o.className = slow ? 'warn' : 'ok';
+          const p = r.pair; const route = p ? `${(p.protocol || '?').toUpperCase()} · ${p.local || '?'}${p.remote ? ' → ' + p.remote : ''}${p.addr ? ' · ' + esc(p.addr) : ''}` : 'путь не определён';
+          res.innerHTML = `<div class="lk-phases"><span>токен <b>${sec(r.ph.token)}</b></span><span>сигнал <b>${sec(r.ph.signal)}</b></span><span>медиаканал <b class="${r.ph.ice > 3000 ? 'bad' : ''}">${sec(r.ph.ice)}</b></span><span>путь <b class="${p && (p.protocol === 'tcp' || p.relay) ? 'bad' : ''}">${route}</b></span></div>`
+            + (r.issues || []).map((w) => `<div class="lk-warn">⚠ ${esc(w)}</div>`).join('')
+            + (!slow ? `<div class="lk-good">Прямое соединение по UDP, задержки нет — со стороны сети всё в порядке.</div>` : '');
+        } else { o.textContent = r.error; o.className = 'bad'; o.title = r.raw || ''; if (r.ph && r.ph.signal) res.innerHTML = `<div class="lk-phases"><span>токен <b>${sec(r.ph.token)}</b></span><span>сигнал <b>${sec(r.ph.signal)}</b></span><span>медиаканал <b class="bad">не установлен</b></span></div>`; }
+        b.disabled = false;
+      };
     } catch (e) { el.innerHTML = `<p class="md-text">Не удалось получить статус: ${esc(e.message)}</p>`; }
   },
   async loadSessions() {
@@ -2876,6 +3344,235 @@ const Settings = {
     catch (e) { el.innerHTML = `<p class="md-text">${esc(e.message)}</p>`; }
   },
 };
+$('#coverInput').addEventListener('change', async (e) => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try { const small = await compressImage(f, 1600, 0.85); const j = await upload(small, small.name); socket.emit('update_profile', { banner: j.url }); S.me.banner = j.url; setTimeout(() => { if (Settings.tab === 'profile') Settings.render(); }, 200); } catch (err) { toast(err.message, 'err'); }
+});
+/* ---------- почта: привязка, отвязка, подтверждение входа ---------- */
+const EmailFlow = {
+  cur: null,
+  sectionHTML(sw) {
+    const em = S.me.email || ''; const shown = esc(S.me.emailMasked || em);
+    const when = em && S.me.emailAt ? new Date(S.me.emailAt).toLocaleDateString('ru-RU') : '';
+    if (!S.mail) return `<p class="md-text">Отправка писем не настроена на сервере (EMAILJS_* в .env) — привязка почты и вход с кодом недоступны.${em ? ' Привязанная почта: ' + shown + '.' : ''}</p>`;
+    if (!em) return `<div class="row-item"><div class="rb"><div class="rt">Почта не привязана</div><div class="rs">Привяжите почту, чтобы восстановить пароль, если забудете его, и включить подтверждение входа кодом из письма</div></div><button class="btn sm" id="emBind">Привязать</button></div>`;
+    return `<div class="row-item"><div class="rb"><div class="rt"><span class="em-ok">✓</span> ${shown}</div><div class="rs">${when ? 'Привязана ' + when + '. ' : ''}Через неё можно восстановить пароль</div></div><button class="btn sm ghost" id="emChange">Сменить</button><button class="btn sm ghost" id="emUnbind" style="color:var(--danger)">Отвязать</button></div>`;
+  },
+  _modal({ title, intro, purpose, needEmail = false, needPassword = false, autoSend = false, goLabel = 'Отправить код', doneLabel = 'Подтвердить', danger = false, action }) {
+    this.cur = { purpose, step: autoSend ? 2 : 1, action, needEmail, needPassword, doneLabel };
+    const to = esc(S.me.emailMasked || S.me.email || '');
+    Modal.push(`${mdHead(esc(title))}<div class="md-body"><p class="md-text" style="line-height:1.5;margin:0 0 12px">${intro}</p>
+      ${needEmail ? '<div class="field"><label>Адрес почты</label><input id="emEmail" type="email" maxlength="254" placeholder="you@gmail.com" autocomplete="email" inputmode="email"></div>' : ''}
+      ${needPassword ? '<div class="field"><label>Пароль от аккаунта</label><input id="emPw" type="password" maxlength="72" autocomplete="current-password"></div>' : ''}
+      <div id="emStep2" class="${autoSend ? '' : 'hidden'}"><p class="md-text" id="emSent">${autoSend ? 'Отправляем код на <b>' + to + '</b>…' : ''}</p><div class="field"><label>Код из письма</label><input id="emCode" class="code-input" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="6" placeholder="••••••"></div><div style="text-align:right"><button class="btn ghost sm" id="emResend" disabled>Отправить ещё раз</button></div></div>
+      <div class="auth-error" id="emErr"></div></div>
+      <div class="md-foot"><button class="btn ghost" data-close>Отмена</button><button class="btn ${danger ? 'danger' : ''}" id="emGo">${autoSend ? doneLabel : goLabel}</button></div>`, { sm: true, onClose: () => { this.cur = null; } });
+    $('#emGo').onclick = () => this.go();
+    $('#emResend').onclick = () => this.send();
+    $('#emCode').addEventListener('keydown', (e) => { if (e.key === 'Enter') this.go(); });
+    if (needEmail) $('#emEmail').addEventListener('keydown', (e) => { if (e.key === 'Enter') this.go(); });
+    if (autoSend) this.send();
+  },
+  send() {
+    const c = this.cur; if (!c) return; const err = $('#emErr'); err.textContent = '';
+    const payload = { purpose: c.purpose };
+    if (c.needEmail) { const em = ($('#emEmail').value || '').trim(); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { err.textContent = 'Введите корректный адрес почты'; $('#emEmail').focus(); return; } payload.email = em; }
+    if (c.needPassword && c.step === 1 && !$('#emPw').value) { err.textContent = 'Введите пароль от аккаунта'; $('#emPw').focus(); return; }
+    $('#emGo').disabled = true; $('#emResend').disabled = true;
+    socket.emit('email_send_code', payload);
+  },
+  onSent(d) {
+    const c = this.cur; if (!c || c.purpose !== d.purpose) return;
+    c.step = 2; $('#emStep2').classList.remove('hidden');
+    $('#emSent').innerHTML = 'Код отправлен на <b>' + esc(d.to) + '</b>. Он действует ' + Math.round((d.ttl || 600) / 60) + ' минут.';
+    const go = $('#emGo'); go.disabled = false; go.textContent = c.doneLabel;
+    if ($('#emEmail')) $('#emEmail').readOnly = true;
+    countdown($('#emResend'), d.retryIn || 45, 'Отправить ещё раз');
+    setTimeout(() => $('#emCode')?.focus(), 50);
+  },
+  onError(d) {
+    const c = this.cur;
+    if (!c) { toast(d.error || 'Ошибка', 'err'); if (Modal.isOpen() && Settings.tab === 'security') Settings.render(); return; }
+    const err = $('#emErr'); if (err) err.textContent = d.error || 'Ошибка';
+    const go = $('#emGo'); if (go) go.disabled = false;
+    if (d.retryIn) countdown($('#emResend'), d.retryIn, 'Отправить ещё раз');
+    else if (d.dead) { const rs = $('#emResend'); if (rs) { clearInterval(rs._cd); rs.disabled = false; rs.textContent = 'Отправить новый код'; } }
+    $('#emCode')?.select();
+  },
+  go() {
+    const c = this.cur; if (!c) return;
+    if (c.step === 1) return this.send();
+    const code = codeOf($('#emCode')); const err = $('#emErr');
+    if (code.length !== 6) { err.textContent = 'Введите 6 цифр из письма'; $('#emCode').focus(); return; }
+    if (c.needPassword && !$('#emPw').value) { err.textContent = 'Введите пароль от аккаунта'; $('#emPw').focus(); return; }
+    err.textContent = ''; $('#emGo').disabled = true;
+    c.action({ code, password: c.needPassword ? $('#emPw').value : undefined, email: c.needEmail ? $('#emEmail').value.trim() : undefined });
+    setTimeout(() => { const g = $('#emGo'); if (g) g.disabled = false; }, 1500);
+  },
+  onOk(d) {
+    Object.assign(S.me, { email: d.email || '', emailMasked: d.emailMasked || '', emailAt: d.emailAt || 0, email2fa: !!d.email2fa });
+    if ('phone2fa' in d) S.me.phone2fa = !!d.phone2fa;
+    const msg = d.type === 'bind' ? 'Почта привязана: ' + d.emailMasked : d.type === 'unbind' ? 'Почта отвязана' : d.email2fa ? 'Подтверждение входа по почте включено' : 'Подтверждение входа выключено';
+    toast(msg, 'ok');
+    if (this.cur) { this.cur = null; Modal.onClose = null; Modal.close(); }
+    else if (Modal.isOpen() && Settings.tab === 'security') Settings.render();
+    renderSbHint();
+  },
+  bind() {
+    const change = !!S.me.email;
+    this._modal({ title: change ? 'Сменить почту' : 'Привязать почту', purpose: 'bind', needEmail: true, needPassword: true, goLabel: 'Отправить код', doneLabel: change ? 'Сменить' : 'Привязать',
+      intro: change ? 'Код придёт на новый адрес. После смены восстановление пароля и подтверждение входа пойдут на него.' : 'На адрес придёт 6-значный код. Привязанная почта нужна, чтобы восстановить пароль и включить подтверждение входа.',
+      action: (v) => socket.emit('email_verify', { code: v.code, password: v.password }) });
+  },
+  unbind() {
+    this._modal({ title: 'Отвязать почту', purpose: 'unbind', needPassword: true, autoSend: true, doneLabel: 'Отвязать', danger: true,
+      intro: 'Без почты нельзя будет восстановить пароль, а подтверждение входа выключится. Нужны пароль и код, отправленный на текущий адрес.',
+      action: (v) => socket.emit('email_unbind', { code: v.code, password: v.password }) });
+  },
+  disable2fa() {
+    this._modal({ title: 'Выключить подтверждение входа', purpose: '2fa_off', autoSend: true, doneLabel: 'Выключить', danger: true,
+      intro: 'Чтобы выключить защиту, подтвердите кодом из письма — он отправлен на вашу почту.',
+      action: (v) => socket.emit('email_2fa', { on: false, code: v.code }) });
+  },
+};
+/* ===== Привязка телефона / отвязка / SMS-подтверждение входа (модалки в настройках) ===== */
+const PhoneFlow = {
+  cur: null,
+  sectionHTML() {
+    const ph = S.me.phone || ''; const shown = esc(S.me.phoneMasked || maskPhoneClient(ph));
+    const when = ph && S.me.phoneAt ? new Date(S.me.phoneAt).toLocaleDateString('ru-RU') : '';
+    if (!S.phone) return `<p class="md-text">Подтверждение по SMS не настроено на сервере (FIREBASE_* в .env) — привязка телефона недоступна.${ph ? ' Привязанный номер: ' + shown + '.' : ''}</p>`;
+    if (!ph) return `<div class="row-item"><div class="rb"><div class="rt">Телефон не привязан</div><div class="rs">Привяжите номер, чтобы восстанавливать пароль по SMS и подтверждать вход кодом из SMS. Номер никому не показывается</div></div><button class="btn sm" id="phBind">Привязать</button></div>`;
+    return `<div class="row-item"><div class="rb"><div class="rt"><span class="em-ok">✓</span> ${shown}</div><div class="rs">${when ? 'Привязан ' + when + '. ' : ''}Через него можно восстановить пароль по SMS</div></div><button class="btn sm ghost" id="phChange">Сменить</button><button class="btn sm ghost" id="phUnbind" style="color:var(--danger)">Отвязать</button></div>`;
+  },
+  _modal({ title, intro, purpose, needPhone = false, needPassword = false, autoSend = false, goLabel = 'Отправить SMS', doneLabel = 'Подтвердить', danger = false, action }) {
+    this.cur = { purpose, step: autoSend ? 2 : 1, action, needPhone, needPassword, doneLabel, phone: autoSend ? (S.me.phone || '') : '' };
+    const to = esc(S.me.phoneMasked || maskPhoneClient(S.me.phone || ''));
+    Modal.push(`${mdHead(esc(title))}<div class="md-body"><p class="md-text" style="line-height:1.5;margin:0 0 12px">${intro}</p>
+      ${needPhone ? '<div class="field"><label>Номер телефона</label><input id="phPhone" type="tel" maxlength="20" placeholder="+7 999 123-45-67" autocomplete="tel" inputmode="tel"></div>' : ''}
+      ${needPassword ? '<div class="field"><label>Пароль от аккаунта</label><input id="phPw" type="password" maxlength="72" autocomplete="current-password"></div>' : ''}
+      <div id="phStep2" class="${autoSend ? '' : 'hidden'}"><p class="md-text" id="phSent">${autoSend ? 'Отправляем SMS на <b>' + to + '</b>…' : ''}</p><div class="field"><label>Код из SMS</label><input id="phCode" class="code-input" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="6" placeholder="••••••"></div><div style="text-align:right"><button class="btn ghost sm" id="phResend" disabled>Отправить ещё раз</button></div></div>
+      <div id="phRc" class="rc-box"></div><div class="auth-error" id="phErr"></div><div class="rc-note">${RC_NOTE}</div></div>
+      <div class="md-foot"><button class="btn ghost" data-close>Отмена</button><button class="btn ${danger ? 'danger' : ''}" id="phGo">${autoSend ? doneLabel : goLabel}</button></div>`, { sm: true, onClose: () => { this.cur = null; } });
+    $('#phGo').onclick = () => this.go();
+    $('#phResend').onclick = () => this.send();
+    $('#phCode').addEventListener('keydown', (e) => { if (e.key === 'Enter') this.go(); });
+    if (needPhone) $('#phPhone').addEventListener('keydown', (e) => { if (e.key === 'Enter') this.go(); });
+    if (autoSend) this.send(); else setTimeout(() => $(needPhone ? '#phPhone' : '#phPw')?.focus(), 50);
+  },
+  async send() {
+    const c = this.cur; if (!c) return; const err = $('#phErr'); err.textContent = '';
+    if (c.needPhone) {
+      const p = normPhoneClient($('#phPhone').value);
+      if (!p) { err.textContent = 'Введите номер в международном формате, например +7 999 123-45-67'; $('#phPhone').focus(); return; }
+      if (c.purpose === 'bind' && p === S.me.phone) { err.textContent = 'Этот номер уже привязан к аккаунту'; return; }
+      c.phone = p;
+    }
+    if (c.needPassword && c.step === 1 && !$('#phPw').value) { err.textContent = 'Введите пароль от аккаунта'; $('#phPw').focus(); return; }
+    const go = $('#phGo'); go.disabled = true; $('#phResend').disabled = true;
+    try {
+      await Phone.send(c.phone, $('#phRc'));
+      if (this.cur !== c) return;
+      c.step = 2; $('#phStep2').classList.remove('hidden');
+      $('#phSent').innerHTML = 'Код отправлен в SMS на <b>' + esc(maskPhoneClient(c.phone)) + '</b>. Он действует несколько минут.';
+      go.disabled = false; go.textContent = c.doneLabel; if ($('#phPhone')) $('#phPhone').readOnly = true;
+      countdown($('#phResend'), 60, 'Отправить ещё раз'); setTimeout(() => $('#phCode')?.focus(), 50);
+    } catch (e) {
+      if (this.cur !== c || e.code === 'nm/superseded') return;
+      err.textContent = e.message; go.disabled = false;
+      const rs = $('#phResend'); clearInterval(rs._cd); rs.disabled = c.step !== 2; rs.textContent = 'Отправить ещё раз';
+    }
+  },
+  async go() {
+    const c = this.cur; if (!c) return;
+    if (c.step === 1) return this.send();
+    const code = codeOf($('#phCode')); const err = $('#phErr');
+    if (code.length !== 6) { err.textContent = 'Введите 6 цифр из SMS'; $('#phCode').focus(); return; }
+    if (c.needPassword && !$('#phPw').value) { err.textContent = 'Введите пароль от аккаунта'; $('#phPw').focus(); return; }
+    err.textContent = ''; const go = $('#phGo'); go.disabled = true;
+    try {
+      const idToken = await Phone.confirm(code); if (this.cur !== c) return;
+      c.action({ idToken, password: c.needPassword ? $('#phPw').value : undefined });
+      setTimeout(() => { const g = $('#phGo'); if (g) g.disabled = false; }, 1500);
+    } catch (e) { if (this.cur !== c) return; err.textContent = e.message; go.disabled = false; $('#phCode').select(); }
+  },
+  onError(d) {
+    const c = this.cur;
+    if (!c) { toast(d.error || 'Ошибка', 'err'); if (Modal.isOpen() && Settings.tab === 'security') Settings.render(); return; }
+    const err = $('#phErr'); if (err) err.textContent = d.error || 'Ошибка';
+    const go = $('#phGo'); if (go) go.disabled = false;
+    const rs = $('#phResend'); if (rs && c.step === 2) { clearInterval(rs._cd); rs.disabled = false; rs.textContent = 'Отправить новый код'; } // токен одноразовый — после ошибки сервера нужен новый код
+    $('#phCode')?.select();
+  },
+  onOk(d) {
+    Object.assign(S.me, { phone: d.phone || '', phoneMasked: d.phoneMasked || '', phoneAt: d.phoneAt || 0, phone2fa: !!d.phone2fa });
+    if ('email2fa' in d) S.me.email2fa = !!d.email2fa;
+    const msg = d.type === 'bind' ? 'Телефон привязан: ' + d.phoneMasked : d.type === 'unbind' ? 'Телефон отвязан' : d.phone2fa ? 'Подтверждение входа по SMS включено' : 'Подтверждение входа выключено';
+    toast(msg, 'ok');
+    if (this.cur) { this.cur = null; Modal.onClose = null; Modal.close(); }
+    else if (Modal.isOpen() && Settings.tab === 'security') Settings.render();
+    renderSbHint();
+  },
+  bind() {
+    const change = !!S.me.phone;
+    this._modal({ title: change ? 'Сменить номер телефона' : 'Привязать телефон', purpose: 'bind', needPhone: true, needPassword: true, doneLabel: change ? 'Сменить' : 'Привязать',
+      intro: change ? 'SMS с кодом придёт на новый номер. После смены восстановление пароля и подтверждение входа пойдут на него.' : 'На номер придёт SMS с 6-значным кодом. Привязанный телефон нужен, чтобы восстановить пароль и подтверждать вход. Номер никому не показывается.',
+      action: (v) => socket.emit('phone_verify', { idToken: v.idToken, password: v.password }) });
+  },
+  unbind() {
+    this._modal({ title: 'Отвязать телефон', purpose: 'unbind', needPassword: true, autoSend: true, doneLabel: 'Отвязать', danger: true,
+      intro: 'Без телефона нельзя будет восстановить пароль по SMS, а подтверждение входа по SMS выключится. Нужны пароль и код из SMS на текущий номер.',
+      action: (v) => socket.emit('phone_unbind', { idToken: v.idToken, password: v.password }) });
+  },
+  disable2fa() {
+    this._modal({ title: 'Выключить подтверждение входа', purpose: '2fa_off', autoSend: true, doneLabel: 'Выключить', danger: true,
+      intro: 'Чтобы выключить защиту, подтвердите кодом из SMS — он отправлен на ваш номер.',
+      action: (v) => socket.emit('phone_2fa', { on: false, idToken: v.idToken }) });
+  },
+};
+/* единый переключатель второго шага входа: выключено / код на почту / код по SMS */
+function twofaMode() { return S.me.phone && S.me.phone2fa ? 'sms' : S.me.email && S.me.email2fa ? 'email' : 'none'; }
+function twofaHTML() {
+  const cur = twofaMode(); const canEmail = !!(S.mail && S.me.email), canSms = !!(S.phone && S.me.phone);
+  if (!canEmail && !canSms) return `<p class="md-text">Чтобы подтверждать вход кодом, привяжите почту или телефон.</p>`;
+  const opt = (v, label, ok) => `<option value="${v}" ${cur === v ? 'selected' : ''} ${ok ? '' : 'disabled'}>${label}</option>`;
+  return `<div class="row-item"><div class="rb"><div class="rt">Второй шаг при входе</div><div class="rs">При входе по паролю понадобится код из письма или SMS. Вход по QR с уже авторизованного устройства — без кода</div></div><select id="twofaSel">${opt('none', 'Выключено', true)}${opt('email', 'Код на почту' + (canEmail ? '' : ' (почта не привязана)'), canEmail)}${opt('sms', 'Код по SMS' + (canSms ? '' : ' (телефон не привязан)'), canSms)}</select></div>`;
+}
+function setTwofa(v) {
+  const cur = twofaMode(); if (v === cur) return;
+  if (v === 'email') { if (!S.me.email) { toast('Сначала привяжите почту', 'err'); Settings.render(); return; } socket.emit('email_2fa', { on: true }); return; }
+  if (v === 'sms') { if (!S.me.phone) { toast('Сначала привяжите телефон', 'err'); Settings.render(); return; } socket.emit('phone_2fa', { on: true }); return; }
+  if (cur === 'email') EmailFlow.disable2fa(); else PhoneFlow.disable2fa();
+}
+function renderSbHint() {
+  const el = $('#sbHint'); if (!el) return;
+  const show = !!(S.ready && S.me && (S.mail || S.phone) && !S.me.email && !S.me.phone && localStorage.getItem('nm_hint_email') !== '1');
+  el.classList.toggle('hidden', !show);
+  if (show) el.innerHTML = `${icon('shield')}<div class="rb"><div class="rt">Защитите аккаунт</div><div class="rs">Привяжите ${S.mail && S.phone ? 'почту или телефон' : S.phone ? 'телефон' : 'почту'}, чтобы не потерять доступ</div></div><button class="btn sm" data-a="bind">Привязать</button><button class="icon-btn" data-a="x" title="Скрыть">${icon('x', 'sm')}</button>`;
+}
+$('#sbHint').addEventListener('click', (e) => {
+  const a = e.target.closest('[data-a]')?.dataset.a; if (!a) return;
+  if (a === 'x') { localStorage.setItem('nm_hint_email', '1'); renderSbHint(); }
+  else { Settings.open('security'); if (!(S.mail && S.phone)) setTimeout(() => (S.phone ? PhoneFlow.bind() : EmailFlow.bind()), 80); }
+});
+function deleteMyAccount() {
+  if (S.isOwner) { toast('Аккаунт владельца сервера удалить нельзя', 'err'); return; }
+  if (S.mail && S.me.email) {
+    EmailFlow._modal({ title: 'Удалить аккаунт?', purpose: 'delete', needPassword: true, autoSend: true, doneLabel: 'Удалить навсегда', danger: true,
+      intro: `Это действие нельзя отменить. Вы выйдете из всех групп и каналов, ваши боты, избранное и секретные чаты будут удалены, все сессии закрыты. Имя @${esc(S.me.username)} останется занятым. Для подтверждения нужны пароль и код, отправленный на <b>${esc(S.me.emailMasked || S.me.email)}</b>.`,
+      action: (v) => socket.emit('delete_account', { password: v.password, code: v.code }) });
+    return;
+  }
+  if (S.phone && S.me.phone) {
+    PhoneFlow._modal({ title: 'Удалить аккаунт?', purpose: 'delete', needPassword: true, autoSend: true, doneLabel: 'Удалить навсегда', danger: true,
+      intro: `Это действие нельзя отменить. Вы выйдете из всех групп и каналов, ваши боты, избранное и секретные чаты будут удалены, все сессии закрыты. Имя @${esc(S.me.username)} останется занятым. Для подтверждения нужны пароль и код из SMS на <b>${esc(S.me.phoneMasked || maskPhoneClient(S.me.phone))}</b>.`,
+      action: (v) => socket.emit('delete_account', { password: v.password, idToken: v.idToken }) });
+    return;
+  }
+  Modal.open(`${mdHead('Удалить аккаунт?')}<div class="md-body"><p class="md-text">Это действие нельзя отменить. Вы выйдете из всех групп и каналов, ваши боты, избранное и секретные чаты будут удалены, все сессии закрыты. Переписки у собеседников останутся с пометкой «Удалённый аккаунт». Имя @${esc(S.me.username)} останется занятым.</p><div class="field"><label>Подтвердите паролем</label><input type="password" id="delPw" autocomplete="current-password" maxlength="72"></div></div><div class="md-foot"><button class="btn ghost" data-close>Отмена</button><button class="btn danger" id="delOk">Удалить навсегда</button></div>`, { sm: true });
+  $('#delOk').onclick = () => { const pw = $('#delPw').value; if (!pw) { $('#delPw').focus(); return; } socket.emit('delete_account', { password: pw }); Modal.close(); };
+  setTimeout(() => $('#delPw')?.focus(), 50);
+}
 $('#avatarInput').addEventListener('change', async (e) => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   try { const small = await compressImage(f, 512, 0.85); const j = await upload(small, small.name); socket.emit('update_profile', { avatar: j.url }); S.me.avatar = j.url; setTimeout(() => { if (Settings.tab === 'profile') Settings.render(); }, 200); } catch (err) { toast(err.message, 'err'); }
@@ -2891,6 +3588,24 @@ function openFolderEditor(id) {
 }
 
 /* ====================== CALLS ====================== */
+/* ---- Программное усиление громкости собеседника (>100%): к обычному воспроизведению добавляется та же дорожка через GainNode ---- */
+const AudioBoost = (() => {
+  let ctx = null; const chains = new Map(); // key → { src, gain, track }
+  function drop(k) { const c = chains.get(k); if (!c) return; try { c.src.disconnect(); c.gain.disconnect(); } catch { } chains.delete(k); }
+  function set(k, track, extra) {
+    if (!extra || !track || track.readyState === 'ended') { drop(k); return; }
+    try {
+      if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === 'suspended') ctx.resume().catch(() => { });
+      const cur = chains.get(k);
+      if (cur && cur.track === track) { cur.gain.gain.setTargetAtTime(extra, ctx.currentTime, 0.05); return; }
+      drop(k);
+      const src = ctx.createMediaStreamSource(new MediaStream([track])); const gain = ctx.createGain(); gain.gain.value = extra; src.connect(gain); gain.connect(ctx.destination);
+      chains.set(k, { src, gain, track });
+    } catch (e) { console.warn('AudioBoost:', e.message); }
+  }
+  return { set, clear: () => { for (const k of [...chains.keys()]) drop(k); } };
+})();
 function syncRange(el) { const min = Number(el.min || 0), max = Number(el.max || 100), v = Number(el.value); el.style.setProperty('--pct', Math.round(((v - min) / (max - min || 1)) * 100) + '%'); }
 document.addEventListener('input', (e) => { if (e.target.matches?.('input[type=range]')) syncRange(e.target); });
 const CallPrefs = {
@@ -3146,9 +3861,65 @@ const Call = {
     try { st.pc?.close(); } catch { }
     try { st.lk?.disconnect(); } catch { }
     st.local?.getTracks().forEach((t) => t.stop()); st.camTrack?.stop(); st.screen?.getTracks().forEach((t) => t.stop());
-    this.el.remote.srcObject = null; this.el.local.srcObject = null; this.el.screen.classList.add('hidden'); this.el.mini.classList.add('hidden'); $('#callSettings').classList.add('hidden'); $('#callQuality').classList.add('hidden'); $('#lkAudio').innerHTML = ''; this.el.grid.innerHTML = '';
+    this.el.remote.srcObject = null; this.el.local.srcObject = null; this.el.screen.classList.add('hidden'); this.el.mini.classList.add('hidden'); $('#callSettings').classList.add('hidden'); $('#callQuality').classList.add('hidden'); $('#lkAudio').innerHTML = ''; this.el.grid.innerHTML = ''; this.el.grid.classList.remove('focus', 'solo');
+    AudioBoost.clear(); this.hideTileMenu(); this.el.remote.volume = 1;
     if (document.fullscreenElement) document.exitFullscreen?.().catch(() => { });
   },
+  /* ---- Громкость участника: 0–200 % (LiveKit — setVolume + усиление, P2P — элемент + усиление) ---- */
+  setVolume(identity, v) {
+    const st = this.st; if (!st) return; v = clamp(Number(v) || 0, 0, 2); st.volumes = st.volumes || {}; st.volumes[key(identity)] = v;
+    if (st.mode === 'livekit') {
+      const p = st.lk && [...st.lk.remoteParticipants.values()].find((x) => key(x.identity) === key(identity));
+      if (p) {
+        try { p.setVolume(Math.min(1, v)); } catch { }
+        const pubs = p.getTrackPublications ? p.getTrackPublications() : [...p.trackPublications.values()];
+        const aud = pubs.find((x) => x.kind === 'audio' && x.track && x.track.mediaStreamTrack);
+        AudioBoost.set('lk:' + key(identity), aud ? aud.track.mediaStreamTrack : null, v > 1 ? v - 1 : 0);
+      }
+    } else {
+      this.el.remote.volume = Math.min(1, v); this.el.remote.muted = v === 0;
+      const at = st.remote && st.remote.getAudioTracks()[0];
+      AudioBoost.set('p2p', at || null, v > 1 ? v - 1 : 0);
+    }
+    $$('.call-tile[data-p]', this.el.grid).forEach((t) => {
+      if (key(t.dataset.p) !== key(identity) || t.dataset.k !== 'cam') return;
+      let b = t.querySelector('.vol');
+      if (v === 1) { b?.remove(); return; }
+      if (!b) { b = document.createElement('span'); b.className = 'vol'; t.appendChild(b); }
+      b.innerHTML = `${icon(v === 0 ? 'mic-off' : 'volume')}${v === 0 ? 'без звука' : Math.round(v * 100) + '%'}`;
+    });
+  },
+  volumeOf(identity) { const st = this.st; return st && st.volumes && st.volumes[key(identity)] !== undefined ? st.volumes[key(identity)] : 1; },
+  /* ---- Фокус (развернуть плитку на большой экран) ---- */
+  tileId: (t) => t.dataset.p + '/' + t.dataset.k,
+  setFocus(id) { const st = this.st; if (!st) return; st.focus = id || null; st.focusAuto = false; st.focusOff = !id; if (st.mode === 'livekit') this.lkRefresh(); },
+  /* ---- Меню плитки: громкость, развернуть, на весь экран ---- */
+  tileMenu(tile, x, y) {
+    const st = this.st; if (!st) return; const menu = $('#tileMenu');
+    const p = tile ? tile.dataset.p : st.peer; const k = tile ? tile.dataset.k : 'cam'; const isLocal = tile ? isMe(p) : false;
+    const u = userOf(p) || { username: p, displayName: p }; const vol = this.volumeOf(p);
+    const focused = tile && st.focus === this.tileId(tile);
+    menu.innerHTML = `<div class="tm-head">${avatarHTML({ ...u, name: u.displayName }, 28)}<span style="overflow:hidden;text-overflow:ellipsis">${esc(u.displayName)}${isLocal ? ' (вы)' : ''}${k === 'screen' ? ' · экран' : ''}</span></div>
+      ${!isLocal ? `<div class="tm-vol"><div class="lbl"><span>Громкость</span><b id="tmVolV">${vol === 0 ? 'без звука' : Math.round(vol * 100) + '%'}</b></div><input type="range" id="tmVol" min="0" max="200" step="5" value="${Math.round(vol * 100)}"></div><div class="tm-hint">100 % — как есть; выше — программное усиление (без наушников возможно эхо)</div>
+      <div class="ctx-item" data-tm="mute">${icon(vol === 0 ? 'volume' : 'mic-off')}${vol === 0 ? 'Включить звук' : 'Выключить звук'}</div><div class="ctx-sep"></div>` : ''}
+      ${tile ? `<div class="ctx-item" data-tm="focus">${icon(focused ? 'min' : 'max')}${focused ? 'Свернуть в сетку' : 'Развернуть на большой экран'}</div>` : ''}
+      <div class="ctx-item" data-tm="fs">${icon('max')}На весь экран (F)</div>
+      ${!isLocal && k === 'cam' && !userOf(p)?.deleted ? `<div class="ctx-item" data-tm="profile">${icon('user')}Профиль</div>` : ''}`;
+    const host = (document.fullscreenElement && this.el.screen.contains(document.fullscreenElement)) ? document.fullscreenElement : this.el.screen;
+    if (menu.parentElement !== host) host.appendChild(menu);
+    menu.classList.remove('hidden');
+    const w = menu.offsetWidth, h = menu.offsetHeight;
+    menu.style.left = clamp(x, 8, window.innerWidth - w - 8) + 'px'; menu.style.top = clamp(y, 8, window.innerHeight - h - 8) + 'px';
+    const r = $('#tmVol'); if (r) { syncRange(r); r.oninput = () => { syncRange(r); const v = Number(r.value) / 100; this.setVolume(p, v); $('#tmVolV').textContent = v === 0 ? 'без звука' : Math.round(v * 100) + '%'; const mi = menu.querySelector('[data-tm=mute]'); if (mi) mi.innerHTML = `${icon(v === 0 ? 'volume' : 'mic-off')}${v === 0 ? 'Включить звук' : 'Выключить звук'}`; }; }
+    menu.onclick = (e) => {
+      const it = e.target.closest('[data-tm]'); if (!it) return; const a = it.dataset.tm;
+      if (a === 'mute') { const cur = this.volumeOf(p); const nv = cur === 0 ? (st.volBefore && st.volBefore[key(p)]) || 1 : 0; st.volBefore = st.volBefore || {}; if (cur !== 0) st.volBefore[key(p)] = cur; this.setVolume(p, nv); this.hideTileMenu(); return; }
+      if (a === 'focus') { this.setFocus(focused ? null : this.tileId(tile)); this.hideTileMenu(); return; }
+      if (a === 'fs') { this.hideTileMenu(); const el = tile || this.el.screen; if (document.fullscreenElement === el) document.exitFullscreen?.(); else { if (document.fullscreenElement) document.exitFullscreen?.(); (el.requestFullscreen ? el.requestFullscreen() : Promise.reject()).catch(() => this.el.screen.requestFullscreen?.().catch(() => toast('Полноэкранный режим недоступен', 'err'))); } return; }
+      if (a === 'profile') { this.hideTileMenu(); if (!st.minimized) this.minimize(true); openProfile(p); return; }
+    };
+  },
+  hideTileMenu() { const m = $('#tileMenu'); if (!m) return; m.classList.add('hidden'); m.innerHTML = ''; m.onclick = null; },
   /* ---- LiveKit ---- */
   async loadLK() {
     if (window.LivekitClient) return true;
@@ -3161,26 +3932,47 @@ const Call = {
     for (const p of peers) socket.emit('call_invite', { to: p, room, video, conversationId: convId, mode: 'livekit' });
     await this.joinLK(room, video, convId, title, peers.length === 1 ? userOf(peers[0]) : null, peers);
   },
-  // Самопроверка: подключение к пустой тестовой комнате (сигнал + медиаканал), без микрофона/камеры
+  // Статистика выбранной ICE-пары: протокол (udp/tcp), тип кандидатов (host/srflx/relay), адрес сервера
+  async pcPairInfo(pc) {
+    try {
+      if (!pc) return null; const stats = await pc.getStats(); let selId = null; const pairs = []; const cands = new Map();
+      stats.forEach((x) => { if (x.type === 'transport' && x.selectedCandidatePairId) selId = x.selectedCandidatePairId; else if (x.type === 'candidate-pair') pairs.push(x); else if (x.type === 'local-candidate' || x.type === 'remote-candidate') cands.set(x.id, x); });
+      const pair = pairs.find((x) => x.id === selId) || pairs.find((x) => x.nominated && x.state === 'succeeded') || pairs.find((x) => x.state === 'succeeded');
+      if (!pair) return null; const l = cands.get(pair.localCandidateId) || {}, r = cands.get(pair.remoteCandidateId) || {};
+      return { protocol: String(r.protocol || l.protocol || '').toLowerCase(), local: l.candidateType || '', remote: r.candidateType || '', addr: (r.address || r.ip) ? `${r.address || r.ip}:${r.port || ''}` : '', relay: l.candidateType === 'relay' || r.candidateType === 'relay', rtt: pair.currentRoundTripTime };
+    } catch { return null; }
+  },
+  lkPcs(room) { const pm = room && room.engine && room.engine.pcManager; return pm ? [pm.subscriber && pm.subscriber._pc, pm.publisher && pm.publisher._pc].filter(Boolean) : []; },
+  async lkNetInfo(room) { for (const pc of this.lkPcs(room)) { const p = await this.pcPairInfo(pc); if (p) return p; } return null; },
+  // Самопроверка: подключение к пустой тестовой комнате (сигнал + медиаканал), без микрофона/камеры, с разбивкой по этапам
   async selfTest() {
-    const t0 = Date.now(); let url = ''; let room = null;
-    if (!(await this.loadLK())) return { ok: false, error: 'Не удалось загрузить LiveKit SDK (/vendor/livekit-client.umd.js)' };
+    const t0 = Date.now(); let url = ''; let room = null; const ph = { token: 0, signal: 0, ice: 0 };
+    if (!(await this.loadLK())) return { ok: false, error: 'Не удалось загрузить LiveKit SDK (/vendor/livekit-client.umd.js)', ph };
     const LK = window.LivekitClient;
     try {
       const r = await api('/get-livekit-token', { roomName: 'nm-selftest-' + key(S.me.username), participantName: S.me.username });
-      url = r.url; room = new LK.Room(); let timer;
-      const timeout = new Promise((_, rej) => { timer = setTimeout(() => rej(new Error('nm_timeout')), 20000); });
-      try { await Promise.race([room.connect(url, r.token), timeout]); } finally { clearTimeout(timer); }
+      ph.token = Date.now() - t0; url = r.url; room = new LK.Room(); let timer; const t1 = Date.now(); let tSig = 0;
+      room.on(LK.RoomEvent.SignalConnected, () => { tSig = Date.now() - t1; });
+      const timeout = new Promise((_, rej) => { timer = setTimeout(() => rej(new Error('nm_timeout')), 25000); });
+      try { await Promise.race([room.connect(url, r.token, { peerConnectionTimeout: 25000 }), timeout]); } finally { clearTimeout(timer); }
+      ph.signal = tSig; ph.ice = Math.max(0, Date.now() - t1 - tSig);
+      const pair = await this.lkNetInfo(room);
       const ms = Date.now() - t0; await room.disconnect().catch(() => { }); room = null;
-      return { ok: true, ms, url };
-    } catch (e) { return { ok: false, error: this.lkErrorText(e, url), raw: String(e?.message || e), url }; }
+      const issues = [];
+      if (pair && pair.protocol === 'tcp' && !pair.relay) issues.push('Медиа идёт по TCP (ICE-TCP, порт 7881): UDP до LiveKit не проходит. Откройте UDP-диапазон RTC (по умолчанию 50000–60000) в файрволе и в облачной security group и задайте внешний IP (rtc.use_external_ip: true). По TCP звонки заметно хуже: задержка, заикания, обрывы.');
+      if (pair && pair.relay) issues.push('Соединение идёт через TURN-ретранслятор: работает, но с дополнительной задержкой (прямой UDP до LiveKit закрыт).');
+      if (ph.ice > 3000) issues.push(`Медиаканал устанавливался ${(ph.ice / 1000).toFixed(1)} с: браузер перебирал недоступные адреса LiveKit (внутренние IP контейнера/сервера, закрытые UDP-порты), пока не нашёл рабочий. В звонке это долгое «Подключение…», а на плохой сети — обрыв по таймауту. Лечится на сервере LiveKit: rtc.use_external_ip: true (или --node-ip <публичный IP>), открытые UDP-порты, для Docker — network_mode: host.`);
+      if (ph.signal > 2500) issues.push(`Сигнальный канал (WebSocket) устанавливался ${(ph.signal / 1000).toFixed(1)} с — сервер далеко или тормозит reverse-proxy/TLS.`);
+      if (ph.token > 2500) issues.push(`Сервер NMessenger выдавал токен ${(ph.token / 1000).toFixed(1)} с — сам сервер мессенджера отвечает медленно.`);
+      return { ok: true, ms, url, ph, pair, issues };
+    } catch (e) { return { ok: false, error: this.lkErrorText(e, url), raw: String(e?.message || e), url, ph }; }
     finally { try { room?.disconnect(); } catch { } }
   },
   // Понятное описание ошибки подключения к LiveKit вместо технических сообщений SDK
   lkErrorText(e, url) {
     const LK = window.LivekitClient; const R = LK && LK.ConnectionErrorReason; const host = (() => { try { return new URL(url).host; } catch { return url || ''; } })();
     const m = String(e?.message || '');
-    if (m === 'nm_timeout') return `Сервер LiveKit (${host}) не ответил за 30 с. Проверьте LIVEKIT_URL и что адрес доступен из браузера.`;
+    if (m === 'nm_timeout') return `Сервер LiveKit (${host}) не ответил за 35 с. Проверьте LIVEKIT_URL и что адрес доступен из браузера.`;
     if (e?.name === 'NotAllowedError' || /permission|not allowed by the user/i.test(m)) return 'Нет доступа к микрофону/камере — разрешите его в браузере';
     if (R && (e?.reason === R.NotAllowed || e?.status === 401)) return 'LiveKit отклонил токен: проверьте LIVEKIT_API_KEY и LIVEKIT_API_SECRET на сервере';
     if (/pc connection|peerconnection|ice/i.test(m) || (R && e?.reason === R.Timeout && /pc/i.test(m))) return `Медиасоединение с LiveKit (${host}) не установилось: на сервере LiveKit закрыты порты RTC (UDP 50000–60000 / TCP 7881) или не задан внешний IP (rtc.use_external_ip / --node-ip). Для сетей с жёстким NAT нужен TURN.`;
@@ -3201,11 +3993,12 @@ const Call = {
       const pr = CallPrefs.get();
       const r = st.lk = new LK.Room({ adaptiveStream: true, dynacast: true, audioCaptureDefaults: { deviceId: pr.mic || undefined, echoCancellation: true, noiseSuppression: true, autoGainControl: true }, videoCaptureDefaults: { deviceId: pr.cam || undefined, resolution: LK.VideoPresets.h720.resolution }, audioOutput: pr.spk ? { deviceId: pr.spk } : undefined });
       const refresh = () => this.lkRefresh();
-      r.on(LK.RoomEvent.TrackSubscribed, (track) => { if (track.kind === 'audio') { const el = track.attach(); $('#lkAudio').appendChild(el); } refresh(); });
+      r.on(LK.RoomEvent.TrackSubscribed, (track, pub, participant) => { if (track.kind === 'audio') { const el = track.attach(); $('#lkAudio').appendChild(el); if (participant && st.volumes && st.volumes[key(participant.identity)] !== undefined) setTimeout(() => this.st === st && this.setVolume(participant.identity, st.volumes[key(participant.identity)]), 50); } refresh(); });
       r.on(LK.RoomEvent.TrackUnsubscribed, (track) => { track.detach().forEach((el) => el.remove()); refresh(); });
       r.on(LK.RoomEvent.ParticipantConnected, (p) => { st.hadRemote = true; st.pending.delete(key(p.identity)); if (st.phase === 'ringing') this.lkActive(); Snd.connect(); refresh(); });
       r.on(LK.RoomEvent.ParticipantDisconnected, () => { refresh(); if (this.st === st && st.hadRemote && st.lk.remoteParticipants.size === 0 && st.invited.length <= 1) this.lkFarewell(st, 'Собеседник завершил звонок', st.dir === 'out' ? 'answered' : null, 1000, 'end'); });
       r.on(LK.RoomEvent.LocalTrackPublished, refresh); r.on(LK.RoomEvent.LocalTrackUnpublished, refresh);
+      r.on(LK.RoomEvent.TrackPublished, refresh); r.on(LK.RoomEvent.TrackUnpublished, () => setTimeout(refresh, 50));
       r.on(LK.RoomEvent.TrackMuted, refresh); r.on(LK.RoomEvent.TrackUnmuted, refresh);
       r.on(LK.RoomEvent.Reconnecting, () => { if (this.st === st) this.setStatus('Переподключение…'); });
       r.on(LK.RoomEvent.Reconnected, () => { if (this.st === st && st.phase === 'active') this.setStatus(fmtDur((Date.now() - st.startedAt) / 1000)); });
@@ -3216,8 +4009,8 @@ const Call = {
         if (reason === DR.DUPLICATE_IDENTITY) why = 'Вы подключились к этому звонку с другого устройства'; else if (reason === DR.ROOM_DELETED) why = 'Комната звонка закрыта'; else if (reason === DR.PARTICIPANT_REMOVED) why = 'Вас отключили от звонка'; else if (reason === DR.SIGNAL_CLOSE || reason === DR.STATE_MISMATCH || reason === DR.JOIN_FAILURE) why = 'Связь с сервером LiveKit потеряна';
         toast(why, why === 'Звонок завершён' ? undefined : 'err'); this.finishLK(st.dir === 'out' ? (st.phase === 'active' ? 'answered' : 'cancelled') : undefined);
       });
-      const timeout = new Promise((_, rej) => { st.connTimer = setTimeout(() => rej(new Error('nm_timeout')), 30000); });
-      await Promise.race([r.connect(url, token), timeout]); clearTimeout(st.connTimer);
+      const timeout = new Promise((_, rej) => { st.connTimer = setTimeout(() => rej(new Error('nm_timeout')), 35000); });
+      await Promise.race([r.connect(url, token, { peerConnectionTimeout: 30000 }), timeout]); clearTimeout(st.connTimer);
       if (this.st !== st || st.ending) return;
       try { await r.localParticipant.setMicrophoneEnabled(true); } catch (e) { if (e?.name === 'NotAllowedError' || e?.name === 'NotFoundError') { toast(e.name === 'NotFoundError' ? 'Микрофон не найден' : 'Нет доступа к микрофону', 'err'); st.muted = true; } else throw e; }
       if (video) { try { await r.localParticipant.setCameraEnabled(true); } catch { st.camOff = true; } }
@@ -3245,6 +4038,8 @@ const Call = {
     clearTimeout(st.ringTimer); Snd.stopRing();
     st.phase = 'active'; st.startedAt = Date.now(); if (st.lk && st.lk.remoteParticipants.size) st.hadRemote = true;
     this.el.screen.classList.add('active'); this.startTimer(); this.updateControls(); this.lkRefresh();
+    // через пару секунд смотрим, каким путём идёт медиа: TCP/TURN = UDP до LiveKit закрыт, качество будет хуже
+    setTimeout(async () => { if (this.st !== st || !st.lk) return; const p = await this.lkNetInfo(st.lk); st.net = p; if (p && (p.protocol === 'tcp' || p.relay)) { const enc = $('#callEnc'); enc.innerHTML += ` · ${p.relay ? 'TURN' : 'TCP'} ⚠`; enc.title = 'UDP до сервера LiveKit закрыт — медиа идёт ' + (p.relay ? 'через TURN-ретранслятор' : 'по TCP') + ', возможны задержки и обрывы. Подробности: Настройки → Звонки → Диагностика'; } }, 3000);
   },
   // Завершение LiveKit-звонка: уведомить приглашённых, записать в историю, отключиться
   finishLK(status) {
@@ -3266,12 +4061,26 @@ const Call = {
       const cam = pubs.find((x) => x.source === LK.Track.Source.Camera && x.track && !x.isMuted);
       const scr = pubs.find((x) => x.source === LK.Track.Source.ScreenShare && x.track);
       const mic = pubs.find((x) => x.source === LK.Track.Source.Microphone);
-      const mk = (pub, isScreen) => { const d = document.createElement('div'); d.className = 'call-tile' + (isScreen ? ' screen' : ''); d.dataset.p = p.identity; if (pub) { const v = pub.track.attach(); v._lkTrack = pub.track; v.autoplay = true; v.playsInline = true; v.muted = true; if (p.isLocal && !isScreen) v.style.transform = 'scaleX(-1)'; d.appendChild(v); } else d.innerHTML = avatarHTML({ ...u, name: u.displayName }, 88); d.insertAdjacentHTML('beforeend', `<span class="tn">${mic && mic.isMuted ? icon('mic-off') : ''}${esc(u.displayName)}${p.isLocal ? ' (вы)' : ''}${isScreen ? ' · экран' : ''}</span>`); return d; };
+      const mk = (pub, isScreen) => { const d = document.createElement('div'); d.className = 'call-tile' + (isScreen ? ' screen' : ''); d.dataset.p = p.identity; d.dataset.k = isScreen ? 'screen' : 'cam'; if (pub) { const v = pub.track.attach(); v._lkTrack = pub.track; v.autoplay = true; v.playsInline = true; v.muted = true; if (p.isLocal && !isScreen) v.style.transform = 'scaleX(-1)'; d.appendChild(v); } else d.innerHTML = avatarHTML({ ...u, name: u.displayName }, 88); d.insertAdjacentHTML('beforeend', `<span class="tn">${mic && mic.isMuted ? icon('mic-off') : ''}${esc(u.displayName)}${p.isLocal ? ' (вы)' : ''}${isScreen ? ' · экран' : ''}</span><button class="tx" data-tx title="Развернуть / свернуть">${icon('max')}</button>`); const vv = this.volumeOf(p.identity); if (!p.isLocal && !isScreen && vv !== 1) d.insertAdjacentHTML('beforeend', `<span class="vol">${icon(vv === 0 ? 'mic-off' : 'volume')}${vv === 0 ? 'без звука' : Math.round(vv * 100) + '%'}</span>`); return d; };
       tiles.push(mk(cam, false)); if (scr) tiles.push(mk(scr, true));
     }
     $$('video', grid).forEach((v) => { try { v._lkTrack?.detach(v); } catch { } });
-    grid.innerHTML = ''; tiles.forEach((t) => grid.appendChild(t));
-    const n = tiles.length; const cols = n <= 1 ? 1 : n <= 4 ? 2 : n <= 9 ? 3 : 4; grid.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+    grid.innerHTML = '';
+    // фокус: вручную выбранная плитка или автоматически — чужая демонстрация экрана
+    const tid = this.tileId; const hasScreen = tiles.some((t) => t.dataset.k === 'screen' && !isMe(t.dataset.p));
+    if (!st.focus && !st.focusOff && hasScreen) { st.focus = tid(tiles.find((t) => t.dataset.k === 'screen' && !isMe(t.dataset.p))); st.focusAuto = true; }
+    if (st.focus && !tiles.some((t) => tid(t) === st.focus)) { st.focus = null; st.focusAuto = false; }
+    if (st.focusAuto && !hasScreen) { st.focus = null; st.focusAuto = false; }
+    if (st.focusOff && !hasScreen) st.focusOff = false;
+    const n = tiles.length;
+    if (st.focus && n > 0) {
+      grid.classList.add('focus'); grid.classList.toggle('solo', n === 1); grid.style.gridTemplateColumns = '';
+      const main = tiles.find((t) => tid(t) === st.focus); main.classList.add('main'); main.querySelector('.tx').innerHTML = icon('min'); grid.appendChild(main);
+      const strip = document.createElement('div'); strip.className = 'strip'; tiles.filter((t) => t !== main).forEach((t) => strip.appendChild(t)); grid.appendChild(strip);
+    } else {
+      grid.classList.remove('focus', 'solo'); tiles.forEach((t) => grid.appendChild(t));
+      const cols = n <= 1 ? 1 : n <= 4 ? 2 : n <= 9 ? 3 : 4; grid.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+    }
     const others = parts.length - 1; if (st.phase !== 'active') this.setStatus(others ? `${others} в звонке` : st.phase === 'ringing' ? 'Вызов…' : st.phase === 'connecting' ? this.el.status.innerHTML : 'Ожидание участников…');
   },
 };
@@ -3290,6 +4099,26 @@ $('#callMini').addEventListener('click', (e) => { if (!e.target.closest('button'
 $('#callFullscreen').addEventListener('click', () => { const el = $('#callScreen'); if (document.fullscreenElement) document.exitFullscreen?.(); else el.requestFullscreen?.().catch(() => { }); });
 let uiTimer = null;
 $('#callScreen').addEventListener('pointermove', () => { const el = $('#callScreen'); el.classList.add('show-ui'); clearTimeout(uiTimer); uiTimer = setTimeout(() => el.classList.remove('show-ui'), 3000); });
+/* плитки звонка: кнопка «развернуть», двойной клик — фокус, ПКМ / долгое нажатие — меню громкости */
+(() => {
+  const grid = $('#callGrid'); let lp = null;
+  grid.addEventListener('click', (e) => { const b = e.target.closest('[data-tx]'); if (!b) return; e.stopPropagation(); const t = b.closest('.call-tile'); const st = Call.st; if (!st) return; Call.setFocus(st.focus === Call.tileId(t) ? null : Call.tileId(t)); });
+  grid.addEventListener('dblclick', (e) => { const t = e.target.closest('.call-tile'); if (!t || e.target.closest('[data-tx]')) return; const st = Call.st; if (!st) return; Call.setFocus(st.focus === Call.tileId(t) ? null : Call.tileId(t)); });
+  grid.addEventListener('contextmenu', (e) => { const t = e.target.closest('.call-tile'); if (!t) return; e.preventDefault(); Call.tileMenu(t, e.clientX, e.clientY); });
+  grid.addEventListener('pointerdown', (e) => { const t = e.target.closest('.call-tile'); if (!t || e.pointerType === 'mouse') return; clearTimeout(lp); lp = setTimeout(() => { Call.tileMenu(t, e.clientX, e.clientY); }, 550); });
+  ['pointerup', 'pointercancel', 'pointermove'].forEach((ev) => grid.addEventListener(ev, (e) => { if (ev === 'pointermove' && e.pointerType !== 'mouse' && Math.abs(e.movementX || 0) + Math.abs(e.movementY || 0) < 3) return; clearTimeout(lp); }));
+  // P2P-звонок: ПКМ по видео собеседника — громкость
+  $('#callScreen').addEventListener('contextmenu', (e) => { const st = Call.st; if (!st || st.mode === 'livekit' || e.target.closest('.call-controls,.call-top,.call-local,#tileMenu,#callSettings')) return; if (st.phase !== 'active') return; e.preventDefault(); Call.tileMenu(null, e.clientX, e.clientY); });
+  $('#callScreen').addEventListener('pointerdown', (e) => { const st = Call.st; if (!st || st.mode === 'livekit' || e.pointerType === 'mouse' || st.phase !== 'active' || e.target.closest('.call-controls,.call-top,.call-local,#tileMenu,#callSettings,.call-grid')) return; clearTimeout(lp); lp = setTimeout(() => Call.tileMenu(null, e.clientX, e.clientY), 550); });
+  ['pointerup', 'pointercancel'].forEach((ev) => $('#callScreen').addEventListener(ev, () => clearTimeout(lp)));
+  document.addEventListener('pointerdown', (e) => { const m = $('#tileMenu'); if (m && !m.classList.contains('hidden') && !m.contains(e.target)) Call.hideTileMenu(); }, true);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !$('#tileMenu').classList.contains('hidden')) { Call.hideTileMenu(); return; }
+    if (!/^[fFаА]$/.test(e.key) || e.ctrlKey || e.metaKey || e.altKey || !Call.st || Call.st.minimized || $('#callScreen').classList.contains('hidden') || e.target.closest('input,textarea,[contenteditable]')) return;
+    e.preventDefault(); const el = document.querySelector('#callGrid .call-tile.main') || $('#callScreen');
+    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => { }); else el.requestFullscreen?.().catch(() => $('#callScreen').requestFullscreen?.().catch(() => { }));
+  });
+})();
 (() => { const box = $('#callLocal'); let drag = null; box.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, r: box.getBoundingClientRect() }; box.setPointerCapture(e.pointerId); }); box.addEventListener('pointermove', (e) => { if (!drag) return; const nx = clamp(drag.r.left + e.clientX - drag.x, 8, window.innerWidth - drag.r.width - 8), ny = clamp(drag.r.top + e.clientY - drag.y, 8, window.innerHeight - drag.r.height - 8); box.style.left = nx + 'px'; box.style.top = ny + 'px'; box.style.right = 'auto'; box.style.bottom = 'auto'; }); box.addEventListener('pointerup', () => { drag = null; }); })();
 window.addEventListener('beforeunload', () => { if (Call.st) Call.hangup(); saveDraft(); });
 /* ---- Перетаскиваемая граница между списком чатов и перепиской ---- */
