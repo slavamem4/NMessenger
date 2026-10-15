@@ -1913,6 +1913,7 @@ app.post('/api/recover/finish', async (req, res) => {
   res.json({ token, user: publicAccount(acc, username) });
 });
 
+require('./nlauncher-sso')(app, { accounts, deletedAccounts, createSession, publicAccount, hashPassword, defaultSettings, validUsername, normEmail, key, persist, isOwnerUser, slug, ipBanned, noteIp });
 app.post('/api/register', (req, res) => {
   const ip = clientIp(req);
   if (ipBanned(ip)) return res.status(403).json({ error: ipBanMessage(ip) });
