@@ -2374,12 +2374,67 @@ app.get('/files/:id', (req, res) => {
   const rec = filesMeta.get(id);
   const fp = path.join(FILES_DIR, id);
   if (!rec || !fs.existsSync(fp)) return res.status(404).end();
+  let stat;
+  try {
+    stat = fs.statSync(fp);
+  } catch {
+    return res.status(404).end();
+  }
+  if (!stat.isFile()) return res.status(404).end();
+
+  // Файлы получают уникальные id и после загрузки не меняются: долгий HTTP-кэш
+  // ускоряет аватары при переходе между вкладками и повторных запусках приложения.
+  const etag = `"${id}-${stat.size}-${Number(rec.ts || 0).toString(36)}"`;
   res.setHeader('Content-Type', rec.mime || 'application/octet-stream');
-  res.setHeader(
-    'Content-Disposition',
-    `inline; filename*=UTF-8''${encodeURIComponent(rec.name)}`
-  );
-  fs.createReadStream(fp).pipe(res);
+  res.setHeader('Content-Disposition', `inline; filename*=UTF-8''${encodeURIComponent(rec.name)}`);
+  // Эти файлы могут содержать личные аватары и вложения, поэтому кэш — только клиентский.
+  res.setHeader('Cache-Control', 'private, max-age=31536000, immutable');
+  res.setHeader('ETag', etag);
+  res.setHeader('Last-Modified', stat.mtime.toUTCString());
+  res.setHeader('Accept-Ranges', 'bytes');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  if (req.headers['if-none-match'] === etag) return res.status(304).end();
+
+  // Поддержка Range нужна HTMLAudioElement для перемотки голосовых сообщений.
+  const rawRange = String(req.headers.range || '').trim();
+  const ifRange = String(req.headers['if-range'] || '').trim();
+  let range = null;
+  if (rawRange && (!ifRange || ifRange === etag)) {
+    let start;
+    let end;
+    const spec = rawRange.startsWith('bytes=') && !rawRange.includes(',') ? rawRange.slice(6) : '';
+    const dash = spec.indexOf('-');
+    if (dash < 0 || dash !== spec.lastIndexOf('-')) {
+      return res.status(416).setHeader('Content-Range', `bytes */${stat.size}`).end();
+    }
+    const left = spec.slice(0, dash);
+    const right = spec.slice(dash + 1);
+    const isDigits = (value) => value.length > 0 && [...value].every((ch) => ch >= '0' && ch <= '9');
+    if (!left && right) {
+      const suffix = Number(right);
+      if (!Number.isSafeInteger(suffix) || suffix <= 0) return res.status(416).setHeader('Content-Range', `bytes */${stat.size}`).end();
+      start = Math.max(0, stat.size - suffix);
+      end = stat.size - 1;
+    } else if (isDigits(left) && (!right || isDigits(right))) {
+      start = Number(left);
+      end = right ? Number(right) : stat.size - 1;
+      if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {
+        return res.status(416).setHeader('Content-Range', `bytes */${stat.size}`).end();
+      }
+    } else {
+      return res.status(416).setHeader('Content-Range', `bytes */${stat.size}`).end();
+    }
+    if (start >= stat.size || start > end || end < 0) return res.status(416).setHeader('Content-Range', `bytes */${stat.size}`).end();
+    range = { start, end: Math.min(end, stat.size - 1) };
+  }
+  if (range) {
+    res.status(206);
+    res.setHeader('Content-Range', `bytes ${range.start}-${range.end}/${stat.size}`);
+    res.setHeader('Content-Length', range.end - range.start + 1);
+    return fs.createReadStream(fp, range).pipe(res);
+  }
+  res.setHeader('Content-Length', stat.size);
+  return fs.createReadStream(fp).pipe(res);
 });
 
 io.on('connection', (socket) => {
